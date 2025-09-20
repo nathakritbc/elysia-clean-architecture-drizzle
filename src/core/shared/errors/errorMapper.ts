@@ -1,12 +1,9 @@
-import {
-	ReasonPhrases,
-	StatusCodes,
-} from 'http-status-codes';
+import { ReasonPhrases, StatusCodes } from 'http-status-codes';
 
 export interface AppErrorOptions {
   statusCode: number;
   message: string;
-  code?: string;  
+  code?: string;
 }
 
 export class AppError extends Error {
@@ -21,52 +18,55 @@ export class AppError extends Error {
   }
 
   toResponse() {
-    return Response.json({
-      error: this.code ?? "APP_ERROR",
-      message: this.message,
-    }, {
-      status: this.statusCode
-    });
+    return Response.json(
+      {
+        error: this.code ?? 'APP_ERROR',
+        message: this.message,
+      },
+      {
+        status: this.statusCode,
+      }
+    );
   }
 }
 
 // Specific error types for better type safety
 export class NotFoundError extends AppError {
-  constructor(message: string = "Resource not found") {
+  constructor(message: string = 'Resource not found') {
     super({
       statusCode: StatusCodes.NOT_FOUND,
       message,
-      code: "NOT_FOUND"
+      code: 'NOT_FOUND',
     });
   }
 }
 
 export class ValidationError extends AppError {
-  constructor(message: string = "Validation failed") {
+  constructor(message: string = 'Validation failed') {
     super({
       statusCode: StatusCodes.BAD_REQUEST,
       message,
-      code: "VALIDATION_ERROR"
+      code: 'VALIDATION_ERROR',
     });
   }
 }
 
 export class InternalServerError extends AppError {
-  constructor(message: string = "Internal server error") {
+  constructor(message: string = 'Internal server error') {
     super({
       statusCode: StatusCodes.INTERNAL_SERVER_ERROR,
       message,
-      code: "INTERNAL_SERVER_ERROR"
+      code: 'INTERNAL_SERVER_ERROR',
     });
   }
 }
 
 export class ConflictError extends AppError {
-  constructor(message: string = "Resource conflict") {
+  constructor(message: string = 'Resource conflict') {
     super({
       statusCode: StatusCodes.CONFLICT,
       message,
-      code: "CONFLICT"
+      code: 'CONFLICT',
     });
   }
 }
@@ -77,7 +77,7 @@ export class ErrorMapper {
       return {
         status: error.statusCode,
         body: {
-          error: error.code ?? "APP_ERROR",
+          error: error.code ?? 'APP_ERROR',
           message: error.message,
         },
       };
@@ -98,8 +98,8 @@ export class ErrorMapper {
     return {
       status: StatusCodes.INTERNAL_SERVER_ERROR,
       body: {
-        error: "UNKNOWN_ERROR",
-        message: "An unexpected error occurred",
+        error: 'UNKNOWN_ERROR',
+        message: 'An unexpected error occurred',
       },
     };
   }
@@ -112,20 +112,26 @@ export class ErrorMapper {
 
     // Unexpected error
     if (error instanceof Error) {
-      return Response.json({
-        error: ReasonPhrases.INTERNAL_SERVER_ERROR,
-        message: error.message,
-      }, {
-        status: StatusCodes.INTERNAL_SERVER_ERROR
-      });
+      return Response.json(
+        {
+          error: ReasonPhrases.INTERNAL_SERVER_ERROR,
+          message: error.message,
+        },
+        {
+          status: StatusCodes.INTERNAL_SERVER_ERROR,
+        }
+      );
     }
 
     // Fallback case
-    return Response.json({
-      error: "UNKNOWN_ERROR",
-      message: "An unexpected error occurred",
-    }, {
-      status: StatusCodes.INTERNAL_SERVER_ERROR
-    });
+    return Response.json(
+      {
+        error: 'UNKNOWN_ERROR',
+        message: 'An unexpected error occurred',
+      },
+      {
+        status: StatusCodes.INTERNAL_SERVER_ERROR,
+      }
+    );
   }
 }

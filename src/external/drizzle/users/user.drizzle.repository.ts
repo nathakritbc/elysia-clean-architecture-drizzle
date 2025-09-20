@@ -1,7 +1,7 @@
-import { eq } from "drizzle-orm";
-import { injectable } from "tsyringe";
-import { db } from "../connection";
-import { users, type User as DrizzleUser } from "./user.schema";
+import { eq } from 'drizzle-orm';
+import { injectable } from 'tsyringe';
+import { db } from '../connection';
+import { users, type User as DrizzleUser } from './user.schema';
 import {
   BUserName,
   User,
@@ -12,9 +12,9 @@ import {
   UserPassword,
   UserUpdatedAt,
   IUser,
-} from "../../../core/domain/users/entity/user.entity";
-import { Builder } from "builder-pattern";
-import { UserRepository } from "../../../core/domain/users/service/user.repository";
+} from '../../../core/domain/users/entity/user.entity';
+import { Builder } from 'builder-pattern';
+import { UserRepository } from '../../../core/domain/users/service/user.repository';
 @injectable()
 export class UserDrizzleRepository extends UserRepository {
   async deleteById(id: UserId): Promise<boolean> {
@@ -33,15 +33,11 @@ export class UserDrizzleRepository extends UserRepository {
 
   async findAll(): Promise<IUser[]> {
     const result = await db.select().from(users);
-    return result ? result.map((user) => this.toDomain(user)) : [];
+    return result ? result.map(user => this.toDomain(user)) : [];
   }
 
   async getByEmail(email: UserEmail): Promise<IUser | undefined> {
-    const result = await db
-      .select()
-      .from(users)
-      .where(eq(users.email, email))
-      .limit(1);
+    const result = await db.select().from(users).where(eq(users.email, email)).limit(1);
     return result[0] ? this.toDomain(result[0]) : undefined;
   }
 

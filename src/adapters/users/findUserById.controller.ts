@@ -1,22 +1,17 @@
-import Elysia, { t } from "elysia";
-import { inject, injectable } from "tsyringe";
-import { FindUserByIdUseCase } from "../../core/domain/users/use-case/findUserById.usecase";
-import {
-  GetUserResponseDto,
-  ErrorResponseDto,
-} from "../../core/shared/dtos/user.dto";
-import { UserId } from "../../core/domain/users/entity/user.entity";
-import { UserMapper } from "./mappers/user.mapper";
+import Elysia, { t } from 'elysia';
+import { inject, injectable } from 'tsyringe';
+import { FindUserByIdUseCase } from '../../core/domain/users/use-case/findUserById.usecase';
+import { GetUserResponseDto, ErrorResponseDto } from '../../core/shared/dtos/user.dto';
+import { UserId } from '../../core/domain/users/entity/user.entity';
+import { UserMapper } from './mappers/user.mapper';
 
 @injectable()
 export class FindUserByIdController {
-  constructor(
-    @inject(FindUserByIdUseCase) private readonly useCase: FindUserByIdUseCase
-  ) {}
+  constructor(@inject(FindUserByIdUseCase) private readonly useCase: FindUserByIdUseCase) {}
 
   register(app: Elysia) {
     app.get(
-      "/users/:id",
+      '/users/:id',
       async ({ params }) => {
         const { id } = params as { id: string };
         const user = await this.useCase.execute(id as UserId);
@@ -33,9 +28,9 @@ export class FindUserByIdController {
           500: ErrorResponseDto,
         },
         detail: {
-          summary: "Get user by ID",
-          description: "Retrieves a specific user by their ID",
-          tags: ["Users"],
+          summary: 'Get user by ID',
+          description: 'Retrieves a specific user by their ID',
+          tags: ['Users'],
         },
       }
     );

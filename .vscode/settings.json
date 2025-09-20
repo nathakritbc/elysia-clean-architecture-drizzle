@@ -21,9 +21,6 @@
   "files.associations": {
     "*.http": "http",
     "*.rest": "http"
-},
-"cSpell.words": [
-  "Elysia",
-  "tsyringe"
-]
+  },
+  "cSpell.words": ["dtos", "Elysia", "tsyringe"]
 }

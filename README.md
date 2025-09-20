@@ -52,34 +52,38 @@ src/
 ## 📦 Installation
 
 1. **Clone the repository**
+
    ```bash
    git clone <repository-url>
    cd clean-arch-backend
    ```
 
 2. **Install dependencies**
+
    ```bash
    # Using pnpm (recommended)
    pnpm install
-   
+
    # Or using bun
    bun install
    ```
 
 3. **Set up environment variables**
+
    ```bash
    cp .env.example .env
    # Edit .env with your database configuration
    ```
 
 4. **Set up the database**
+
    ```bash
    # Generate migration files
    bun run db:generate
-   
+
    # Apply migrations to database
    bun run db:migrate
-   
+
    # Or push schema directly (for development)
    bun run db:push
    ```
@@ -116,15 +120,16 @@ The server will start at `http://localhost:3000`
 
 ### User Management
 
-| Method | Endpoint | Description | Request Body |
-|--------|----------|-------------|--------------|
-| `POST` | `/users` | Create a new user | `{ name: string, email: string, password: string }` |
-| `GET` | `/users` | Get all users | - |
-| `GET` | `/users/:id` | Get user by ID | - |
+| Method | Endpoint     | Description       | Request Body                                        |
+| ------ | ------------ | ----------------- | --------------------------------------------------- |
+| `POST` | `/users`     | Create a new user | `{ name: string, email: string, password: string }` |
+| `GET`  | `/users`     | Get all users     | -                                                   |
+| `GET`  | `/users/:id` | Get user by ID    | -                                                   |
 
 ### Example Requests
 
 **Create User**
+
 ```bash
 curl -X POST http://localhost:3000/users \
   -H "Content-Type: application/json" \
@@ -136,11 +141,13 @@ curl -X POST http://localhost:3000/users \
 ```
 
 **Get All Users**
+
 ```bash
 curl http://localhost:3000/users
 ```
 
 **Get User by ID**
+
 ```bash
 curl http://localhost:3000/users/1
 ```
@@ -148,16 +155,19 @@ curl http://localhost:3000/users/1
 ## 🏛️ Clean Architecture Layers
 
 ### 1. Domain Layer (`src/core/domain/`)
+
 - **Entities**: Core business objects (`User.ts`)
 - **Use Cases**: Business logic implementation
 - **Services**: Domain service interfaces
 
 ### 2. Application Layer (`src/adapters/`)
+
 - **Controllers**: Handle HTTP requests and responses
 - **DTOs**: Data Transfer Objects with TypeBox validation
 - **Presenters**: Format data for external interfaces
 
 ### 3. Infrastructure Layer (`src/external/`)
+
 - **Database**: Drizzle ORM implementation with migrations
 - **Web API**: Elysia framework setup with Swagger
 - **External Services**: Third-party integrations
@@ -167,28 +177,28 @@ curl http://localhost:3000/users/1
 The project uses **TSyringe** for dependency injection with the following setup:
 
 ### Container Configuration
+
 ```typescript
 // src/core/shared/container.ts
-container.registerSingleton<BaseCollectionUser>(
-  TOKENS.ICollectionUser,
-  CollectionUserDrizzle
-);
+container.registerSingleton<BaseCollectionUser>(TOKENS.ICollectionUser, CollectionUserDrizzle);
 ```
 
 ### Token-based Injection
+
 ```typescript
 // src/core/shared/tokens.ts
 export const TOKENS = {
-  ICollectionUser: Symbol("ICollectionUser"),
+  ICollectionUser: Symbol('ICollectionUser'),
 } as const;
 ```
 
 ### Usage in Use Cases
+
 ```typescript
 @injectable()
 export class CreateUserUseCase implements IUseCase<Input, void> {
   constructor(
-    @inject(TOKENS.ICollectionUser) 
+    @inject(TOKENS.ICollectionUser)
     private readonly collection: BaseCollectionUser
   ) {}
 
@@ -201,6 +211,7 @@ export class CreateUserUseCase implements IUseCase<Input, void> {
 ## 🗄️ Database Schema
 
 ### User Table
+
 ```sql
 CREATE TABLE users (
   id SERIAL PRIMARY KEY,
@@ -264,15 +275,18 @@ NODE_ENV=development
 ## 📚 Documentation
 
 ### Core Documentation
+
 - **[DEVELOPMENT.md](DEVELOPMENT.md)** - Comprehensive development guide with architecture explanations
 - **[DTOs.md](DTOs.md)** - Data Transfer Objects documentation with TypeBox validation
 - **[tests/README.md](tests/README.md)** - HTTP API testing guide and examples
 
 ### API Documentation
+
 - **Swagger UI**: Available at `http://localhost:3000/swagger` when server is running
 - **OpenAPI Spec**: Auto-generated from Elysia TypeBox schemas
 
 ### Architecture Documentation
+
 - **Clean Architecture**: Domain-driven design with clear layer separation
 - **Dependency Injection**: TSyringe container configuration and usage
 - **Repository Pattern**: Abstract data access layer with Drizzle ORM implementation

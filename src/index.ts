@@ -1,8 +1,6 @@
-import "reflect-metadata";
-import routes from "./external/api/routes";
+import 'reflect-metadata';
+import routes from './external/api/routes';
 
 routes.listen(3000);
 
-console.log(
-  `🦊 Elysia is running at ${routes.server?.hostname}:${routes.server?.port}`
-);
+console.log(`🦊 Elysia is running at ${routes.server?.hostname}:${routes.server?.port}`);

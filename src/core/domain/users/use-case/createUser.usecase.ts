@@ -1,5 +1,5 @@
-import { inject, injectable } from "tsyringe";
-import { IUseCase } from "../../../shared/useCase";
+import { inject, injectable } from 'tsyringe';
+import { IUseCase } from '../../../shared/useCase';
 import {
   User,
   BUserName,
@@ -8,11 +8,11 @@ import {
   UserStatus,
   UserUpdatedAt,
   UserCreatedAt,
-} from "../entity/user.entity";
-import { TOKENS } from "../../../shared/tokens";
-import { EStatus } from "../../../shared/status.enum";
-import { Builder } from "builder-pattern";
-import { UserRepository } from "../service/user.repository";
+} from '../entity/user.entity';
+import { TOKENS } from '../../../shared/tokens';
+import { EStatus } from '../../../shared/status.enum';
+import { Builder } from 'builder-pattern';
+import { UserRepository } from '../service/user.repository';
 
 type Input = {
   name: BUserName;
@@ -33,7 +33,7 @@ export class CreateUserUseCase implements IUseCase<Input, void> {
     const isUserExist = await this.userRepository.getByEmail(email);
 
     if (isUserExist) {
-      throw new Error("User already exists");
+      throw new Error('User already exists');
     }
 
     const user = Builder(User)

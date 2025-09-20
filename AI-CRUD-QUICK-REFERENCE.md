@@ -3,14 +3,18 @@
 ## 🚀 Quick Start for AI Assistants
 
 ### 1. **Input Requirements**
+
 Ask the user for:
+
 - Entity name (e.g., "Product", "Order", "Category")
 - Entity fields with types and validation rules
 - Business rules and constraints
 - Required CRUD operations (Create, Read, Update, Delete)
 
 ### 2. **File Generation Order**
+
 Generate files in this sequence:
+
 1. **Domain Layer**: Entity → Service Interface → Base Service → Use Cases
 2. **Infrastructure Layer**: Drizzle Schema → Repository Implementation
 3. **Application Layer**: DTOs → Controllers
@@ -18,6 +22,7 @@ Generate files in this sequence:
 5. **Tests**: HTTP test files
 
 ### 3. **Naming Conventions**
+
 ```typescript
 // Entity: Product
 // Files: Product.ts, CollectionProduct.ts, CreateProductUseCase.ts
@@ -30,16 +35,17 @@ Generate files in this sequence:
 
 Replace these placeholders in all generated files:
 
-| Placeholder | Example | Description |
-|-------------|---------|-------------|
-| `{Entity}` | `Product` | PascalCase entity name |
-| `{entity}` | `product` | camelCase entity name |
-| `{entities}` | `products` | camelCase plural |
-| `{ENTITY}` | `PRODUCT` | UPPER_CASE entity name |
+| Placeholder  | Example    | Description            |
+| ------------ | ---------- | ---------------------- |
+| `{Entity}`   | `Product`  | PascalCase entity name |
+| `{entity}`   | `product`  | camelCase entity name  |
+| `{entities}` | `products` | camelCase plural       |
+| `{ENTITY}`   | `PRODUCT`  | UPPER_CASE entity name |
 
 ## 🎯 Essential Files to Generate
 
 ### Domain Layer
+
 ```
 src/core/domain/{entity}/
 ├── entity/{Entity}.ts
@@ -54,6 +60,7 @@ src/core/domain/{entity}/
 ```
 
 ### Infrastructure Layer
+
 ```
 src/external/drizzle/
 ├── schema.ts (add {Entity} table)
@@ -61,6 +68,7 @@ src/external/drizzle/
 ```
 
 ### Application Layer
+
 ```
 src/adapters/
 ├── Create{Entity}Controller.ts
@@ -74,6 +82,7 @@ src/core/shared/dtos/
 ```
 
 ### Configuration
+
 ```
 src/core/shared/
 ├── container.ts (add registrations)
@@ -84,6 +93,7 @@ src/external/api/
 ```
 
 ### Tests
+
 ```
 tests/http/
 └── {entities}.http
@@ -92,6 +102,7 @@ tests/http/
 ## 🔧 Key Patterns
 
 ### Entity Pattern
+
 ```typescript
 export class {Entity} extends Entity {
   // Fields with proper types
@@ -103,6 +114,7 @@ export class {Entity} extends Entity {
 ```
 
 ### Service Pattern
+
 ```typescript
 export abstract class BaseCollection{Entity} {
   abstract getById(id: number): Promise<{Entity} | null>;
@@ -114,14 +126,15 @@ export abstract class BaseCollection{Entity} {
 ```
 
 ### Use Case Pattern
+
 ```typescript
 @injectable()
 export class Create{Entity}UseCase implements IUseCase<Input, void> {
   constructor(
-    @inject(TOKENS.ICollection{Entity}) 
+    @inject(TOKENS.ICollection{Entity})
     private readonly collection: BaseCollection{Entity}
   ) {}
-  
+
   async execute(input: Input): Promise<void> {
     // Business logic and validation
   }
@@ -129,14 +142,15 @@ export class Create{Entity}UseCase implements IUseCase<Input, void> {
 ```
 
 ### Controller Pattern
+
 ```typescript
 @injectable()
 export class Create{Entity}Controller {
   constructor(
-    @inject(Create{Entity}UseCase) 
+    @inject(Create{Entity}UseCase)
     private readonly useCase: Create{Entity}UseCase
   ) {}
-  
+
   register(server: Elysia) {
     server.post("/{entities}", handler, {
       body: Create{Entity}RequestDTO,
@@ -147,6 +161,7 @@ export class Create{Entity}Controller {
 ```
 
 ### DTO Pattern
+
 ```typescript
 export const Create{Entity}RequestDTO = t.Object({
   field1: t.String({ minLength: 2, maxLength: 100 }),
@@ -158,59 +173,65 @@ export const Create{Entity}RequestDTO = t.Object({
 ## 🎯 Common Field Types
 
 ### String Fields
+
 ```typescript
 // Required string
-name: t.String({ minLength: 2, maxLength: 100 })
+name: t.String({ minLength: 2, maxLength: 100 });
 
 // Optional string
-description: t.Optional(t.String({ maxLength: 500 }))
+description: t.Optional(t.String({ maxLength: 500 }));
 
 // Email validation
-email: t.String({ format: "email" })
+email: t.String({ format: 'email' });
 
 // Unique string
-sku: t.String({ pattern: /^[A-Z0-9-]+$/ })
+sku: t.String({ pattern: /^[A-Z0-9-]+$/ });
 ```
 
 ### Number Fields
+
 ```typescript
 // Required number
-price: t.Number({ minimum: 0 })
+price: t.Number({ minimum: 0 });
 
 // Optional number
-quantity: t.Optional(t.Number({ minimum: 0 }))
+quantity: t.Optional(t.Number({ minimum: 0 }));
 
 // Integer
-category_id: t.Number()
+category_id: t.Number();
 ```
 
 ### Date Fields
+
 ```typescript
 // Auto-generated dates
-created_at: t.Optional(t.Date())
-updated_at: t.Optional(t.Date())
+created_at: t.Optional(t.Date());
+updated_at: t.Optional(t.Date());
 ```
 
 ## 🔄 Database Schema Patterns
 
 ### Basic Table
+
 ```typescript
-export const {entities} = pgTable("{entities}", {
-  id: serial("id").primaryKey(),
-  name: varchar("name", { length: 100 }).notNull().unique(),
-  description: varchar("description", { length: 500 }),
-  price: decimal("price", { precision: 10, scale: 2 }).notNull(),
-  created_at: timestamp("created_at").defaultNow().notNull(),
-  updated_at: timestamp("updated_at").defaultNow().notNull(),
+export const { entities } = pgTable('{entities}', {
+  id: serial('id').primaryKey(),
+  name: varchar('name', { length: 100 }).notNull().unique(),
+  description: varchar('description', { length: 500 }),
+  price: decimal('price', { precision: 10, scale: 2 }).notNull(),
+  created_at: timestamp('created_at').defaultNow().notNull(),
+  updated_at: timestamp('updated_at').defaultNow().notNull(),
 });
 ```
 
 ### Foreign Key
+
 ```typescript
 category_id: integer("category_id").notNull().references(() => categories.id),
 ```
 
 ### Unique Constraint
+
 ```typescript
 name: varchar("name", { length: 100 }).notNull().unique(),
 ```
@@ -218,6 +239,7 @@ name: varchar("name", { length: 100 }).notNull().unique(),
 ## 🧪 Test Patterns
 
 ### HTTP Test Structure
+
 ```http
 ### Variables
 @baseUrl = http://localhost:3000
@@ -262,6 +284,7 @@ DELETE {{baseUrl}}/{entities}/1
 ## ⚡ Quick Checklist
 
 Before finishing, ensure:
+
 - ✅ All files follow naming conventions
 - ✅ Dependencies are properly injected
 - ✅ DTOs include proper validation

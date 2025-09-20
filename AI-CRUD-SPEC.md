@@ -7,6 +7,7 @@ This document provides specifications for AI assistants to generate CRUD (Create
 ## 🏗️ Architecture Pattern
 
 ### Clean Architecture Layers
+
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │                    External Layer                           │
@@ -42,6 +43,7 @@ This document provides specifications for AI assistants to generate CRUD (Create
 ## 📋 CRUD Generation Template
 
 ### Input Parameters
+
 When generating CRUD operations, the AI should request:
 
 1. **Entity Name** (e.g., "Product", "Order", "Category")
@@ -50,6 +52,7 @@ When generating CRUD operations, the AI should request:
 4. **API Endpoints** needed (full CRUD or partial)
 
 ### Example Input
+
 ```typescript
 // Entity: Product
 // Fields:
@@ -74,6 +77,7 @@ When generating CRUD operations, the AI should request:
 ### 1. Domain Layer Files
 
 #### Entity (`src/core/domain/{entity}/entity/{Entity}.ts`)
+
 ```typescript
 import { Entity } from "../../../shared/Entity";
 
@@ -105,6 +109,7 @@ export class {Entity} extends Entity {
 ```
 
 #### Service Interface (`src/core/domain/{entity}/service/Collection{Entity}.ts`)
+
 ```typescript
 import { {Entity} } from "../entity/{Entity}";
 
@@ -119,6 +124,7 @@ export interface ICollection{Entity} {
 ```
 
 #### Base Service (`src/core/domain/{entity}/service/BaseCollection{Entity}.ts`)
+
 ```typescript
 import { {Entity} } from "../entity/{Entity}";
 
@@ -133,6 +139,7 @@ export abstract class BaseCollection{Entity} {
 ```
 
 #### Use Cases
+
 ```typescript
 // Create{Entity}UseCase.ts
 import { inject, injectable } from "tsyringe";
@@ -151,7 +158,7 @@ type Input = {
 @injectable()
 export class Create{Entity}UseCase implements IUseCase<Input, void> {
   constructor(
-    @inject(TOKENS.ICollection{Entity}) 
+    @inject(TOKENS.ICollection{Entity})
     private readonly collection: BaseCollection{Entity}
   ) {}
 
@@ -192,6 +199,7 @@ export class Create{Entity}UseCase implements IUseCase<Input, void> {
 ### 2. Infrastructure Layer Files
 
 #### Drizzle Schema (`src/external/drizzle/schema.ts`)
+
 ```typescript
 // Add to existing schema.ts
 export const {entities} = pgTable("{entities}", {
@@ -209,6 +217,7 @@ export type New{Entity} = typeof {entities}.$inferInsert;
 ```
 
 #### Repository Implementation (`src/external/drizzle/Collection{Entity}Drizzle.ts`)
+
 ```typescript
 import { eq } from "drizzle-orm";
 import { injectable } from "tsyringe";
@@ -295,6 +304,7 @@ export class Collection{Entity}Drizzle extends BaseCollection{Entity} {
 ### 3. Application Layer Files
 
 #### DTOs (`src/core/shared/dtos/{Entity}DTOs.ts`)
+
 ```typescript
 import { t } from "elysia";
 
@@ -347,15 +357,16 @@ export type {Entity}sResponseDTOType = typeof {Entity}sResponseDTO;
 ```
 
 #### Controllers
+
 ```typescript
 // Create{Entity}Controller.ts
 import Elysia from "elysia";
 import { inject, injectable } from "tsyringe";
 import { Create{Entity}UseCase } from "../core/domain/{entity}/use-case/Create{Entity}UseCase";
-import { 
-  Create{Entity}RequestDTO, 
-  {Entity}ResponseDTO, 
-  ErrorResponseDTO 
+import {
+  Create{Entity}RequestDTO,
+  {Entity}ResponseDTO,
+  ErrorResponseDTO
 } from "../core/shared/dtos/{Entity}DTOs";
 
 @injectable()
@@ -375,7 +386,7 @@ export class Create{Entity}Controller {
             price: number;
             category_id: number;
           };
-          
+
           await this.useCase.execute({ name, description, price, category_id });
 
           return {
@@ -416,6 +427,7 @@ export class Create{Entity}Controller {
 ### 4. Configuration Files
 
 #### Update Container (`src/core/shared/container.ts`)
+
 ```typescript
 // Add to existing container.ts
 import { Collection{Entity}Drizzle } from "../../external/drizzle/Collection{Entity}Drizzle";
@@ -429,6 +441,7 @@ container.registerSingleton<BaseCollection{Entity}>(
 ```
 
 #### Update Tokens (`src/core/shared/tokens.ts`)
+
 ```typescript
 // Add to existing tokens.ts
 export const TOKENS = {
@@ -438,6 +451,7 @@ export const TOKENS = {
 ```
 
 #### Update Routes (`src/external/api/routes.ts`)
+
 ```typescript
 // Add to existing routes.ts
 import { Create{Entity}Controller } from "../../adapters/Create{Entity}Controller";
@@ -464,6 +478,7 @@ delete{Entity}Controller.register(app);
 ### 5. Test Files
 
 #### HTTP Tests (`tests/http/{entities}.http`)
+
 ```http
 ### Variables
 @baseUrl = http://localhost:3000
@@ -513,14 +528,18 @@ DELETE {{baseUrl}}/{entities}/1
 ## 🔄 Generation Process
 
 ### Step 1: Input Collection
+
 AI should ask for:
+
 1. Entity name and fields
 2. Business rules and constraints
 3. Required CRUD operations
 4. Validation rules
 
 ### Step 2: File Generation
+
 Generate files in this order:
+
 1. Domain layer (Entity, Service, Use Cases)
 2. Infrastructure layer (Schema, Repository)
 3. Application layer (DTOs, Controllers)
@@ -528,7 +547,9 @@ Generate files in this order:
 5. Tests (HTTP files)
 
 ### Step 3: Validation
+
 Ensure:
+
 - All files follow naming conventions
 - Dependencies are properly injected
 - DTOs include proper validation
@@ -538,6 +559,7 @@ Ensure:
 ## 📝 Naming Conventions
 
 ### File Naming
+
 - **Entities**: `{Entity}.ts` (PascalCase)
 - **Services**: `Collection{Entity}.ts` (PascalCase)
 - **Use Cases**: `{Action}{Entity}UseCase.ts` (PascalCase)
@@ -546,12 +568,14 @@ Ensure:
 - **Repositories**: `Collection{Entity}Drizzle.ts` (PascalCase)
 
 ### Variable Naming
+
 - **Entity instances**: `{entity}` (camelCase)
 - **Entity arrays**: `{entities}` (camelCase)
 - **Database tables**: `{entities}` (snake_case)
 - **API endpoints**: `/{entities}` (kebab-case)
 
 ### Class Naming
+
 - **Entities**: `{Entity}` (PascalCase)
 - **Services**: `ICollection{Entity}`, `BaseCollection{Entity}` (PascalCase)
 - **Use Cases**: `{Action}{Entity}UseCase` (PascalCase)
@@ -560,26 +584,31 @@ Ensure:
 ## 🎯 Best Practices
 
 ### 1. **Consistency**
+
 - Follow existing patterns in the codebase
 - Use consistent naming conventions
 - Maintain the same file structure
 
 ### 2. **Error Handling**
+
 - Include proper error handling in all layers
 - Provide meaningful error messages
 - Handle validation errors gracefully
 
 ### 3. **Validation**
+
 - Include comprehensive DTO validation
 - Add business rule validation in use cases
 - Test edge cases and error scenarios
 
 ### 4. **Testing**
+
 - Create comprehensive HTTP test files
 - Include positive and negative test cases
 - Test validation and error scenarios
 
 ### 5. **Documentation**
+
 - Add proper TypeScript types
 - Include OpenAPI documentation in controllers
 - Document business rules and constraints

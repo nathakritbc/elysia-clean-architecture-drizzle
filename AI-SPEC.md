@@ -6,7 +6,7 @@
 **Framework**: Elysia + TypeScript + Bun  
 **Architecture Pattern**: Clean Architecture  
 **Database**: PostgreSQL with Drizzle ORM  
-**Dependency Injection**: TSyringe  
+**Dependency Injection**: TSyringe
 
 ## System Architecture
 
@@ -47,6 +47,7 @@
 ## Domain Model
 
 ### User Entity
+
 ```typescript
 class User extends Entity {
   id: number;
@@ -59,6 +60,7 @@ class User extends Entity {
 ```
 
 ### Business Rules
+
 1. **User Uniqueness**: Email must be unique across all users
 2. **Data Validation**: All fields are required for user creation
 3. **Password Security**: Passwords should be hashed (implementation pending)
@@ -66,6 +68,7 @@ class User extends Entity {
 ## Use Cases
 
 ### 1. Create User Use Case
+
 - **Input**: `{ name: string, email: string, password: string }`
 - **Output**: `void`
 - **Business Rules**:
@@ -74,6 +77,7 @@ class User extends Entity {
   - Throw error if user already exists
 
 ### 2. Find User by ID Use Case
+
 - **Input**: `number` (user ID)
 - **Output**: `User | null`
 - **Business Rules**:
@@ -81,6 +85,7 @@ class User extends Entity {
   - Return null if not found
 
 ### 3. Find All Users Use Case
+
 - **Input**: `void`
 - **Output**: `User[]`
 - **Business Rules**:
@@ -90,6 +95,7 @@ class User extends Entity {
 ## API Specification
 
 ### Base URL
+
 ```
 http://localhost:3000
 ```
@@ -97,16 +103,20 @@ http://localhost:3000
 ### Endpoints
 
 #### POST /users
+
 **Description**: Create a new user  
 **Request Body**:
+
 ```json
 {
   "name": "string",
-  "email": "string", 
+  "email": "string",
   "password": "string"
 }
 ```
+
 **Response**:
+
 ```json
 {
   "status": 200,
@@ -115,7 +125,9 @@ http://localhost:3000
   }
 }
 ```
+
 **Error Response**:
+
 ```json
 {
   "name": "Error",
@@ -124,8 +136,10 @@ http://localhost:3000
 ```
 
 #### GET /users
+
 **Description**: Get all users  
 **Response**:
+
 ```json
 [
   {
@@ -140,14 +154,17 @@ http://localhost:3000
 ```
 
 #### GET /users/:id
+
 **Description**: Get user by ID  
 **Path Parameters**:
+
 - `id`: User ID (number)
-**Response**:
+  **Response**:
+
 ```json
 {
   "id": 1,
-  "name": "John Doe", 
+  "name": "John Doe",
   "email": "john@example.com",
   "password": "hashedpassword",
   "created_at": "2024-01-01T00:00:00.000Z",
@@ -158,6 +175,7 @@ http://localhost:3000
 ## Database Schema
 
 ### Users Table
+
 ```sql
 CREATE TABLE users (
   id SERIAL PRIMARY KEY,
@@ -170,41 +188,41 @@ CREATE TABLE users (
 ```
 
 ### Drizzle Schema Definition
+
 ```typescript
-export const users = pgTable("users", {
-  id: serial("id").primaryKey(),
-  email: varchar("email", { length: 255 }).notNull().unique(),
-  name: varchar("name", { length: 255 }).notNull(),
-  password: varchar("password", { length: 255 }).notNull(),
-  created_at: timestamp("created_at").defaultNow().notNull(),
-  updated_at: timestamp("updated_at").defaultNow().notNull(),
+export const users = pgTable('users', {
+  id: serial('id').primaryKey(),
+  email: varchar('email', { length: 255 }).notNull().unique(),
+  name: varchar('name', { length: 255 }).notNull(),
+  password: varchar('password', { length: 255 }).notNull(),
+  created_at: timestamp('created_at').defaultNow().notNull(),
+  updated_at: timestamp('updated_at').defaultNow().notNull(),
 });
 ```
 
 ## Dependency Injection Configuration
 
 ### Container Setup
+
 ```typescript
 // Registration
-container.registerSingleton<BaseCollectionUser>(
-  TOKENS.ICollectionUser,
-  CollectionUserDrizzle
-);
+container.registerSingleton<BaseCollectionUser>(TOKENS.ICollectionUser, CollectionUserDrizzle);
 
 // Injection
 @injectable()
 export class CreateUserUseCase {
   constructor(
-    @inject(TOKENS.ICollectionUser) 
+    @inject(TOKENS.ICollectionUser)
     private readonly collection: BaseCollectionUser
   ) {}
 }
 ```
 
 ### DI Tokens
+
 ```typescript
 export const TOKENS = {
-  ICollectionUser: Symbol("ICollectionUser"),
+  ICollectionUser: Symbol('ICollectionUser'),
 } as const;
 ```
 
@@ -248,21 +266,25 @@ src/
 ## Development Guidelines
 
 ### Code Organization
+
 1. **Domain Layer**: Contains business logic, entities, and use cases
 2. **Application Layer**: Contains controllers and interface adapters
 3. **Infrastructure Layer**: Contains external dependencies (database, web framework)
 
 ### Dependency Rules
+
 1. **Dependencies point inward**: External layers depend on inner layers
 2. **Use interfaces**: Define contracts in domain layer, implement in infrastructure
 3. **Dependency Injection**: Use TSyringe for loose coupling
 
 ### Error Handling
+
 - Use custom error classes for business logic errors
 - Return appropriate HTTP status codes
 - Provide meaningful error messages
 
 ### Testing Strategy
+
 - **Unit Tests**: Test use cases and domain logic
 - **Integration Tests**: Test controllers and database interactions
 - **Repository Pattern**: Use in-memory implementation for testing
@@ -270,15 +292,18 @@ src/
 ## Performance Considerations
 
 ### Database
+
 - Use connection pooling for PostgreSQL
 - Implement proper indexing on email field
 - Consider query optimization for large datasets
 
 ### Caching
+
 - Implement Redis for session management (future)
 - Cache frequently accessed user data
 
 ### Security
+
 - Hash passwords using bcrypt (pending implementation)
 - Implement JWT authentication (future)
 - Add input validation and sanitization
@@ -286,6 +311,7 @@ src/
 ## Future Enhancements
 
 ### Planned Features
+
 1. **Authentication & Authorization**
    - JWT token-based authentication
    - Role-based access control
@@ -307,6 +333,7 @@ src/
    - Performance monitoring
 
 ### Scalability Considerations
+
 - Implement database migrations
 - Add API rate limiting
 - Consider microservices architecture for larger applications

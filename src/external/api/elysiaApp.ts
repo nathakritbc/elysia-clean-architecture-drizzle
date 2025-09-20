@@ -1,22 +1,21 @@
-import Elysia from "elysia";
-import { swagger } from "@elysiajs/swagger";
-import { ErrorMapper } from "../../core/shared/errors/errorMapper";
+import Elysia from 'elysia';
+import { swagger } from '@elysiajs/swagger';
+import { ErrorMapper } from '../../core/shared/errors/errorMapper';
 
 const app = new Elysia()
   .use(
     swagger({
       documentation: {
         info: {
-          title: "Elysia Clean Architecture Backend API",
-          version: "1.0.0",
-          description:
-            "API documentation for the Clean Architecture Backend with Drizzle ORM",
+          title: 'Elysia Clean Architecture Backend API',
+          version: '1.0.0',
+          description: 'API documentation for the Clean Architecture Backend with Drizzle ORM',
         },
-        tags: [{ name: "Users", description: "User management endpoints" }],
+        tags: [{ name: 'Users', description: 'User management endpoints' }],
         servers: [
           {
-            url: "http://localhost:3000",
-            description: "Development server",
+            url: 'http://localhost:3000',
+            description: 'Development server',
           },
         ],
       },
@@ -24,10 +23,10 @@ const app = new Elysia()
   )
   .onError(({ error, code }) => {
     // Handle validation errors with custom messages
-    if (code === "VALIDATION") {
+    if (code === 'VALIDATION') {
       return Response.json(
         {
-          error: "VALIDATION_ERROR",
+          error: 'VALIDATION_ERROR',
           message: error.message,
         },
         {

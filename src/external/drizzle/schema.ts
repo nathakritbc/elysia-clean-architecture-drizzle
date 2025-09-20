@@ -1,4 +1,4 @@
-import { users } from "./users/user.schema";
+import { users } from './users/user.schema';
 
 // Export all tables for Drizzle
 export { users };

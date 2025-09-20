@@ -1,10 +1,10 @@
-import { t } from "elysia";
+import { t } from 'elysia';
 
 // Base User DTO
 export const UserDto = t.Object({
   id: t.Optional(t.String()),
   name: t.String(),
-  email: t.String({ format: "email" }),
+  email: t.String({ format: 'email' }),
   password: t.String({ minLength: 6 }),
   status: t.Optional(t.String()),
   createdAt: t.Optional(t.Date()),
@@ -14,7 +14,7 @@ export const UserDto = t.Object({
 // Create User Request DTO
 export const CreateUserRequestDto = t.Object({
   name: t.String({ minLength: 2, maxLength: 100 }),
-  email: t.String({ format: "email" }),
+  email: t.String({ format: 'email' }),
   password: t.String({ minLength: 6, maxLength: 100 }),
 });
 
@@ -30,7 +30,7 @@ export const CreateUserResponseDto = t.Object({
 export const GetUserResponseDto = t.Object({
   id: t.Optional(t.String()),
   name: t.String(),
-  email: t.String({ format: "email" }),
+  email: t.String({ format: 'email' }),
   password: t.String(),
   status: t.Optional(t.String()),
   createdAt: t.Optional(t.Date()),

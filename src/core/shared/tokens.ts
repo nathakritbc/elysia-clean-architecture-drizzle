@@ -1,3 +1,3 @@
 export const TOKENS = {
-  IUserRepository: Symbol("IUserRepository"),
+  IUserRepository: Symbol('IUserRepository'),
 } as const;

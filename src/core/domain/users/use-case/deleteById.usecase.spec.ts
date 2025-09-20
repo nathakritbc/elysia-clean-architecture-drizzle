@@ -1,12 +1,12 @@
-import "reflect-metadata";
-import { faker } from "@faker-js/faker";
-import { vi } from "vitest";
-import { mock } from "vitest-mock-extended";
-import { IUser, UserId } from "../entity/user.entity";
-import { UserRepository } from "../service/user.repository";
-import { DeleteByIdUseCase } from "./deleteById.usecase";
+import 'reflect-metadata';
+import { faker } from '@faker-js/faker';
+import { vi } from 'vitest';
+import { mock } from 'vitest-mock-extended';
+import { IUser, UserId } from '../entity/user.entity';
+import { UserRepository } from '../service/user.repository';
+import { DeleteByIdUseCase } from './deleteById.usecase';
 
-describe("DeleteProductByIdUseCase", () => {
+describe('DeleteProductByIdUseCase', () => {
   let useCase: DeleteByIdUseCase;
   const productRepository = mock<UserRepository>();
 
@@ -19,10 +19,10 @@ describe("DeleteProductByIdUseCase", () => {
   });
 
   const productId = faker.string.uuid() as UserId;
-  it("should be throw error when product not found", async () => {
+  it('should be throw error when product not found', async () => {
     //Arrange
     productRepository.findById.mockResolvedValue(undefined);
-    const errorExpected = new Error("User ID is required");
+    const errorExpected = new Error('User ID is required');
 
     //Act
     const actual = useCase.execute(productId);
@@ -33,7 +33,7 @@ describe("DeleteProductByIdUseCase", () => {
     expect(productRepository.deleteById).not.toHaveBeenCalled();
   });
 
-  it("should be delete product", async () => {
+  it('should be delete product', async () => {
     //Arrange
     const product = mock<IUser>({ id: productId });
     productRepository.findById.mockResolvedValue(product);

@@ -1,4 +1,4 @@
-import { UserEmail, UserId, IUser } from "../entity/user.entity";
+import { UserEmail, UserId, IUser } from '../entity/user.entity';
 
 export abstract class UserRepository {
   abstract getByEmail(email: UserEmail): Promise<IUser | undefined>;
