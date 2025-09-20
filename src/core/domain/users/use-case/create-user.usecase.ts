@@ -37,7 +37,7 @@ export class CreateUserUseCase implements IUseCase<CreateUserInput, IUser> {
       .password(password)
       .createdAt(dayjs().toDate() as UserCreatedAt)
       .updatedAt(dayjs().toDate() as UserUpdatedAt)
-      .status(EStatus.ACTIVE as UserStatus)
+      .status(EStatus.active as UserStatus)
       .build();
 
     return await this.userRepository.create(user);

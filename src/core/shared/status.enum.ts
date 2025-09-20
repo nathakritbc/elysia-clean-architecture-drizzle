@@ -1,5 +1,5 @@
 export enum EStatus {
-  ACTIVE = 'active',
-  INACTIVE = 'inactive',
-  DELETED = 'deleted',
+  active = 'active',
+  inactive = 'inactive',
+  deleted = 'deleted',
 }

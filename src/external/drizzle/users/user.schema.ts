@@ -8,7 +8,7 @@ export const users = pgTable('users', {
   password: varchar('password', { length: 255 }).notNull(),
   created_at: timestamp('created_at').defaultNow().notNull(),
   updated_at: timestamp('updated_at').defaultNow().notNull(),
-  status: varchar('status', { length: 30 }).default(EStatus.ACTIVE).notNull(),
+  status: varchar('status', { length: 30 }).default(EStatus.active).notNull(),
 });
 
 export type User = typeof users.$inferSelect;
