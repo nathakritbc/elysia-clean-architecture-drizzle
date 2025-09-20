@@ -29,8 +29,25 @@ export const ValidationErrorResponseDTO = t.Object({
 
 export const StatusDto = t.Enum(EStatus);
 
+export const GetAllParamsDto = t.Object({
+  search: t.Optional(t.String()),
+  sort: t.Optional(t.String()),
+  order: t.Optional(t.String()),
+  page: t.Optional(t.Number()),
+  limit: t.Optional(t.Number()),
+});
+
+export const GetAllMetaDto = t.Object({
+  total: t.Number(),
+  page: t.Number(),
+  limit: t.Number(),
+  totalPages: t.Number(),
+});
+
 // Type exports
-export type SuccessResponseDTOType = typeof SuccessResponseDTO;
 export type CommonErrorResponseDTOType = typeof CommonErrorResponseDTO;
-export type ValidationErrorResponseDTOType = typeof ValidationErrorResponseDTO;
+export type GetAllMetaDtoType = typeof GetAllMetaDto;
+export type GetAllParamsDtoType = typeof GetAllParamsDto;
 export type StatusDtoType = typeof StatusDto;
+export type SuccessResponseDTOType = typeof SuccessResponseDTO;
+export type ValidationErrorResponseDTOType = typeof ValidationErrorResponseDTO;

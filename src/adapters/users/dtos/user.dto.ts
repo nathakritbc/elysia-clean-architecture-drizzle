@@ -1,5 +1,5 @@
 import { t } from 'elysia';
-import { StatusDto } from '../../../core/shared/dtos/common.dto';
+import { GetAllMetaDto, GetAllParamsDto, StatusDto } from '../../../core/shared/dtos/common.dto';
 import { EStatus } from '../../../core/shared/status.enum';
 // Base User DTO
 export const UserDto = t.Object({
@@ -58,6 +58,12 @@ export const UserIdParamsDto = t.Object({
   id: t.String(),
 });
 
+export const GetAllUsersQueryDto = t.Object({
+  ...GetAllParamsDto.properties,
+  name: t.Optional(t.String()),
+  email: t.Optional(t.String({ format: 'email' })),
+});
+
 export interface UserResponseDto {
   id: string;
   name: string;
@@ -67,6 +73,11 @@ export interface UserResponseDto {
   createdAt?: Date;
   updatedAt?: Date;
 }
+
+export const GetAllUsersReturnTypeDto = t.Object({
+  result: t.Array(UserDto),
+  meta: GetAllMetaDto,
+});
 
 // Type exports for TypeScript
 export type UserDtoType = typeof UserDto;
@@ -79,3 +90,5 @@ export type GetUserResponseDtoType = typeof GetUserResponseDto;
 export type GetUsersResponseDtoType = typeof GetUsersResponseDto;
 export type ErrorResponseDtoType = typeof ErrorResponseDto;
 export type UserIdParamsDtoType = typeof UserIdParamsDto;
+export type GetAllUsersQueryDtoType = typeof GetAllUsersQueryDto;
+export type GetAllUsersReturnTypeType = typeof GetAllUsersReturnTypeDto;
