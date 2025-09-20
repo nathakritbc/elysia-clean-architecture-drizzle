@@ -4,7 +4,7 @@ import pino, { Logger as Pino } from 'pino';
 
 import type { LoggerPort } from '../../core/shared/logger/logger.port';
 import { TOKENS } from '../../core/shared/tokens';
-import type { AppConfig } from '../config/appConfig';
+import type { AppConfig } from '../config/app-config';
 
 @injectable()
 export class PinoLogger implements LoggerPort {

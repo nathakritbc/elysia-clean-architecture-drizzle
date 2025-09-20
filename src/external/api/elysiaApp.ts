@@ -11,6 +11,14 @@ interface TraceProcessStopEvent {
   error?: unknown;
 }
 
+interface ErrorHandlerParams {
+  error: unknown;
+  code: number | string;
+  request?: {
+    url?: string;
+  };
+}
+
 interface TraceProcess {
   onStop(callback: (event?: TraceProcessStopEvent) => void): void;
 }
@@ -212,14 +220,6 @@ const createTracingPlugin = () => {
     });
   };
 };
-
-interface ErrorHandlerParams {
-  error: unknown;
-  code: number | string;
-  request?: {
-    url?: string;
-  };
-}
 
 const createErrorHandler = () => {
   return ({ error, code, request }: ErrorHandlerParams) => {

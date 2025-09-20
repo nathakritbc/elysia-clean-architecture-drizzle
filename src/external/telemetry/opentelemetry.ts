@@ -3,7 +3,7 @@ import { resourceFromAttributes } from '@opentelemetry/resources';
 import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions';
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http';
 
-import type { AppConfig } from '../config/appConfig';
+import type { AppConfig } from '../config/app-config';
 import type { LoggerPort } from '../../core/shared/logger/logger.port';
 
 export type TelemetryController = {
