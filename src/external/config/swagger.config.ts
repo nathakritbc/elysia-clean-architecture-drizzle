@@ -1,7 +1,7 @@
 import 'dotenv/config';
-import { appConfig } from './app-config';
+// import { appConfig } from './app-config';
 
-const url = `${appConfig.server.host}:${appConfig.server.port}`;
+// const url = `${appConfig.server.host}:${appConfig.server.port}`;
 
 export const createSwaggerConfig = () => ({
   documentation: {
@@ -13,7 +13,7 @@ export const createSwaggerConfig = () => ({
     tags: [{ name: 'Users', description: 'User management endpoints' }],
     servers: [
       {
-        url,
+        url: '',
         description: 'Development server',
       },
     ],
