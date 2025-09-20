@@ -1,7 +1,6 @@
 import 'dotenv/config';
 import Elysia from 'elysia';
 import { swagger } from '@elysiajs/swagger';
-import { opentelemetry } from '@elysiajs/opentelemetry';
 import { ErrorMapper } from '../../core/shared/errors/error-mapper';
 import { container } from '../../core/shared/container';
 import { TOKENS } from '../../core/shared/tokens';
@@ -9,6 +8,9 @@ import type { LoggerPort } from '../../core/shared/logger/logger.port';
 import { createSwaggerConfig } from '../config/swagger.config';
 import type { AppConfig } from '../config/app-config';
 import { openapi } from '@elysiajs/openapi';
+import { opentelemetry } from '@elysiajs/opentelemetry';
+import { BatchSpanProcessor } from '@opentelemetry/sdk-trace-node';
+import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-proto';
 
 const logger = container.resolve<LoggerPort>(TOKENS.Logger);
 const appConfig = container.resolve<AppConfig>(TOKENS.AppConfig);
@@ -114,6 +116,7 @@ if (appConfig.telemetry.enabled) {
   app.use(
     opentelemetry({
       serviceName: appConfig.telemetry.serviceName,
+      spanProcessors: [new BatchSpanProcessor(new OTLPTraceExporter())],
     })
   );
 }
