@@ -1,0 +1,19 @@
+### Create User
+POST {{baseUrl}}/users
+Content-Type: application/json
+
+{
+  "name": "John Doe",
+  "email": "john@example.com",
+  "password": "password123"
+}
+
+### Get All Users
+GET {{baseUrl}}/users
+
+### Get User by ID
+GET {{baseUrl}}/users/16ff20e5-f634-4406-bd5c-a7d41a47c147
+
+### Update User
+PUT {{baseUrl}}/users/16ff20e5-f634-4406-bd5c-a7d41a47c147
+Content-Type: application/json
