@@ -8,6 +8,7 @@ import { TOKENS } from '../../core/shared/tokens';
 import type { LoggerPort } from '../../core/shared/logger/logger.port';
 import { createSwaggerConfig } from '../config/swagger.config';
 import type { AppConfig } from '../config/app-config';
+import { openapi } from '@elysiajs/openapi';
 
 const logger = container.resolve<LoggerPort>(TOKENS.Logger);
 const appConfig = container.resolve<AppConfig>(TOKENS.AppConfig);
@@ -103,6 +104,7 @@ const createErrorHandler = () => {
 };
 
 const app = ErrorMapper.register(new Elysia())
+  .use(openapi())
   .use(appConfig.cors)
   .use(swagger(createSwaggerConfig()))
   .use(createBrowserRoutes)

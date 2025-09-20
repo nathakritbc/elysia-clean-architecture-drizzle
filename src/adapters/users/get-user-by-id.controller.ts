@@ -1,11 +1,11 @@
-import Elysia, { t } from 'elysia';
+import Elysia from 'elysia';
 import { inject, injectable } from 'tsyringe';
 import { getUserByIdUseCase } from '../../core/domain/users/use-case/get-user-by-id.usecase';
 import { UserId } from '../../core/domain/users/entity/user.entity';
 import { UserMapper } from './mappers/user.mapper';
 import { TOKENS } from '../../core/shared/tokens';
 import type { LoggerPort } from '../../core/shared/logger/logger.port';
-import { GetUserResponseDto, ErrorResponseDto } from './dtos/user.dto';
+import { GetUserResponseDto, ErrorResponseDto, UserIdParamsDto } from './dtos/user.dto';
 
 @injectable()
 export class GetUserByIdController {
@@ -32,9 +32,7 @@ export class GetUserByIdController {
         }
       },
       {
-        params: t.Object({
-          id: t.String(),
-        }),
+        params: UserIdParamsDto,
         response: {
           200: GetUserResponseDto,
           404: ErrorResponseDto,
