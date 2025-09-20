@@ -1,12 +1,13 @@
 import 'reflect-metadata';
-import { UpdateUserByIdInput, UserRepository } from '../service/user.repository';
+import { UserRepository } from '../service/user.repository';
 import { faker } from '@faker-js/faker';
 import { vi } from 'vitest';
 import { mock } from 'vitest-mock-extended';
-import { IUser, UserId } from '../entity/user.entity';
+import { BUserName, UserStatus, UserEmail, UserId, UserPassword, IUser } from '../entity/user.entity';
 import { NotFoundError } from '../../../shared/errors/error-mapper';
 import { UpdateUserByIdUseCase } from './update-user-by-id.usecase';
 import { Builder } from 'builder-pattern';
+import { EStatus } from '../../../shared/status.enum';
 
 describe('UpdateUserByIdUseCase', () => {
   let useCase: UpdateUserByIdUseCase;
@@ -26,7 +27,13 @@ describe('UpdateUserByIdUseCase', () => {
     userRepository.getById.mockResolvedValue(undefined);
     const errorExpected = new NotFoundError('User not found');
 
-    const userInput = Builder<UpdateUserByIdInput>().id(userId).user(mock<IUser>()).build();
+    const userInput = Builder<IUser>()
+      .id(userId)
+      .name(faker.person.fullName() as BUserName)
+      .email(faker.internet.email() as UserEmail)
+      .password(faker.internet.password() as UserPassword)
+      .status(faker.helpers.arrayElement(Object.values(EStatus)) as UserStatus)
+      .build();
 
     //Act
     const promise = useCase.execute(userInput);
@@ -42,8 +49,9 @@ describe('UpdateUserByIdUseCase', () => {
     const user = mock<IUser>({ id: userId });
     userRepository.getById.mockResolvedValue(user);
     userRepository.updateById.mockResolvedValue(user);
-    const userInput = Builder<UpdateUserByIdInput>().id(userId).user(user).build();
-    const expected = userInput.user;
+    const userInput = user;
+
+    const expected = userInput;
 
     //Act
     const actual = await useCase.execute(userInput);

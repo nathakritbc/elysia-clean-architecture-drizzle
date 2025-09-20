@@ -14,7 +14,7 @@ import {
   IUser,
 } from '../../../core/domain/users/entity/user.entity';
 import { Builder } from 'builder-pattern';
-import { UpdateUserByIdInput, UserRepository } from '../../../core/domain/users/service/user.repository';
+import { UserRepository } from '../../../core/domain/users/service/user.repository';
 @injectable()
 export class UserDrizzleRepository extends UserRepository {
   async deleteById(id: UserId): Promise<void> {
@@ -41,11 +41,11 @@ export class UserDrizzleRepository extends UserRepository {
     return result[0] ? this.toDomain(result[0]) : undefined;
   }
 
-  async updateById({ id, user }: UpdateUserByIdInput): Promise<IUser> {
+  async updateById(user: IUser): Promise<IUser> {
     const result = await db
       .update(users)
       .set(user)
-      .where(eq(users.id, id as string))
+      .where(eq(users.id, user.id as string))
       .returning();
     return this.toDomain(result[0]);
   }

@@ -13,8 +13,7 @@ import { UserMapper } from './mappers/user.mapper';
 import { TOKENS } from '../../core/shared/tokens';
 import type { LoggerPort } from '../../core/shared/logger/logger.port';
 import { UpdateUserRequestDto, UpdateUserResponseDto, ErrorResponseDto, UserIdParamsDto } from './dtos/user.dto';
-import { Builder, StrictBuilder } from 'builder-pattern';
-import { UpdateUserByIdInput } from '../../core/domain/users/service/user.repository';
+import { Builder } from 'builder-pattern';
 
 @injectable()
 export class UpdateUserByIdController {
@@ -34,15 +33,15 @@ export class UpdateUserByIdController {
           this.logger.info('Updating user by id', { id });
           this.logger.info('User to update', body);
 
-          const userToUpdate = Builder<IUser>()
+          const user = Builder<IUser>()
+            .id(id)
             .name(name as BUserName)
             .email(email as UserEmail)
             .password(password as UserPassword)
             .status(status as UserStatus)
             .build();
-          const input = StrictBuilder<UpdateUserByIdInput>().id(id).user(userToUpdate).build();
 
-          const updatedUser = await this.useCase.execute(input);
+          const updatedUser = await this.useCase.execute(user);
           this.logger.info('User updated successfully', { id });
           return UserMapper.mapToDto(updatedUser);
         } catch (error) {
