@@ -81,7 +81,7 @@ export class UserDrizzleRepository extends UserRepository {
 
     const countQuery = db.select({ count: sql<number>`count(*)` }).from(users);
     const totalResult = await (whereClause ? countQuery.where(whereClause) : countQuery);
-    const total = totalResult[0]?.count ?? 0;
+    const total = totalResult[0]?.count ? Number(totalResult[0]?.count) : 0;
 
     let dataQuery = db.select().from(users).$dynamic();
 
@@ -94,9 +94,9 @@ export class UserDrizzleRepository extends UserRepository {
     return {
       result,
       meta: {
-        total,
-        page: safePage,
         limit: safeLimit,
+        page: safePage,
+        total,
         totalPages,
       },
     };

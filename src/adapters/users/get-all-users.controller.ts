@@ -18,21 +18,23 @@ export class GetAllUsersController {
   register(server: Elysia) {
     server.get(
       '/users',
-      async ({ params }) => {
+      async ({ query }) => {
         try {
-          this.logger.info('Fetching users:', { params });
+          this.logger.info('Fetching users:', { query });
 
-          const query = Builder<GetAllUsersQuery>()
-            .search(params.search)
-            .sort(params.sort)
-            .order(params.order)
-            .page(params.page)
-            .limit(params.limit)
-            .name(params.name as BUserName)
-            .email(params.email as UserEmail)
+          const page = Number(query?.page ?? 1);
+          const limit = Number(query?.limit ?? -1);
+          const queryParams = Builder<GetAllUsersQuery>()
+            .search(query.search)
+            .sort(query.sort)
+            .order(query.order)
+            .page(page)
+            .limit(limit)
+            .name(query.name as BUserName)
+            .email(query.email as UserEmail)
             .build();
 
-          const data = await this.useCase.execute(query);
+          const data = await this.useCase.execute(queryParams);
           this.logger.debug('Fetched users successfully', { count: data.meta.total });
 
           return data;
@@ -43,7 +45,7 @@ export class GetAllUsersController {
         }
       },
       {
-        params: GetAllUsersQueryDto,
+        query: GetAllUsersQueryDto,
         response: {
           200: GetAllUsersReturnTypeDto,
           400: ErrorResponseDto,
