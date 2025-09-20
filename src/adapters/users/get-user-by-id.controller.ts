@@ -38,6 +38,7 @@ export class GetUserByIdController {
         response: {
           200: GetUserResponseDto,
           404: ErrorResponseDto,
+          500: ErrorResponseDto,
         },
         detail: {
           summary: 'Get user by ID',

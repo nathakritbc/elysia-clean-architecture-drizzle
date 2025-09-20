@@ -4,7 +4,7 @@ import { GetAllUsersUseCase } from '../../core/domain/users/use-case/get-all-use
 import { UserMapper } from './mappers/user.mapper';
 import { TOKENS } from '../../core/shared/tokens';
 import type { LoggerPort } from '../../core/shared/logger/logger.port';
-import { GetUsersResponseDto } from './dtos/user.dto';
+import { ErrorResponseDto, GetUsersResponseDto } from './dtos/user.dto';
 
 @injectable()
 export class GetAllUsersController {
@@ -32,6 +32,7 @@ export class GetAllUsersController {
       {
         response: {
           200: GetUsersResponseDto,
+          500: ErrorResponseDto,
         },
         detail: {
           summary: 'Get all users',
