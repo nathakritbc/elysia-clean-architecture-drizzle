@@ -6,7 +6,6 @@ import {
   ErrorResponseDto,
 } from "../../core/shared/dtos/user.dto";
 import { UserId } from "../../core/domain/users/entity/user.entity";
-import { NotFoundError } from "../../core/shared/errors/ErrorMapper";
 import { UserMapper } from "./mappers/user.mapper";
 
 @injectable()
@@ -21,11 +20,6 @@ export class FindUserByIdController {
       async ({ params }) => {
         const { id } = params as { id: string };
         const user = await this.useCase.execute(id as UserId);
-
-        if (!user) {
-          throw new NotFoundError("User not found");
-        }
-
         return UserMapper.mapToDto(user);
       },
       {

@@ -1,6 +1,6 @@
 import Elysia from "elysia";
 import { swagger } from "@elysiajs/swagger";
-import { ErrorMapper } from "../../core/shared/errors/ErrorMapper";
+import { ErrorMapper } from "../../core/shared/errors/errorMapper";
 
 const app = new Elysia()
   .use(
