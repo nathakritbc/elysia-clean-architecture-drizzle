@@ -1,18 +1,20 @@
+import type { Elysia } from 'elysia';
 import { ReasonPhrases, StatusCodes } from 'http-status-codes';
 
 export interface AppErrorOptions {
-  statusCode: number;
+  status: number;
   message: string;
   code?: string;
 }
 
 export class AppError extends Error {
-  public readonly statusCode: number;
+  public readonly status: number;
   public readonly code?: string;
 
-  constructor({ statusCode, message, code }: AppErrorOptions) {
+  constructor({ status, message, code }: AppErrorOptions) {
     super(message);
-    this.statusCode = statusCode;
+    this.name = new.target.name;
+    this.status = status;
     this.code = code;
     Object.setPrototypeOf(this, new.target.prototype);
   }
@@ -20,11 +22,11 @@ export class AppError extends Error {
   toResponse() {
     return Response.json(
       {
-        error: this.code ?? 'APP_ERROR',
+        error: this.code ?? this.name ?? 'APP_ERROR',
         message: this.message,
       },
       {
-        status: this.statusCode,
+        status: this.status,
       }
     );
   }
@@ -34,7 +36,7 @@ export class AppError extends Error {
 export class NotFoundError extends AppError {
   constructor(message: string = 'Resource not found') {
     super({
-      statusCode: StatusCodes.NOT_FOUND,
+      status: StatusCodes.NOT_FOUND,
       message,
       code: 'NOT_FOUND',
     });
@@ -44,7 +46,7 @@ export class NotFoundError extends AppError {
 export class ValidationError extends AppError {
   constructor(message: string = 'Validation failed') {
     super({
-      statusCode: StatusCodes.BAD_REQUEST,
+      status: StatusCodes.BAD_REQUEST,
       message,
       code: 'VALIDATION_ERROR',
     });
@@ -54,7 +56,7 @@ export class ValidationError extends AppError {
 export class InternalServerError extends AppError {
   constructor(message: string = 'Internal server error') {
     super({
-      statusCode: StatusCodes.INTERNAL_SERVER_ERROR,
+      status: StatusCodes.INTERNAL_SERVER_ERROR,
       message,
       code: 'INTERNAL_SERVER_ERROR',
     });
@@ -64,7 +66,7 @@ export class InternalServerError extends AppError {
 export class ConflictError extends AppError {
   constructor(message: string = 'Resource conflict') {
     super({
-      statusCode: StatusCodes.CONFLICT,
+      status: StatusCodes.CONFLICT,
       message,
       code: 'CONFLICT',
     });
@@ -72,12 +74,22 @@ export class ConflictError extends AppError {
 }
 
 export class ErrorMapper {
+  static register(app: Elysia) {
+    return app.error({
+      AppError,
+      NotFoundError,
+      ValidationError,
+      InternalServerError,
+      ConflictError,
+    });
+  }
+
   static toHttp(error: unknown) {
     if (error instanceof AppError) {
       return {
-        status: error.statusCode,
+        status: error.status,
         body: {
-          error: error.code ?? 'APP_ERROR',
+          error: error.code ?? error.name ?? 'APP_ERROR',
           message: error.message,
         },
       };

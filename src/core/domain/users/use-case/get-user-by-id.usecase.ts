@@ -3,7 +3,7 @@ import { IUseCase } from '../../../shared/useCase';
 import { IUser, UserId } from '../entity/user.entity';
 import { UserRepository } from '../service/user.repository';
 import { TOKENS } from '../../../shared/tokens';
-import { NotFoundError } from 'elysia';
+import { NotFoundError } from '../../../shared/errors/error-mapper';
 
 @injectable()
 export class getUserByIdUseCase implements IUseCase<UserId, IUser> {

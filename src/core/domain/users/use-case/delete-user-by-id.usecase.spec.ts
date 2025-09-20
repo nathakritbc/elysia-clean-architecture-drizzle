@@ -4,7 +4,7 @@ import { vi } from 'vitest';
 import { mock } from 'vitest-mock-extended';
 import { IUser, UserId } from '../entity/user.entity';
 import { UserRepository } from '../service/user.repository';
-import { NotFoundError } from 'elysia';
+import { NotFoundError } from '../../../shared/errors/error-mapper';
 import { DeleteUserByIdUseCase } from './delete-user-by-id.usecase';
 
 describe('DeleteUserByIdUseCase', () => {

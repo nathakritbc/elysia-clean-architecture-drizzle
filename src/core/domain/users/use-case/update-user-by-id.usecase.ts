@@ -3,7 +3,7 @@ import { IUseCase } from '../../../shared/useCase';
 import { IUser } from '../entity/user.entity';
 import { UpdateUserByIdInput, UserRepository } from '../service/user.repository';
 import { TOKENS } from '../../../shared/tokens';
-import { NotFoundError } from 'elysia';
+import { NotFoundError } from '../../../shared/errors/error-mapper';
 
 @injectable()
 export class UpdateUserByIdUseCase implements IUseCase<UpdateUserByIdInput, IUser> {

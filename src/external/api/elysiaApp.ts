@@ -102,7 +102,10 @@ const createErrorHandler = () => {
   };
 };
 
-const app = new Elysia();
+const app = ErrorMapper.register(new Elysia())
+  .use(swagger(createSwaggerConfig()))
+  .use(createBrowserRoutes)
+  .onError(createErrorHandler());
 
 if (appConfig.telemetry.enabled) {
   app.use(
@@ -111,7 +114,5 @@ if (appConfig.telemetry.enabled) {
     })
   );
 }
-
-app.use(swagger(createSwaggerConfig())).use(createBrowserRoutes).onError(createErrorHandler());
 
 export default app;

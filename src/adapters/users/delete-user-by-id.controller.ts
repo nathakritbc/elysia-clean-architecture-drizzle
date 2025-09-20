@@ -18,16 +18,12 @@ export class DeleteUserByIdController {
       '/users/:id',
       async ({ params }) => {
         const { id } = params as { id: UserId };
-        try {
-          this.logger.info('Deleting user by id', { id });
-          await this.useCase.execute(id);
-          this.logger.info('User deleted successfully', { id });
-          return { success: true };
-        } catch (error) {
-          const normalizedError = error instanceof Error ? error : new Error('Unknown error');
-          this.logger.error('Failed to delete user', { id, error: normalizedError });
-          throw error;
-        }
+
+        this.logger.info('Deleting user by id', { id });
+        await this.useCase.execute(id);
+        this.logger.info('User deleted successfully', { id });
+
+        return { success: true };
       },
       {
         params: UserIdParamsDto,

@@ -4,7 +4,7 @@ import { faker } from '@faker-js/faker';
 import { vi } from 'vitest';
 import { mock } from 'vitest-mock-extended';
 import { IUser, UserId } from '../entity/user.entity';
-import { NotFoundError } from 'elysia';
+import { NotFoundError } from '../../../shared/errors/error-mapper';
 import { UpdateUserByIdUseCase } from './update-user-by-id.usecase';
 import { Builder } from 'builder-pattern';
 

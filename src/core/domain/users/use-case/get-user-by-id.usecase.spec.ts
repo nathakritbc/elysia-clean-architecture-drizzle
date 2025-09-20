@@ -5,7 +5,7 @@ import { faker } from '@faker-js/faker';
 import { vi } from 'vitest';
 import { mock } from 'vitest-mock-extended';
 import { IUser, UserId } from '../entity/user.entity';
-import { NotFoundError } from 'elysia';
+import { NotFoundError } from '../../../shared/errors/error-mapper';
 
 describe('getUserByIdUseCase', () => {
   let useCase: getUserByIdUseCase;

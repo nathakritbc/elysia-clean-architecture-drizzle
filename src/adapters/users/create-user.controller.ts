@@ -7,7 +7,7 @@ import { UserPassword } from '../../core/domain/users/entity/user.entity';
 import { TOKENS } from '../../core/shared/tokens';
 import type { LoggerPort } from '../../core/shared/logger/logger.port';
 import { StrictBuilder } from 'builder-pattern';
-import { CreateUserRequestDto, CreateUserResponseDto } from './dtos/user.dto';
+import { CreateUserRequestDto, CreateUserResponseDto, ErrorResponseDto } from './dtos/user.dto';
 
 @injectable()
 export class CreateUserController {
@@ -44,6 +44,7 @@ export class CreateUserController {
         body: CreateUserRequestDto,
         response: {
           200: CreateUserResponseDto,
+          400: ErrorResponseDto,
         },
         detail: {
           summary: 'Create a new user',

@@ -3,8 +3,8 @@ POST {{baseUrl}}/users
 Content-Type: application/json
 
 {
-  "name": "John Doe 3",
-  "email": "john4@example.com",
+  "name": "John Doe99",
+  "email": "johns4@example.com",
   "password": "password123"
 }
 
