@@ -3,8 +3,7 @@ import { IUseCase } from '../../../shared/useCase';
 import { IUser, UserId } from '../entity/user.entity';
 import { UserRepository } from '../service/user.repository';
 import { TOKENS } from '../../../shared/tokens';
-import { NotFoundError } from 'elysia';
-import { ReasonPhrases } from 'http-status-codes';
+import { NotFoundError } from '../../../shared/errors/error-mapper';
 
 @injectable()
 export class getUserByIdUseCase implements IUseCase<UserId, IUser> {
@@ -14,8 +13,8 @@ export class getUserByIdUseCase implements IUseCase<UserId, IUser> {
   ) {}
 
   async execute(userId: UserId): Promise<IUser> {
-    const user = await this.userRepository.findById(userId);
-    if (!user) throw new NotFoundError(ReasonPhrases.NOT_FOUND);
+    const user = await this.userRepository.getById(userId);
+    if (!user) throw new NotFoundError('User not found');
     return user;
   }
 }

@@ -1,22 +1,21 @@
 import { inject, injectable } from 'tsyringe';
 import { IUseCase } from '../../../shared/useCase';
-import { UserId } from '../entity/user.entity';
+import { IUser } from '../entity/user.entity';
 import { UserRepository } from '../service/user.repository';
 import { TOKENS } from '../../../shared/tokens';
 import { NotFoundError } from '../../../shared/errors/error-mapper';
 
 @injectable()
-export class DeleteUserByIdUseCase implements IUseCase<UserId, void> {
+export class UpdateUserByIdUseCase implements IUseCase<IUser, IUser> {
   constructor(
     @inject(TOKENS.IUserRepository)
     private readonly userRepository: UserRepository
   ) {}
 
-  async execute(input: UserId): Promise<void> {
-    const userExist = await this.userRepository.getById(input);
-
+  async execute(user: IUser): Promise<IUser> {
+    const userExist = await this.userRepository.getById(user.id);
     if (!userExist) throw new NotFoundError('User not found');
 
-    return this.userRepository.deleteById(input);
+    return this.userRepository.updateById(user);
   }
 }

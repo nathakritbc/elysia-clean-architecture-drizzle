@@ -1,12 +1,13 @@
 import { t } from 'elysia';
-
+import { GetAllMetaDto, GetAllParamsDto, StatusDto } from '../../../core/shared/dtos/common.dto';
+import { EStatus } from '../../../core/shared/status.enum';
 // Base User DTO
 export const UserDto = t.Object({
-  id: t.Optional(t.String()),
+  id: t.String(),
   name: t.String(),
   email: t.String({ format: 'email' }),
   password: t.String({ minLength: 6 }),
-  status: t.Optional(t.String()),
+  status: StatusDto,
   createdAt: t.Optional(t.Date()),
   updatedAt: t.Optional(t.Date()),
 });
@@ -20,6 +21,25 @@ export const CreateUserRequestDto = t.Object({
 
 // Create User Response DTO
 export const CreateUserResponseDto = UserDto;
+
+// Update User Request DTO
+export const UpdateUserRequestDto = t.Object(
+  {
+    name: t.Optional(t.String({ minLength: 2, maxLength: 100 })),
+    email: t.Optional(t.String({ format: 'email' })),
+    password: t.Optional(t.String({ minLength: 6, maxLength: 100 })),
+    status: t.Optional(StatusDto),
+  },
+  { additionalProperties: false }
+);
+
+// Update User Response DTO
+export const UpdateUserResponseDto = UserDto;
+
+// Delete User Response DTO
+export const DeleteUserResponseDto = t.Object({
+  success: t.Boolean(),
+});
 
 // Get User Response DTO (single user)
 export const GetUserResponseDto = UserDto;
@@ -35,24 +55,40 @@ export const ErrorResponseDto = t.Object({
 
 // Path Parameters DTO
 export const UserIdParamsDto = t.Object({
-  id: t.Number(),
+  id: t.String(),
+});
+
+export const GetAllUsersQueryDto = t.Object({
+  ...GetAllParamsDto.properties,
+  name: t.Optional(t.String()),
+  email: t.Optional(t.String({ format: 'email' })),
 });
 
 export interface UserResponseDto {
-  id?: string;
+  id: string;
   name: string;
   email: string;
   password: string;
-  status?: string;
+  status: EStatus;
   createdAt?: Date;
   updatedAt?: Date;
 }
+
+export const GetAllUsersReturnTypeDto = t.Object({
+  result: t.Array(UserDto),
+  meta: GetAllMetaDto,
+});
 
 // Type exports for TypeScript
 export type UserDtoType = typeof UserDto;
 export type CreateUserRequestDtoType = typeof CreateUserRequestDto;
 export type CreateUserResponseDtoType = typeof CreateUserResponseDto;
+export type UpdateUserRequestDtoType = typeof UpdateUserRequestDto;
+export type UpdateUserResponseDtoType = typeof UpdateUserResponseDto;
+export type DeleteUserResponseDtoType = typeof DeleteUserResponseDto;
 export type GetUserResponseDtoType = typeof GetUserResponseDto;
 export type GetUsersResponseDtoType = typeof GetUsersResponseDto;
 export type ErrorResponseDtoType = typeof ErrorResponseDto;
 export type UserIdParamsDtoType = typeof UserIdParamsDto;
+export type GetAllUsersQueryDtoType = typeof GetAllUsersQueryDto;
+export type GetAllUsersReturnTypeType = typeof GetAllUsersReturnTypeDto;

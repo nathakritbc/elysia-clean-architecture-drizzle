@@ -7,13 +7,14 @@ import {
 } from './open-telemetry.config';
 import { loggerTransport, LoggingConfig, logLevel } from './logger.config';
 import { DatabaseConfig, databaseUrl } from './postgres-db.config';
-
+import { corsConfig } from './cors.config';
 export interface AppConfig {
   env: string;
   server: ServerConfig;
   logging: LoggingConfig;
   telemetry: OpenTelemetryConfig;
   database: DatabaseConfig;
+  cors: typeof corsConfig;
 }
 
 export interface ServerConfig {
@@ -28,7 +29,7 @@ const toNumber = (value: string | undefined, fallback: number): number => {
 
 export const env = process.env.NODE_ENV ?? 'development';
 const port = toNumber(process.env.PORT, 7000);
-const host = process.env.HOST ?? '0.0.0.0';
+const host = process.env.HOST ?? 'localhost';
 
 export const appConfig: AppConfig = {
   env,
@@ -48,4 +49,5 @@ export const appConfig: AppConfig = {
   database: {
     url: databaseUrl,
   },
+  cors: corsConfig,
 };
