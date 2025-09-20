@@ -46,6 +46,7 @@ export class GetAllUsersController {
         params: GetAllUsersQueryDto,
         response: {
           200: GetAllUsersReturnTypeDto,
+          400: ErrorResponseDto,
           500: ErrorResponseDto,
         },
         detail: {
