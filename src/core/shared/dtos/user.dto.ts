@@ -19,12 +19,7 @@ export const CreateUserRequestDto = t.Object({
 });
 
 // Create User Response DTO
-export const CreateUserResponseDto = t.Object({
-  status: t.Number(),
-  body: t.Object({
-    message: t.String(),
-  }),
-});
+export const CreateUserResponseDto = UserDto;
 
 // Get User Response DTO (single user)
 export const GetUserResponseDto = t.Object({

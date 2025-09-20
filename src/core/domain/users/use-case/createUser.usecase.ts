@@ -8,43 +8,38 @@ import {
   UserStatus,
   UserUpdatedAt,
   UserCreatedAt,
+  IUser,
 } from '../entity/user.entity';
 import { TOKENS } from '../../../shared/tokens';
 import { EStatus } from '../../../shared/status.enum';
 import { Builder } from 'builder-pattern';
 import { UserRepository } from '../service/user.repository';
-
-type Input = {
+import dayjs from 'dayjs';
+export interface CreateUserInput {
   name: BUserName;
   email: UserEmail;
   password: UserPassword;
-};
+}
 
 @injectable()
-export class CreateUserUseCase implements IUseCase<Input, void> {
+export class CreateUserUseCase implements IUseCase<CreateUserInput, IUser> {
   constructor(
     @inject(TOKENS.IUserRepository)
     private readonly userRepository: UserRepository
   ) {}
 
-  async execute(input: Input): Promise<void> {
+  async execute(input: CreateUserInput): Promise<IUser> {
     const { name, email, password } = input;
 
-    const isUserExist = await this.userRepository.getByEmail(email);
-
-    if (isUserExist) {
-      throw new Error('User already exists');
-    }
-
     const user = Builder(User)
-      .email(email as UserEmail)
-      .name(name as BUserName)
-      .password(password as UserPassword)
-      .createdAt(new Date() as UserCreatedAt)
-      .updatedAt(new Date() as UserUpdatedAt)
+      .email(email)
+      .name(name)
+      .password(password)
+      .createdAt(dayjs().toDate() as UserCreatedAt)
+      .updatedAt(dayjs().toDate() as UserUpdatedAt)
       .status(EStatus.ACTIVE as UserStatus)
       .build();
 
-    await this.userRepository.create(user);
+    return await this.userRepository.create(user);
   }
 }

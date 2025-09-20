@@ -1,12 +1,13 @@
 import Elysia from 'elysia';
 import { inject, injectable } from 'tsyringe';
-import { CreateUserUseCase } from '../../core/domain/users/use-case/createUser.usecase';
+import { CreateUserInput, CreateUserUseCase } from '../../core/domain/users/use-case/createUser.usecase';
 import { CreateUserRequestDto, CreateUserResponseDto, ErrorResponseDto } from '../../core/shared/dtos/user.dto';
 import { BUserName } from '../../core/domain/users/entity/user.entity';
 import { UserEmail } from '../../core/domain/users/entity/user.entity';
 import { UserPassword } from '../../core/domain/users/entity/user.entity';
 import { TOKENS } from '../../core/shared/tokens';
 import type { LoggerPort } from '../../core/shared/logger/logger.port';
+import { StrictBuilder } from 'builder-pattern';
 
 @injectable()
 export class CreateUserController {
@@ -19,25 +20,23 @@ export class CreateUserController {
     app.post(
       '/users',
       async ({ body }) => {
-        const { name, email, password } = body as {
-          name: BUserName;
-          email: UserEmail;
-          password: UserPassword;
-        };
-        try {
-          this.logger.info('Creating user', { email, name });
-          await this.useCase.execute({ name, email, password });
-          this.logger.info('User created successfully', { email });
+        const input = StrictBuilder<CreateUserInput>()
+          .email(body.email as UserEmail)
+          .name(body.name as BUserName)
+          .password(body.password as UserPassword)
+          .build();
 
-          return {
-            status: 200,
-            body: {
-              message: 'Usuario criado com sucesso',
-            },
-          };
+        try {
+          this.logger.info('Creating user', { ...input });
+
+          const userCreated = await this.useCase.execute(input);
+
+          this.logger.info('User created successfully', { ...userCreated });
+
+          return userCreated;
         } catch (error) {
           const normalizedError = error instanceof Error ? error : new Error('Unknown error');
-          this.logger.error('Failed to create user', { email, error: normalizedError });
+          this.logger.error('Failed to create user', { ...input, error: normalizedError });
           throw error;
         }
       },
