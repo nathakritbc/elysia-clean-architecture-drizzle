@@ -6,6 +6,8 @@ import {
   ErrorResponseDto,
 } from "../../core/shared/dtos/user.dto";
 import { UserId } from "../../core/domain/users/entity/user.entity";
+import { NotFoundError } from "../../core/shared/errors/ErrorMapper";
+import { UserMapper } from "./mappers/user.mapper";
 
 @injectable()
 export class FindUserByIdController {
@@ -13,29 +15,18 @@ export class FindUserByIdController {
     @inject(FindUserByIdUseCase) private readonly useCase: FindUserByIdUseCase
   ) {}
 
-  register(server: Elysia) {
-    server.get(
+  register(app: Elysia) {
+    app.get(
       "/users/:id",
-      async ({ params, error }) => {
-        try {
-          const { id } = params as { id: string };
-          const user = await this.useCase.execute(id as UserId);
+      async ({ params }) => {
+        const { id } = params as { id: string };
+        const user = await this.useCase.execute(id as UserId);
 
-          if (!user) {
-            return error(404, {
-              name: "NotFoundError",
-              message: "User not found",
-            });
-          }
-
-          return user;
-        } catch (err) {
-          return error(500, {
-            name: "Error",
-            message:
-              err instanceof Error ? err.message : "Internal server error",
-          });
+        if (!user) {
+          throw new NotFoundError("User not found");
         }
+
+        return UserMapper.mapToDto(user);
       },
       {
         params: t.Object({

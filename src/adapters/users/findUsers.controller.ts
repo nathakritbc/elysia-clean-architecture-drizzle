@@ -1,10 +1,13 @@
 import Elysia from "elysia";
 import { inject, injectable } from "tsyringe";
+import { isEmpty } from "radash";
+
 import { FindUsersUseCase } from "../../core/domain/users/use-case/findUsers.usecase";
 import {
   GetUsersResponseDto,
   ErrorResponseDto,
 } from "../../core/shared/dtos/user.dto";
+import { UserMapper } from "./mappers/user.mapper";
 
 @injectable()
 export class FindUsersController {
@@ -15,16 +18,16 @@ export class FindUsersController {
   register(server: Elysia) {
     server.get(
       "/users",
-      async ({ error }) => {
+      async () => {
         try {
           const data = await this.useCase.execute();
-          return data;
-        } catch (err) {
-          return error(500, {
-            name: "Error",
-            message:
-              err instanceof Error ? err.message : "Internal server error",
-          });
+          return !isEmpty(data) ? UserMapper.mapToDtoArray(data) : [];
+        } catch (error) {
+          throw new Error(
+            `Failed to fetch users: ${
+              error instanceof Error ? error.message : "Unknown error"
+            }`
+          );
         }
       },
       {

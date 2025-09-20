@@ -24,13 +24,13 @@ type Input = {
 export class CreateUserUseCase implements IUseCase<Input, void> {
   constructor(
     @inject(TOKENS.IUserRepository)
-    private readonly collection: UserRepository
+    private readonly userRepository: UserRepository
   ) {}
 
   async execute(input: Input): Promise<void> {
     const { name, email, password } = input;
 
-    const isUserExist = await this.collection.getByEmail(email);
+    const isUserExist = await this.userRepository.getByEmail(email);
 
     if (isUserExist) {
       throw new Error("User already exists");
@@ -45,6 +45,6 @@ export class CreateUserUseCase implements IUseCase<Input, void> {
       .status(EStatus.ACTIVE as UserStatus)
       .build();
 
-    await this.collection.create(user);
+    await this.userRepository.create(user);
   }
 }

@@ -16,38 +16,31 @@ export class CreateUserController {
     @inject(CreateUserUseCase) private readonly useCase: CreateUserUseCase
   ) {}
 
-  register(server: Elysia) {
-    server.post(
+  register(app: Elysia) {
+    app.post(
       "/users",
-      async ({ body, error }) => {
-        try {
-          const { name, email, password } = body as {
-            name: BUserName;
-            email: UserEmail;
-            password: UserPassword;
-          };
+      async ({ body }) => {
+        const { name, email, password } = body as {
+          name: BUserName;
+          email: UserEmail;
+          password: UserPassword;
+        };
 
-          await this.useCase.execute({ name, email, password });
+        await this.useCase.execute({ name, email, password });
 
-          return {
-            status: 200,
-            body: {
-              mensagem: "Usuario criado com sucesso",
-            },
-          };
-        } catch (err) {
-          return error(400, {
-            name: "Error",
-            message:
-              err instanceof Error ? err.message : "Unknown error occurred",
-          });
-        }
+        return {
+          status: 200,
+          body: {
+            message: "Usuario criado com sucesso",
+          },
+        };
       },
       {
         body: CreateUserRequestDto,
         response: {
           200: CreateUserResponseDto,
           400: ErrorResponseDto,
+          409: ErrorResponseDto,
         },
         detail: {
           summary: "Create a new user",

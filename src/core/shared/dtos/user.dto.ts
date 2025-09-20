@@ -2,12 +2,13 @@ import { t } from "elysia";
 
 // Base User DTO
 export const UserDto = t.Object({
-  id: t.Optional(t.Number()),
+  id: t.Optional(t.String()),
   name: t.String(),
   email: t.String({ format: "email" }),
   password: t.String({ minLength: 6 }),
-  created_at: t.Optional(t.Date()),
-  updated_at: t.Optional(t.Date()),
+  status: t.Optional(t.String()),
+  createdAt: t.Optional(t.Date()),
+  updatedAt: t.Optional(t.Date()),
 });
 
 // Create User Request DTO
@@ -21,18 +22,19 @@ export const CreateUserRequestDto = t.Object({
 export const CreateUserResponseDto = t.Object({
   status: t.Number(),
   body: t.Object({
-    mensagem: t.String(),
+    message: t.String(),
   }),
 });
 
 // Get User Response DTO (single user)
 export const GetUserResponseDto = t.Object({
-  id: t.Optional(t.Number()),
+  id: t.Optional(t.String()),
   name: t.String(),
   email: t.String({ format: "email" }),
   password: t.String(),
-  created_at: t.Optional(t.Date()),
-  updated_at: t.Optional(t.Date()),
+  status: t.Optional(t.String()),
+  createdAt: t.Optional(t.Date()),
+  updatedAt: t.Optional(t.Date()),
 });
 
 // Get Users Response DTO (array of users)
@@ -48,6 +50,16 @@ export const ErrorResponseDto = t.Object({
 export const UserIdParamsDto = t.Object({
   id: t.Number(),
 });
+
+export interface UserResponseDto {
+  id?: string;
+  name: string;
+  email: string;
+  password: string;
+  status?: string;
+  createdAt?: Date;
+  updatedAt?: Date;
+}
 
 // Type exports for TypeScript
 export type UserDtoType = typeof UserDto;

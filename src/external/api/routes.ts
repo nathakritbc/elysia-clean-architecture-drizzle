@@ -2,7 +2,7 @@ import { container } from "../../core/shared/container";
 import { CreateUserController } from "../../adapters/users/createUser.controller";
 import { FindUserByIdController } from "../../adapters/users/findUserById.controller";
 import { FindUsersController } from "../../adapters/users/findUsers.controller";
-import app from "./config";
+import app from "./elysiaApp";
 
 // Resolve controllers from DI container and register routes
 const createUserController = container.resolve(CreateUserController);
