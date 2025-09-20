@@ -1,11 +1,11 @@
 import Elysia, { t } from 'elysia';
 import { inject, injectable } from 'tsyringe';
 import { getUserByIdUseCase } from '../../core/domain/users/use-case/get-user-by-id.usecase';
-import { GetUserResponseDto, ErrorResponseDto } from '../../core/shared/dtos/user.dto';
 import { UserId } from '../../core/domain/users/entity/user.entity';
 import { UserMapper } from './mappers/user.mapper';
 import { TOKENS } from '../../core/shared/tokens';
 import type { LoggerPort } from '../../core/shared/logger/logger.port';
+import { GetUserResponseDto, ErrorResponseDto } from './dtos/user.dto';
 
 @injectable()
 export class GetUserByIdController {
