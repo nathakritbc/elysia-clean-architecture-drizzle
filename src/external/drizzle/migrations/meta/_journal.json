@@ -1,0 +1,34 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1757088124138,
+      "tag": "0000_steep_rocket_racer",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1757092936589,
+      "tag": "0001_empty_phantom_reporter",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1757093097255,
+      "tag": "0002_white_sage",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1757094837401,
+      "tag": "0003_vengeful_onslaught",
+      "breakpoints": true
+    }
+  ]
+}

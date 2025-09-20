@@ -1,0 +1,79 @@
+### Variables
+@baseUrl = http://localhost:3000
+@contentType = application/json
+
+### Create User - Valid Request
+POST {{baseUrl}}/users
+Content-Type: {{contentType}}
+
+{
+  "name": "John Doe",
+  "email": "john.doe@example.com",
+  "password": "password123"
+}
+
+### Create User - Invalid Email Format
+POST {{baseUrl}}/users
+Content-Type: {{contentType}}
+
+{
+  "name": "Jane Doe",
+  "email": "invalid-email",
+  "password": "password123"
+}
+
+### Create User - Password Too Short
+POST {{baseUrl}}/users
+Content-Type: {{contentType}}
+
+{
+  "name": "Bob Smith",
+  "email": "bob@example.com",
+  "password": "123"
+}
+
+### Create User - Name Too Short
+POST {{baseUrl}}/users
+Content-Type: {{contentType}}
+
+{
+  "name": "A",
+  "email": "alice@example.com",
+  "password": "password123"
+}
+
+### Create User - Missing Fields
+POST {{baseUrl}}/users
+Content-Type: {{contentType}}
+
+{
+  "name": "Charlie Brown"
+}
+
+### Create User - Duplicate Email (Test after creating first user)
+POST {{baseUrl}}/users
+Content-Type: {{contentType}}
+
+{
+  "name": "John Doe Duplicate",
+  "email": "john.doe@example.com",
+  "password": "password456"
+}
+
+### Get All Users
+GET {{baseUrl}}/users
+
+### Get User by ID - Valid ID
+GET {{baseUrl}}/users/1
+
+### Get User by ID - Invalid ID Format
+GET {{baseUrl}}/users/abc
+
+### Get User by ID - Non-existent ID
+GET {{baseUrl}}/users/999
+
+### Get User by ID - Negative ID
+GET {{baseUrl}}/users/-1
+
+### Get User by ID - Zero ID
+GET {{baseUrl}}/users/0

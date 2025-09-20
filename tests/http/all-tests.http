@@ -1,0 +1,176 @@
+### Clean Architecture Backend - API Test Suite
+### This file contains all API tests organized by modules
+
+### Variables
+@baseUrl = http://localhost:3000
+@contentType = application/json
+
+### ========================================
+### USER MANAGEMENT TESTS
+### ========================================
+
+### Create User - Valid Request
+POST {{baseUrl}}/users
+Content-Type: {{contentType}}
+
+{
+  "name": "John Does",
+  "email": "john.adoe@example.com",
+  "password": "password123"
+}
+
+### Create User - Invalid Email
+POST {{baseUrl}}/users
+Content-Type: {{contentType}}
+
+{
+  "name": "Jane Doe",
+  "email": "invalid-email",
+  "password": "password123"
+}
+
+### Create User - Password Too Short
+POST {{baseUrl}}/users
+Content-Type: {{contentType}}
+
+{
+  "name": "Bob Smith",
+  "email": "bob@example.com",
+  "password": "123"
+}
+
+### Get All Users
+GET {{baseUrl}}/users
+
+### Get User by ID - Valid
+GET {{baseUrl}}/users/1
+
+### Get User by ID - Invalid Format
+GET {{baseUrl}}/users/abc
+
+### Get User by ID - Not Found
+GET {{baseUrl}}/users/999
+
+### ========================================
+### VALIDATION TESTS
+### ========================================
+
+### Empty Request Body
+POST {{baseUrl}}/users
+Content-Type: {{contentType}}
+
+{}
+
+### Wrong Data Types
+POST {{baseUrl}}/users
+Content-Type: {{contentType}}
+
+{
+  "name": 123,
+  "email": 456,
+  "password": true
+}
+
+### Extra Fields
+POST {{baseUrl}}/users
+Content-Type: {{contentType}}
+
+{
+  "name": "Test User",
+  "email": "test@example.com",
+  "password": "password123",
+  "extraField": "should not be here"
+}
+
+### SQL Injection Attempt
+POST {{baseUrl}}/users
+Content-Type: {{contentType}}
+
+{
+  "name": "'; DROP TABLE users; --",
+  "email": "hacker@example.com",
+  "password": "password123"
+}
+
+### ========================================
+### ERROR SCENARIO TESTS
+### ========================================
+
+### Invalid HTTP Method
+PUT {{baseUrl}}/users
+Content-Type: {{contentType}}
+
+{
+  "name": "Test User",
+  "email": "test@example.com",
+  "password": "password123"
+}
+
+### Missing Content-Type
+POST {{baseUrl}}/users
+
+{
+  "name": "Test User",
+  "email": "test@example.com",
+  "password": "password123"
+}
+
+### Non-existent Endpoint
+GET {{baseUrl}}/non-existent-endpoint
+
+### Invalid JSON Format
+POST {{baseUrl}}/users
+Content-Type: {{contentType}}
+
+{
+  "name": "Test User",
+  "email": "test@example.com",
+  "password": "password123"
+  // Missing closing brace
+
+### ========================================
+### PERFORMANCE TESTS
+### ========================================
+
+### Multiple User Creation
+POST {{baseUrl}}/users
+Content-Type: {{contentType}}
+
+{
+  "name": "Performance Test User 1",
+  "email": "perf1@example.com",
+  "password": "password123"
+}
+
+###
+POST {{baseUrl}}/users
+Content-Type: {{contentType}}
+
+{
+  "name": "Performance Test User 2",
+  "email": "perf2@example.com",
+  "password": "password123"
+}
+
+###
+POST {{baseUrl}}/users
+Content-Type: {{contentType}}
+
+{
+  "name": "Performance Test User 3",
+  "email": "perf3@example.com",
+  "password": "password123"
+}
+
+### Bulk User Retrieval
+GET {{baseUrl}}/users
+
+### ========================================
+### HEALTH CHECK TESTS
+### ========================================
+
+### Basic Health Check
+GET {{baseUrl}}/
+
+### Server Status
+GET {{baseUrl}}/health

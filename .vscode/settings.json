@@ -1,0 +1,29 @@
+{
+  "rest-client.environmentVariables": {
+    "development": {
+      "baseUrl": "http://localhost:3000",
+      "contentType": "application/json"
+    },
+    "production": {
+      "baseUrl": "https://your-production-url.com",
+      "contentType": "application/json"
+    }
+  },
+  "rest-client.defaultHeaders": {
+    "User-Agent": "REST Client",
+    "Accept": "application/json"
+  },
+  "rest-client.timeoutinmilliseconds": 10000,
+  "rest-client.showResponseInDifferentTab": true,
+  "rest-client.previewResponseInUntitledDocument": true,
+  "rest-client.rememberCookiesForSubsequentRequests": true,
+  "rest-client.enableTelemetry": false,
+  "files.associations": {
+    "*.http": "http",
+    "*.rest": "http"
+},
+"cSpell.words": [
+  "Elysia",
+  "tsyringe"
+]
+}

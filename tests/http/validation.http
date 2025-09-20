@@ -1,0 +1,103 @@
+### Variables
+@baseUrl = http://localhost:3000
+@contentType = application/json
+
+### Validation Tests - Edge Cases
+
+### Test 1: Empty Request Body
+POST {{baseUrl}}/users
+Content-Type: {{contentType}}
+
+{}
+
+### Test 2: Null Values
+POST {{baseUrl}}/users
+Content-Type: {{contentType}}
+
+{
+  "name": null,
+  "email": null,
+  "password": null
+}
+
+### Test 3: Undefined Values
+POST {{baseUrl}}/users
+Content-Type: {{contentType}}
+
+{
+  "name": undefined,
+  "email": undefined,
+  "password": undefined
+}
+
+### Test 4: Wrong Data Types
+POST {{baseUrl}}/users
+Content-Type: {{contentType}}
+
+{
+  "name": 123,
+  "email": 456,
+  "password": true
+}
+
+### Test 5: Extra Fields (should be ignored or cause validation error)
+POST {{baseUrl}}/users
+Content-Type: {{contentType}}
+
+{
+  "name": "Test User",
+  "email": "test@example.com",
+  "password": "password123",
+  "extraField": "should not be here",
+  "anotherField": 123
+}
+
+### Test 6: SQL Injection Attempt
+POST {{baseUrl}}/users
+Content-Type: {{contentType}}
+
+{
+  "name": "'; DROP TABLE users; --",
+  "email": "hacker@example.com",
+  "password": "password123"
+}
+
+### Test 7: XSS Attempt
+POST {{baseUrl}}/users
+Content-Type: {{contentType}}
+
+{
+  "name": "<script>alert('xss')</script>",
+  "email": "xss@example.com",
+  "password": "password123"
+}
+
+### Test 8: Very Long Strings
+POST {{baseUrl}}/users
+Content-Type: {{contentType}}
+
+{
+  "name": "This is a very long name that exceeds the maximum length limit of 100 characters and should cause a validation error",
+  "email": "verylongemailaddressthatexceedsthenormallength@verylongdomainname.com",
+  "password": "This is a very long password that exceeds the maximum length limit of 100 characters and should cause a validation error"
+}
+
+### Test 9: Special Characters
+POST {{baseUrl}}/users
+Content-Type: {{contentType}}
+
+{
+  "name": "José María O'Connor-Smith",
+  "email": "josé.maría@example.com",
+  "password": "p@ssw0rd!@#$%^&*()"
+}
+
+### Test 10: Unicode Characters
+POST {{baseUrl}}/users
+Content-Type: {{contentType}}
+
+{
+  "name": "张三李四",
+  "email": "zhangsan@example.com",
+  "password": "password123"
+}
