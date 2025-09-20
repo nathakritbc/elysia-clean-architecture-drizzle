@@ -1,6 +1,6 @@
 import Elysia, { t } from 'elysia';
 import { inject, injectable } from 'tsyringe';
-import { FindUserByIdUseCase } from '../../core/domain/users/use-case/findUserById.usecase';
+import { getUserByIdUseCase } from '../../core/domain/users/use-case/getUserById.usecase';
 import { GetUserResponseDto, ErrorResponseDto } from '../../core/shared/dtos/user.dto';
 import { UserId } from '../../core/domain/users/entity/user.entity';
 import { UserMapper } from './mappers/user.mapper';
@@ -8,9 +8,9 @@ import { TOKENS } from '../../core/shared/tokens';
 import type { LoggerPort } from '../../core/shared/logger/logger.port';
 
 @injectable()
-export class FindUserByIdController {
+export class GetUserByIdController {
   constructor(
-    @inject(FindUserByIdUseCase) private readonly useCase: FindUserByIdUseCase,
+    @inject(getUserByIdUseCase) private readonly useCase: getUserByIdUseCase,
     @inject(TOKENS.Logger) private readonly logger: LoggerPort
   ) {}
 
@@ -18,10 +18,11 @@ export class FindUserByIdController {
     app.get(
       '/users/:id',
       async ({ params }) => {
-        const { id } = params as { id: string };
+        const { id } = params as { id: UserId };
         try {
           this.logger.info('Fetching user by id', { id });
-          const user = await this.useCase.execute(id as UserId);
+          const user = await this.useCase.execute(id);
+
           this.logger.debug('User fetched successfully', { id });
           return UserMapper.mapToDto(user);
         } catch (error) {
@@ -36,9 +37,7 @@ export class FindUserByIdController {
         }),
         response: {
           200: GetUserResponseDto,
-          400: ErrorResponseDto,
           404: ErrorResponseDto,
-          500: ErrorResponseDto,
         },
         detail: {
           summary: 'Get user by ID',

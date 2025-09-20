@@ -7,7 +7,7 @@ import { NotFoundError } from 'elysia';
 import { ReasonPhrases } from 'http-status-codes';
 
 @injectable()
-export class FindUserByIdUseCase implements IUseCase<UserId, IUser> {
+export class getUserByIdUseCase implements IUseCase<UserId, IUser> {
   constructor(
     @inject(TOKENS.IUserRepository)
     private readonly userRepository: UserRepository

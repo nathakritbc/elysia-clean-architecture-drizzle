@@ -5,13 +5,13 @@ import { UserRepository } from '../service/user.repository';
 import { TOKENS } from '../../../shared/tokens';
 
 @injectable()
-export class FindUsersUseCase implements IUseCase<void, IUser[]> {
+export class GetAllUsersUseCase implements IUseCase<void, IUser[]> {
   constructor(
     @inject(TOKENS.IUserRepository)
-    private readonly collection: UserRepository
+    private readonly userRepository: UserRepository
   ) {}
 
   async execute(): Promise<IUser[]> {
-    return this.collection.findAll();
+    return this.userRepository.findAll();
   }
 }

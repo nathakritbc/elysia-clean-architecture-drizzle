@@ -5,45 +5,46 @@ import { mock } from 'vitest-mock-extended';
 import { IUser, UserId } from '../entity/user.entity';
 import { UserRepository } from '../service/user.repository';
 import { DeleteByIdUseCase } from './deleteById.usecase';
+import { NotFoundError } from 'elysia';
 
 describe('DeleteProductByIdUseCase', () => {
   let useCase: DeleteByIdUseCase;
-  const productRepository = mock<UserRepository>();
+  const userRepository = mock<UserRepository>();
 
   beforeEach(() => {
-    useCase = new DeleteByIdUseCase(productRepository);
+    useCase = new DeleteByIdUseCase(userRepository);
   });
 
   afterEach(() => {
     vi.resetAllMocks();
   });
 
-  const productId = faker.string.uuid() as UserId;
-  it('should be throw error when product not found', async () => {
+  const userId = faker.string.uuid() as UserId;
+  it('should be throw error when user not found', async () => {
     //Arrange
-    productRepository.findById.mockResolvedValue(undefined);
-    const errorExpected = new Error('User ID is required');
+    userRepository.findById.mockResolvedValue(undefined);
+    const errorExpected = new NotFoundError('User not found');
 
     //Act
-    const actual = useCase.execute(productId);
+    const actual = useCase.execute(userId);
 
     //Assert
     await expect(actual).rejects.toThrowError(errorExpected);
-    expect(productRepository.findById).toHaveBeenCalledWith(productId);
-    expect(productRepository.deleteById).not.toHaveBeenCalled();
+    expect(userRepository.findById).toHaveBeenCalledWith(userId);
+    expect(userRepository.deleteById).not.toHaveBeenCalled();
   });
 
-  it('should be delete product', async () => {
+  it('should be delete user', async () => {
     //Arrange
-    const product = mock<IUser>({ id: productId });
-    productRepository.findById.mockResolvedValue(product);
-    productRepository.deleteById.mockResolvedValue(true);
+    const user = mock<IUser>({ id: userId });
+    userRepository.findById.mockResolvedValue(user);
+    userRepository.deleteById.mockResolvedValue(true);
 
     //Act
-    const actual = await useCase.execute(productId);
+    const actual = await useCase.execute(userId);
     //Assert
     expect(actual).toBeTruthy();
-    expect(productRepository.findById).toHaveBeenCalledWith(productId);
-    expect(productRepository.deleteById).toHaveBeenCalledWith(productId);
+    expect(userRepository.findById).toHaveBeenCalledWith(userId);
+    expect(userRepository.deleteById).toHaveBeenCalledWith(userId);
   });
 });

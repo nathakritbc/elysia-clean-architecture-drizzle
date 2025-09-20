@@ -1,17 +1,15 @@
 import Elysia from 'elysia';
 import { inject, injectable } from 'tsyringe';
-import { isEmpty } from 'radash';
-
-import { FindUsersUseCase } from '../../core/domain/users/use-case/findUsers.usecase';
-import { GetUsersResponseDto, ErrorResponseDto } from '../../core/shared/dtos/user.dto';
+import { GetAllUsersUseCase } from '../../core/domain/users/use-case/getAllUsers.usecase';
+import { GetUsersResponseDto } from '../../core/shared/dtos/user.dto';
 import { UserMapper } from './mappers/user.mapper';
 import { TOKENS } from '../../core/shared/tokens';
 import type { LoggerPort } from '../../core/shared/logger/logger.port';
 
 @injectable()
-export class FindUsersController {
+export class GetAllUsersController {
   constructor(
-    @inject(FindUsersUseCase) private readonly useCase: FindUsersUseCase,
+    @inject(GetAllUsersUseCase) private readonly useCase: GetAllUsersUseCase,
     @inject(TOKENS.Logger) private readonly logger: LoggerPort
   ) {}
 
@@ -24,7 +22,7 @@ export class FindUsersController {
           const data = await this.useCase.execute();
           const count = Array.isArray(data) ? data.length : 0;
           this.logger.debug('Fetched users successfully', { count });
-          return !isEmpty(data) ? UserMapper.mapToDtoArray(data) : [];
+          return UserMapper.mapToDtoArray(data);
         } catch (error) {
           const normalizedError = error instanceof Error ? error : new Error('Unknown error');
           this.logger.error('Failed to fetch users', { error: normalizedError });
@@ -34,7 +32,6 @@ export class FindUsersController {
       {
         response: {
           200: GetUsersResponseDto,
-          500: ErrorResponseDto,
         },
         detail: {
           summary: 'Get all users',

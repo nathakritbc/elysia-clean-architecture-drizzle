@@ -1,7 +1,7 @@
 import Elysia from 'elysia';
 import { inject, injectable } from 'tsyringe';
 import { CreateUserInput, CreateUserUseCase } from '../../core/domain/users/use-case/createUser.usecase';
-import { CreateUserRequestDto, CreateUserResponseDto, ErrorResponseDto } from '../../core/shared/dtos/user.dto';
+import { CreateUserRequestDto, CreateUserResponseDto } from '../../core/shared/dtos/user.dto';
 import { BUserName } from '../../core/domain/users/entity/user.entity';
 import { UserEmail } from '../../core/domain/users/entity/user.entity';
 import { UserPassword } from '../../core/domain/users/entity/user.entity';
@@ -44,8 +44,6 @@ export class CreateUserController {
         body: CreateUserRequestDto,
         response: {
           200: CreateUserResponseDto,
-          400: ErrorResponseDto,
-          409: ErrorResponseDto,
         },
         detail: {
           summary: 'Create a new user',

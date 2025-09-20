@@ -22,15 +22,7 @@ export const CreateUserRequestDto = t.Object({
 export const CreateUserResponseDto = UserDto;
 
 // Get User Response DTO (single user)
-export const GetUserResponseDto = t.Object({
-  id: t.Optional(t.String()),
-  name: t.String(),
-  email: t.String({ format: 'email' }),
-  password: t.String(),
-  status: t.Optional(t.String()),
-  createdAt: t.Optional(t.Date()),
-  updatedAt: t.Optional(t.Date()),
-});
+export const GetUserResponseDto = UserDto;
 
 // Get Users Response DTO (array of users)
 export const GetUsersResponseDto = t.Array(GetUserResponseDto);
