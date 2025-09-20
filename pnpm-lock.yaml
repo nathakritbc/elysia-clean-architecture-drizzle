@@ -8,6 +8,12 @@ importers:
 
   .:
     dependencies:
+      '@elysiajs/cors':
+        specifier: ^1.4.0
+        version: 1.4.0(elysia@1.3.21(exact-mirror@0.2.1(@sinclair/typebox@0.34.41))(file-type@21.0.0)(typescript@5.9.2))
+      '@elysiajs/openapi':
+        specifier: ^1.4.5
+        version: 1.4.5(elysia@1.3.21(exact-mirror@0.2.1(@sinclair/typebox@0.34.41))(file-type@21.0.0)(typescript@5.9.2))
       '@elysiajs/opentelemetry':
         specifier: ^1.4.0
         version: 1.4.0(elysia@1.3.21(exact-mirror@0.2.1(@sinclair/typebox@0.34.41))(file-type@21.0.0)(typescript@5.9.2))
@@ -147,6 +153,16 @@ packages:
 
   '@drizzle-team/brocli@0.10.2':
     resolution: {integrity: sha512-z33Il7l5dKjUgGULTqBsQBQwckHh5AbIuxhdsIxDDiZAzBOrZO6q9ogcWC65kU382AfynTfgNumVcNIjuIua6w==}
+
+  '@elysiajs/cors@1.4.0':
+    resolution: {integrity: sha512-pb0SCzBfFbFSYA/U40HHO7R+YrcXBJXOWgL20eSViK33ol1e20ru2/KUaZYo5IMUn63yaTJI/bQERuQ+77ND8g==}
+    peerDependencies:
+      elysia: '>= 1.4.0'
+
+  '@elysiajs/openapi@1.4.5':
+    resolution: {integrity: sha512-plvsxY59qW+RBMYBu+5idRc4RDzyYMe8p3rUFbc7vjjg9L4hQiHkwCm96jLD9mPyEnzZimClIAV2+16OvCDA6Q==}
+    peerDependencies:
+      elysia: '>= 1.4.0'
 
   '@elysiajs/opentelemetry@1.4.0':
     resolution: {integrity: sha512-snW/u/mLXU1OR86XgDW+CvsZEL1sFLeatWqxu2Knxk/0c9mxQsWYfDJP7hpP+iOL2Ryp9z9q1uRwgc6Rxze6eA==}
@@ -2021,6 +2037,14 @@ snapshots:
   '@borewit/text-codec@0.1.1': {}
 
   '@drizzle-team/brocli@0.10.2': {}
+
+  '@elysiajs/cors@1.4.0(elysia@1.3.21(exact-mirror@0.2.1(@sinclair/typebox@0.34.41))(file-type@21.0.0)(typescript@5.9.2))':
+    dependencies:
+      elysia: 1.3.21(exact-mirror@0.2.1(@sinclair/typebox@0.34.41))(file-type@21.0.0)(typescript@5.9.2)
+
+  '@elysiajs/openapi@1.4.5(elysia@1.3.21(exact-mirror@0.2.1(@sinclair/typebox@0.34.41))(file-type@21.0.0)(typescript@5.9.2))':
+    dependencies:
+      elysia: 1.3.21(exact-mirror@0.2.1(@sinclair/typebox@0.34.41))(file-type@21.0.0)(typescript@5.9.2)
 
   '@elysiajs/opentelemetry@1.4.0(elysia@1.3.21(exact-mirror@0.2.1(@sinclair/typebox@0.34.41))(file-type@21.0.0)(typescript@5.9.2))':
     dependencies:

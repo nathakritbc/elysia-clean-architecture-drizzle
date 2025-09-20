@@ -7,13 +7,14 @@ import {
 } from './open-telemetry.config';
 import { loggerTransport, LoggingConfig, logLevel } from './logger.config';
 import { DatabaseConfig, databaseUrl } from './postgres-db.config';
-
+import { corsConfig } from './cors.config';
 export interface AppConfig {
   env: string;
   server: ServerConfig;
   logging: LoggingConfig;
   telemetry: OpenTelemetryConfig;
   database: DatabaseConfig;
+  cors: typeof corsConfig;
 }
 
 export interface ServerConfig {
@@ -48,4 +49,5 @@ export const appConfig: AppConfig = {
   database: {
     url: databaseUrl,
   },
+  cors: corsConfig,
 };

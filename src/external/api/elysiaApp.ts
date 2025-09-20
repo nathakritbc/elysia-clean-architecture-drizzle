@@ -103,6 +103,7 @@ const createErrorHandler = () => {
 };
 
 const app = ErrorMapper.register(new Elysia())
+  .use(appConfig.cors)
   .use(swagger(createSwaggerConfig()))
   .use(createBrowserRoutes)
   .onError(createErrorHandler());
