@@ -4,15 +4,15 @@ import { vi } from 'vitest';
 import { mock } from 'vitest-mock-extended';
 import { IUser, UserId } from '../entity/user.entity';
 import { UserRepository } from '../service/user.repository';
-import { DeleteByIdUseCase } from './deleteById.usecase';
 import { NotFoundError } from 'elysia';
+import { DeleteUserByIdUseCase } from './deleteUserById.usecase';
 
-describe('DeleteProductByIdUseCase', () => {
-  let useCase: DeleteByIdUseCase;
+describe('DeleteUserByIdUseCase', () => {
+  let useCase: DeleteUserByIdUseCase;
   const userRepository = mock<UserRepository>();
 
   beforeEach(() => {
-    useCase = new DeleteByIdUseCase(userRepository);
+    useCase = new DeleteUserByIdUseCase(userRepository);
   });
 
   afterEach(() => {

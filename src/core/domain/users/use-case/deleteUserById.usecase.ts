@@ -6,7 +6,7 @@ import { TOKENS } from '../../../shared/tokens';
 import { NotFoundError } from 'elysia';
 
 @injectable()
-export class DeleteByIdUseCase implements IUseCase<UserId, boolean> {
+export class DeleteUserByIdUseCase implements IUseCase<UserId, boolean> {
   constructor(
     @inject(TOKENS.IUserRepository)
     private readonly userRepository: UserRepository
