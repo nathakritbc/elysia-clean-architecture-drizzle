@@ -1,3 +1,4 @@
+import 'dotenv/config';
 export type ServerConfig = {
   host: string;
   port: number;
@@ -5,6 +6,12 @@ export type ServerConfig = {
 
 export type LoggingConfig = {
   level: string;
+  transport?: {
+    target: string;
+    options: {
+      colorize: boolean;
+    };
+  };
 };
 
 export type TelemetryConfig = {
@@ -55,6 +62,17 @@ const telemetryServiceName = process.env.OTEL_SERVICE_NAME ?? 'elysia-clean-arch
 const telemetryEndpoint = process.env.OTEL_EXPORTER_OTLP_ENDPOINT;
 const databaseUrl = process.env.DATABASE_URL ?? '';
 
+//Logger
+const loggerTransport =
+  env === 'development'
+    ? {
+        target: 'pino-pretty',
+        options: {
+          colorize: true,
+        },
+      }
+    : undefined;
+
 export const appConfig: AppConfig = {
   env,
   server: {
@@ -63,6 +81,7 @@ export const appConfig: AppConfig = {
   },
   logging: {
     level: logLevel,
+    transport: loggerTransport,
   },
   telemetry: {
     enabled: telemetryEnabled,

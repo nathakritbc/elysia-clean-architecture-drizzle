@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import { inject, injectable } from 'tsyringe';
 import pino, { Logger as Pino } from 'pino';
 
@@ -12,6 +13,7 @@ export class PinoLogger implements LoggerPort {
   constructor(@inject(TOKENS.AppConfig) private readonly config: AppConfig) {
     this.logger = pino({
       level: config.logging.level,
+      transport: config.logging.transport,
       base: {
         env: config.env,
         service: config.telemetry.serviceName,

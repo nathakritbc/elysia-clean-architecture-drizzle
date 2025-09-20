@@ -29,6 +29,23 @@ const app = new Elysia()
       },
     })
   )
+  // Handle common browser requests
+  .get('/favicon.ico', () => new Response(null, { status: 204 }))
+  .get(
+    '/sw.js',
+    () =>
+      new Response('// Service worker not implemented', {
+        headers: { 'Content-Type': 'application/javascript' },
+      })
+  )
+  .get('/manifest.json', () => Response.json({ error: 'Not found' }, { status: 404 }))
+  .get(
+    '/robots.txt',
+    () =>
+      new Response('User-agent: *\nDisallow: /', {
+        headers: { 'Content-Type': 'text/plain' },
+      })
+  )
   .trace(({ context, response, onHandle, onAfterResponse, onError }) => {
     let span: Span | null = null;
     let spanEnded = false;
@@ -105,11 +122,12 @@ const app = new Elysia()
           return;
         }
 
-        const status = typeof context.set.status === 'number'
-          ? context.set.status
-          : response instanceof Response
-            ? response.status
-            : undefined;
+        const status =
+          typeof context.set.status === 'number'
+            ? context.set.status
+            : response instanceof Response
+              ? response.status
+              : undefined;
 
         if (typeof status === 'number') {
           span.setAttribute('http.status_code', status);
@@ -138,11 +156,22 @@ const app = new Elysia()
   .onError(({ error, code, request }) => {
     const normalizedError = error instanceof Error ? error : new Error('Unknown error');
 
-    logger.error('Request handling failed', {
-      code,
-      url: request?.url,
-      error: normalizedError,
-    });
+    // Skip logging for common browser requests that don't exist
+    const url = request?.url;
+    const isCommonBrowserRequest =
+      url &&
+      (url.includes('/favicon.ico') ||
+        url.includes('/sw.js') ||
+        url.includes('/manifest.json') ||
+        url.includes('/robots.txt'));
+
+    if (!isCommonBrowserRequest) {
+      logger.error('Request handling failed', {
+        code,
+        url: request?.url,
+        error: normalizedError,
+      });
+    }
 
     // Handle validation errors with custom messages
     if (code === 'VALIDATION') {
@@ -155,6 +184,28 @@ const app = new Elysia()
           status: 400,
         }
       );
+    }
+
+    // Handle 404 errors for common browser requests with appropriate responses
+    if (code === 'NOT_FOUND' && isCommonBrowserRequest) {
+      if (url?.includes('/favicon.ico')) {
+        return new Response(null, { status: 204 }); // No Content for favicon
+      }
+      if (url?.includes('/sw.js')) {
+        return new Response('// Service worker not implemented', {
+          status: 404,
+          headers: { 'Content-Type': 'application/javascript' },
+        });
+      }
+      if (url?.includes('/manifest.json')) {
+        return Response.json({ error: 'Not found' }, { status: 404 });
+      }
+      if (url?.includes('/robots.txt')) {
+        return new Response('User-agent: *\nDisallow: /', {
+          status: 404,
+          headers: { 'Content-Type': 'text/plain' },
+        });
+      }
     }
 
     // Handle all other errors using ErrorMapper

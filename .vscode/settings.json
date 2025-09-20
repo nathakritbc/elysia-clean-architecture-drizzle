@@ -22,5 +22,10 @@
     "*.http": "http",
     "*.rest": "http"
   },
-  "cSpell.words": ["dtos", "Elysia", "tsyringe"]
+  "cSpell.words": [
+    "dtos",
+    "Elysia",
+    "elysiajs",
+    "tsyringe"
+  ]
 }
