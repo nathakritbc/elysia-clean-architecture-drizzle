@@ -16,12 +16,15 @@
     "prepare": "husky"
   },
   "dependencies": {
+    "@elysiajs/opentelemetry": "^1.4.0",
     "@elysiajs/swagger": "^1.3.1",
     "@faker-js/faker": "^10.0.0",
     "@opentelemetry/api": "^1.9.0",
     "@opentelemetry/exporter-trace-otlp-http": "^0.205.0",
+    "@opentelemetry/exporter-trace-otlp-proto": "^0.205.0",
     "@opentelemetry/resources": "^2.1.0",
     "@opentelemetry/sdk-node": "^0.205.0",
+    "@opentelemetry/sdk-trace-node": "^2.1.0",
     "@opentelemetry/semantic-conventions": "^1.37.0",
     "builder-pattern": "^2.2.0",
     "dayjs": "^1.11.18",
