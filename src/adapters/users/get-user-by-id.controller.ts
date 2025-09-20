@@ -1,6 +1,6 @@
 import Elysia, { t } from 'elysia';
 import { inject, injectable } from 'tsyringe';
-import { getUserByIdUseCase } from '../../core/domain/users/use-case/getUserById.usecase';
+import { getUserByIdUseCase } from '../../core/domain/users/use-case/get-user-by-id.usecase';
 import { GetUserResponseDto, ErrorResponseDto } from '../../core/shared/dtos/user.dto';
 import { UserId } from '../../core/domain/users/entity/user.entity';
 import { UserMapper } from './mappers/user.mapper';

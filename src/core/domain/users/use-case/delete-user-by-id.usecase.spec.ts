@@ -5,7 +5,7 @@ import { mock } from 'vitest-mock-extended';
 import { IUser, UserId } from '../entity/user.entity';
 import { UserRepository } from '../service/user.repository';
 import { NotFoundError } from 'elysia';
-import { DeleteUserByIdUseCase } from './deleteUserById.usecase';
+import { DeleteUserByIdUseCase } from './delete-user-by-id.usecase';
 
 describe('DeleteUserByIdUseCase', () => {
   let useCase: DeleteUserByIdUseCase;

@@ -1,7 +1,7 @@
 import { container } from '../../core/shared/container';
-import { CreateUserController } from '../../adapters/users/createUser.controller';
-import { GetUserByIdController } from '../../adapters/users/getUserById.controller';
-import { GetAllUsersController } from '../../adapters/users/getAllUsers.controller';
+import { CreateUserController } from '../../adapters/users/create-user.controller';
+import { GetUserByIdController } from '../../adapters/users/get-user-by-id.controller';
+import { GetAllUsersController } from '../../adapters/users/get-all-users.controller';
 import app from './elysiaApp';
 
 // Resolve controllers from DI container and register routes

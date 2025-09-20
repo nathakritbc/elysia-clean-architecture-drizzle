@@ -1,6 +1,6 @@
 import Elysia from 'elysia';
 import { inject, injectable } from 'tsyringe';
-import { CreateUserInput, CreateUserUseCase } from '../../core/domain/users/use-case/createUser.usecase';
+import { CreateUserInput, CreateUserUseCase } from '../../core/domain/users/use-case/create-user.usecase';
 import { CreateUserRequestDto, CreateUserResponseDto } from '../../core/shared/dtos/user.dto';
 import { BUserName } from '../../core/domain/users/entity/user.entity';
 import { UserEmail } from '../../core/domain/users/entity/user.entity';

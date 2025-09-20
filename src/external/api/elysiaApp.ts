@@ -2,7 +2,7 @@ import Elysia from 'elysia';
 import { swagger } from '@elysiajs/swagger';
 import { SpanKind, SpanStatusCode, trace } from '@opentelemetry/api';
 import type { Span } from '@opentelemetry/api';
-import { ErrorMapper } from '../../core/shared/errors/errorMapper';
+import { ErrorMapper } from '../../core/shared/errors/error-mapper';
 import { container } from '../../core/shared/container';
 import { TOKENS } from '../../core/shared/tokens';
 import type { LoggerPort } from '../../core/shared/logger/logger.port';

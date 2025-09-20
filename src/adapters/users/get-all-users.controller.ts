@@ -1,6 +1,6 @@
 import Elysia from 'elysia';
 import { inject, injectable } from 'tsyringe';
-import { GetAllUsersUseCase } from '../../core/domain/users/use-case/getAllUsers.usecase';
+import { GetAllUsersUseCase } from '../../core/domain/users/use-case/get-all-users.usecase';
 import { GetUsersResponseDto } from '../../core/shared/dtos/user.dto';
 import { UserMapper } from './mappers/user.mapper';
 import { TOKENS } from '../../core/shared/tokens';
