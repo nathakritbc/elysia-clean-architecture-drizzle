@@ -3,24 +3,24 @@ POST {{baseUrl}}/users
 Content-Type: application/json
 
 {
-  "name": "John Doe22",
-  "email": "johns224sss@example.com",
-  "password": "password123"
+  "name": "Jossshn Doe22",
+  "email": "joddasdhns224sss@example.com",
+  "password": "pasasdassword123"
 }
 
 ### Get All Users
 GET {{baseUrl}}/users
 
 ### Get User by ID
-GET {{baseUrl}}/users/f6daa33b-183e-4c86-b464-be0606b3ed3a
+GET {{baseUrl}}/users/d5c7f5ce-ae98-446f-8d61-4cdacbdf2ccc
 
 ### Update User
-PUT {{baseUrl}}/users/f6daa33b-183e-4c86-b464-be0606b3ed3a
+PUT {{baseUrl}}/users/d5c7f5ce-ae98-446f-8d61-4cdacbdf2ccc
 Content-Type: application/json
 
 {
-  "name": "John Updated" 
+  "name": "John Updated"  
 }
 
 ### Delete User
-DELETE {{baseUrl}}/users/f6daa33b-183e-4c86-b464-be0606b3ed3a
+DELETE {{baseUrl}}/users/d5c7f5ce-ae98-446f-8d61-4cdacbdf2ccc

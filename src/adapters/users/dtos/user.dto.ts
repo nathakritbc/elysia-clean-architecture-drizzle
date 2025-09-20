@@ -1,12 +1,13 @@
 import { t } from 'elysia';
-import { StatusDto, StatusDtoType } from '../../../core/shared/dtos/common.dto';
+import { StatusDto } from '../../../core/shared/dtos/common.dto';
+import { EStatus } from '../../../core/shared/status.enum';
 // Base User DTO
 export const UserDto = t.Object({
-  id: t.Optional(t.String()),
+  id: t.String(),
   name: t.String(),
   email: t.String({ format: 'email' }),
   password: t.String({ minLength: 6 }),
-  status: t.Optional(StatusDto),
+  status: StatusDto,
   createdAt: t.Optional(t.Date()),
   updatedAt: t.Optional(t.Date()),
 });
@@ -58,11 +59,11 @@ export const UserIdParamsDto = t.Object({
 });
 
 export interface UserResponseDto {
-  id?: string;
+  id: string;
   name: string;
   email: string;
   password: string;
-  status?: StatusDtoType;
+  status: EStatus;
   createdAt?: Date;
   updatedAt?: Date;
 }
