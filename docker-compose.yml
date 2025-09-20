@@ -7,7 +7,7 @@ services:
       NODE_ENV: development
       HOST: 0.0.0.0
       PORT: 7000
-      DATABASE_URL: postgresql://postgres:12345678@localhost:5432/elysia_db
+      DATABASE_URL: postgresql://postgres:12345678@postgres:5432/elysia_db
       OTEL_ENABLED: 'true'
       OTEL_SERVICE_NAME: elysia-clean-architecture
       OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4318
