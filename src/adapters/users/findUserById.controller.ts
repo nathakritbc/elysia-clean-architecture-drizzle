@@ -4,18 +4,31 @@ import { FindUserByIdUseCase } from '../../core/domain/users/use-case/findUserBy
 import { GetUserResponseDto, ErrorResponseDto } from '../../core/shared/dtos/user.dto';
 import { UserId } from '../../core/domain/users/entity/user.entity';
 import { UserMapper } from './mappers/user.mapper';
+import { TOKENS } from '../../core/shared/tokens';
+import type { LoggerPort } from '../../core/shared/logger/logger.port';
 
 @injectable()
 export class FindUserByIdController {
-  constructor(@inject(FindUserByIdUseCase) private readonly useCase: FindUserByIdUseCase) {}
+  constructor(
+    @inject(FindUserByIdUseCase) private readonly useCase: FindUserByIdUseCase,
+    @inject(TOKENS.Logger) private readonly logger: LoggerPort
+  ) {}
 
   register(app: Elysia) {
     app.get(
       '/users/:id',
       async ({ params }) => {
         const { id } = params as { id: string };
-        const user = await this.useCase.execute(id as UserId);
-        return UserMapper.mapToDto(user);
+        try {
+          this.logger.info('Fetching user by id', { id });
+          const user = await this.useCase.execute(id as UserId);
+          this.logger.debug('User fetched successfully', { id });
+          return UserMapper.mapToDto(user);
+        } catch (error) {
+          const normalizedError = error instanceof Error ? error : new Error('Unknown error');
+          this.logger.error('Failed to fetch user by id', { id, error: normalizedError });
+          throw error;
+        }
       },
       {
         params: t.Object({
