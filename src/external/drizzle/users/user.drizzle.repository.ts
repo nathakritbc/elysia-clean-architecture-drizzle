@@ -14,24 +14,24 @@ import {
   IUser,
 } from '../../../core/domain/users/entity/user.entity';
 import { Builder } from 'builder-pattern';
-import { UserRepository } from '../../../core/domain/users/service/user.repository';
+import { UpdateUserByIdInput, UserRepository } from '../../../core/domain/users/service/user.repository';
 @injectable()
 export class UserDrizzleRepository extends UserRepository {
-  async deleteById(id: UserId): Promise<boolean> {
-    const result = await db.delete(users).where(eq(users.id, id as string));
-    return result.length > 0;
+  async deleteById(id: UserId): Promise<void> {
+    await db.delete(users).where(eq(users.id, id as string));
   }
 
-  async findById(id: UserId): Promise<IUser | undefined> {
+  async getById(id: UserId): Promise<IUser | undefined> {
     const result = await db
       .select()
       .from(users)
       .where(eq(users.id, id as string))
       .limit(1);
+
     return result[0] ? this.toDomain(result[0]) : undefined;
   }
 
-  async findAll(): Promise<IUser[]> {
+  async getAll(): Promise<IUser[]> {
     const result = await db.select().from(users);
     return result ? result.map(user => this.toDomain(user)) : [];
   }
@@ -39,6 +39,15 @@ export class UserDrizzleRepository extends UserRepository {
   async getByEmail(email: UserEmail): Promise<IUser | undefined> {
     const result = await db.select().from(users).where(eq(users.email, email)).limit(1);
     return result[0] ? this.toDomain(result[0]) : undefined;
+  }
+
+  async updateById({ id, user }: UpdateUserByIdInput): Promise<IUser> {
+    const result = await db
+      .update(users)
+      .set(user)
+      .where(eq(users.id, id as string))
+      .returning();
+    return this.toDomain(result[0]);
   }
 
   async create(user: IUser): Promise<IUser> {

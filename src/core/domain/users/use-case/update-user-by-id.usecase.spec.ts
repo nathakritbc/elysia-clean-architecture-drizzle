@@ -23,7 +23,7 @@ describe('UpdateUserByIdUseCase', () => {
   const userId = faker.string.uuid() as UserId;
   it('should be throw error when user not found', async () => {
     //Arrange
-    userRepository.findById.mockResolvedValue(undefined);
+    userRepository.getById.mockResolvedValue(undefined);
     const errorExpected = new NotFoundError('User not found');
 
     const userInput = Builder<UpdateUserByIdInput>().id(userId).user(mock<IUser>()).build();
@@ -33,14 +33,14 @@ describe('UpdateUserByIdUseCase', () => {
 
     //Assert
     await expect(promise).rejects.toThrowError(errorExpected);
-    expect(userRepository.findById).toHaveBeenCalledWith(userId);
+    expect(userRepository.getById).toHaveBeenCalledWith(userId);
     expect(userRepository.updateById).not.toHaveBeenCalled();
   });
 
   it('should be get user by id', async () => {
     //Arrange
     const user = mock<IUser>({ id: userId });
-    userRepository.findById.mockResolvedValue(user);
+    userRepository.getById.mockResolvedValue(user);
     userRepository.updateById.mockResolvedValue(user);
     const userInput = Builder<UpdateUserByIdInput>().id(userId).user(user).build();
     const expected = userInput.user;
@@ -50,7 +50,7 @@ describe('UpdateUserByIdUseCase', () => {
 
     //Assert
     expect(actual).toEqual(expected);
-    expect(userRepository.findById).toHaveBeenCalledWith(userId);
+    expect(userRepository.getById).toHaveBeenCalledWith(userId);
     expect(userRepository.updateById).toHaveBeenCalledWith(userInput);
   });
 });

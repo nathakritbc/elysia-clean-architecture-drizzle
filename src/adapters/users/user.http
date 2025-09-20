@@ -3,8 +3,8 @@ POST {{baseUrl}}/users
 Content-Type: application/json
 
 {
-  "name": "John Doe",
-  "email": "john@example.com",
+  "name": "John Doe 3",
+  "email": "john4@example.com",
   "password": "password123"
 }
 
@@ -12,8 +12,15 @@ Content-Type: application/json
 GET {{baseUrl}}/users
 
 ### Get User by ID
-GET {{baseUrl}}/users/16ff20e5-f634-4406-bd5c-a7d41a47c147
+GET {{baseUrl}}/users/f6daa33b-183e-4c86-b464-be0606b3ed3a
 
 ### Update User
-PUT {{baseUrl}}/users/16ff20e5-f634-4406-bd5c-a7d41a47c147
+PUT {{baseUrl}}/users/f6daa33b-183e-4c86-b464-be0606b3ed3a
 Content-Type: application/json
+
+{
+  "name": "John Updated" 
+}
+
+### Delete User
+DELETE {{baseUrl}}/users/f6daa33b-183e-4c86-b464-be0606b3ed3a

@@ -13,8 +13,9 @@ export class UpdateUserByIdUseCase implements IUseCase<UpdateUserByIdInput, IUse
   ) {}
 
   async execute({ id, user }: UpdateUserByIdInput): Promise<IUser> {
-    const userExist = await this.userRepository.findById(id);
+    const userExist = await this.userRepository.getById(id);
     if (!userExist) throw new NotFoundError('User not found');
+
     return this.userRepository.updateById({ id, user });
   }
 }

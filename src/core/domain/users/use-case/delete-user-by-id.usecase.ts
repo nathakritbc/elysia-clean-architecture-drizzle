@@ -6,14 +6,14 @@ import { TOKENS } from '../../../shared/tokens';
 import { NotFoundError } from 'elysia';
 
 @injectable()
-export class DeleteUserByIdUseCase implements IUseCase<UserId, boolean> {
+export class DeleteUserByIdUseCase implements IUseCase<UserId, void> {
   constructor(
     @inject(TOKENS.IUserRepository)
     private readonly userRepository: UserRepository
   ) {}
 
-  async execute(input: UserId): Promise<boolean> {
-    const userExist = await this.userRepository.findById(input);
+  async execute(input: UserId): Promise<void> {
+    const userExist = await this.userRepository.getById(input);
 
     if (!userExist) throw new NotFoundError('User not found');
 

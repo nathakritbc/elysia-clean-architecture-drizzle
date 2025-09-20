@@ -12,6 +12,6 @@ export class GetAllUsersUseCase implements IUseCase<void, IUser[]> {
   ) {}
 
   async execute(): Promise<IUser[]> {
-    return this.userRepository.findAll();
+    return this.userRepository.getAll();
   }
 }

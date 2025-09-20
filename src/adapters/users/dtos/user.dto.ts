@@ -21,6 +21,25 @@ export const CreateUserRequestDto = t.Object({
 // Create User Response DTO
 export const CreateUserResponseDto = UserDto;
 
+// Update User Request DTO
+export const UpdateUserRequestDto = t.Object(
+  {
+    name: t.Optional(t.String({ minLength: 2, maxLength: 100 })),
+    email: t.Optional(t.String({ format: 'email' })),
+    password: t.Optional(t.String({ minLength: 6, maxLength: 100 })),
+    status: t.Optional(t.String()),
+  },
+  { additionalProperties: false }
+);
+
+// Update User Response DTO
+export const UpdateUserResponseDto = UserDto;
+
+// Delete User Response DTO
+export const DeleteUserResponseDto = t.Object({
+  success: t.Boolean(),
+});
+
 // Get User Response DTO (single user)
 export const GetUserResponseDto = UserDto;
 
@@ -35,7 +54,7 @@ export const ErrorResponseDto = t.Object({
 
 // Path Parameters DTO
 export const UserIdParamsDto = t.Object({
-  id: t.Number(),
+  id: t.String(),
 });
 
 export interface UserResponseDto {
@@ -52,6 +71,9 @@ export interface UserResponseDto {
 export type UserDtoType = typeof UserDto;
 export type CreateUserRequestDtoType = typeof CreateUserRequestDto;
 export type CreateUserResponseDtoType = typeof CreateUserResponseDto;
+export type UpdateUserRequestDtoType = typeof UpdateUserRequestDto;
+export type UpdateUserResponseDtoType = typeof UpdateUserResponseDto;
+export type DeleteUserResponseDtoType = typeof DeleteUserResponseDto;
 export type GetUserResponseDtoType = typeof GetUserResponseDto;
 export type GetUsersResponseDtoType = typeof GetUsersResponseDto;
 export type ErrorResponseDtoType = typeof ErrorResponseDto;
