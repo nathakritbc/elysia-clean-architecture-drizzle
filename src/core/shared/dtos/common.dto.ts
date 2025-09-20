@@ -1,4 +1,5 @@
 import { t } from 'elysia';
+import { EStatus } from '../status.enum';
 
 // Common Success Response DTO
 export const SuccessResponseDTO = t.Object({
@@ -26,7 +27,10 @@ export const ValidationErrorResponseDTO = t.Object({
   }),
 });
 
+export const StatusDto = t.Enum(EStatus);
+
 // Type exports
 export type SuccessResponseDTOType = typeof SuccessResponseDTO;
 export type CommonErrorResponseDTOType = typeof CommonErrorResponseDTO;
 export type ValidationErrorResponseDTOType = typeof ValidationErrorResponseDTO;
+export type StatusDtoType = typeof StatusDto;

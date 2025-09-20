@@ -45,6 +45,7 @@ export class CreateUserController {
         response: {
           200: CreateUserResponseDto,
           400: ErrorResponseDto,
+          500: ErrorResponseDto,
         },
         detail: {
           summary: 'Create a new user',

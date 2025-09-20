@@ -29,7 +29,7 @@ const toNumber = (value: string | undefined, fallback: number): number => {
 
 export const env = process.env.NODE_ENV ?? 'development';
 const port = toNumber(process.env.PORT, 7000);
-const host = process.env.HOST ?? '0.0.0.0';
+const host = process.env.HOST ?? 'localhost';
 
 export const appConfig: AppConfig = {
   env,
