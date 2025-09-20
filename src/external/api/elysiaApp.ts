@@ -1,17 +1,18 @@
 import 'dotenv/config';
 import Elysia from 'elysia';
 import { swagger } from '@elysiajs/swagger';
-import { SpanKind, SpanStatusCode, trace } from '@opentelemetry/api';
-import type { Span } from '@opentelemetry/api';
+import { opentelemetry } from '@elysiajs/opentelemetry';
 import { ErrorMapper } from '../../core/shared/errors/error-mapper';
 import { container } from '../../core/shared/container';
 import { TOKENS } from '../../core/shared/tokens';
 import type { LoggerPort } from '../../core/shared/logger/logger.port';
 import { createSwaggerConfig } from '../config/swagger.config';
+import type { AppConfig } from '../config/app-config';
 
-interface TraceProcessStopEvent {
-  error?: unknown;
-}
+const logger = container.resolve<LoggerPort>(TOKENS.Logger);
+const appConfig = container.resolve<AppConfig>(TOKENS.AppConfig);
+
+const COMMON_BROWSER_PATHS = ['/favicon.ico', '/sw.js', '/manifest.json', '/robots.txt'];
 
 interface ErrorHandlerParams {
   error: unknown;
@@ -20,35 +21,6 @@ interface ErrorHandlerParams {
     url?: string;
   };
 }
-
-interface TraceProcess {
-  onStop(callback: (event?: TraceProcessStopEvent) => void): void;
-}
-
-interface TracingPluginParams {
-  context: TracingContext;
-  response: unknown;
-  onHandle: (callback: (process: TraceProcess) => void) => void;
-  onAfterResponse: (callback: (process: TraceProcess) => void) => void;
-  onError: (callback: (process: TraceProcess) => void) => void;
-}
-
-interface TracingContext {
-  route?: string;
-  path?: string;
-  request: {
-    method: string;
-    url: string;
-  };
-  set?: {
-    status?: number | string;
-  };
-}
-
-const logger = container.resolve<LoggerPort>(TOKENS.Logger);
-const tracer = trace.getTracer('elysia-app');
-
-const COMMON_BROWSER_PATHS = ['/favicon.ico', '/sw.js', '/manifest.json', '/robots.txt'];
 
 const createBrowserRoutes = (app: Elysia) => {
   return app
@@ -68,34 +40,6 @@ const createBrowserRoutes = (app: Elysia) => {
           headers: { 'Content-Type': 'text/plain' },
         })
     );
-};
-
-const createSpanAttributes = (context: TracingContext, requestUrl: URL | null) => {
-  const route = context.route ?? requestUrl?.pathname ?? context.path;
-  const baseAttributes: Record<string, string | number | boolean> = {
-    'http.method': context.request.method,
-    'http.route': route ?? '',
-    'http.target': requestUrl?.pathname ?? context.path ?? '',
-    'http.url': requestUrl?.toString() ?? context.request.url,
-  };
-
-  if (requestUrl?.host) {
-    baseAttributes['http.host'] = requestUrl.host;
-  }
-
-  if (requestUrl?.protocol) {
-    baseAttributes['http.scheme'] = requestUrl.protocol.replace(':', '');
-  }
-
-  return { route, baseAttributes };
-};
-
-const parseRequestUrl = (url: string): URL | null => {
-  try {
-    return new URL(url);
-  } catch {
-    return null;
-  }
 };
 
 const isCommonBrowserRequest = (url?: string): boolean => {
@@ -123,87 +67,6 @@ const handleBrowserRequestError = (url: string) => {
     });
   }
   return null;
-};
-
-const createTracingPlugin = () => {
-  return ({ context, response, onHandle, onAfterResponse, onError }: TracingPluginParams) => {
-    let span: Span | null = null;
-    let spanEnded = false;
-
-    const requestUrl = parseRequestUrl(context.request.url);
-    const { route, baseAttributes } = createSpanAttributes(context, requestUrl);
-    const spanName = `${context.request.method} ${route}`;
-
-    const createSpan = (): Span =>
-      tracer.startSpan(spanName, {
-        kind: SpanKind.SERVER,
-        attributes: baseAttributes,
-      });
-
-    const ensureSpan = (): Span => {
-      if (!span || spanEnded) {
-        span = createSpan();
-        spanEnded = false;
-      }
-      return span;
-    };
-
-    const endSpan = () => {
-      if (!span || spanEnded) return;
-      span.end();
-      spanEnded = true;
-      span = null;
-    };
-
-    const recordError = (error: Error) => {
-      const activeSpan = ensureSpan();
-      activeSpan.recordException(error);
-      activeSpan.setStatus({ code: SpanStatusCode.ERROR, message: error.message });
-      endSpan();
-    };
-
-    onHandle(process => {
-      span = createSpan();
-      spanEnded = false;
-
-      process.onStop(({ error } = {}) => {
-        if (!error || !span || spanEnded) return;
-        const normalizedError = error instanceof Error ? error : new Error(String(error));
-        recordError(normalizedError);
-      });
-    });
-
-    onAfterResponse(process => {
-      process.onStop(() => {
-        if (!span || spanEnded) return;
-
-        const contextStatus = context.set?.status;
-        const status =
-          typeof contextStatus === 'number'
-            ? contextStatus
-            : response instanceof Response
-              ? response.status
-              : undefined;
-
-        if (typeof status === 'number') {
-          span.setAttribute('http.status_code', status);
-          span.setStatus({ code: status >= 400 ? SpanStatusCode.ERROR : SpanStatusCode.OK });
-        } else {
-          span.setStatus({ code: SpanStatusCode.OK });
-        }
-
-        endSpan();
-      });
-    });
-
-    onError(process => {
-      process.onStop(({ error } = {}) => {
-        if (!error) return;
-        const normalizedError = error instanceof Error ? error : new Error(String(error));
-        recordError(normalizedError);
-      });
-    });
-  };
 };
 
 const createErrorHandler = () => {
@@ -239,10 +102,16 @@ const createErrorHandler = () => {
   };
 };
 
-const app = new Elysia()
-  .use(swagger(createSwaggerConfig()))
-  .use(createBrowserRoutes)
-  .trace(createTracingPlugin())
-  .onError(createErrorHandler());
+const app = new Elysia();
+
+if (appConfig.telemetry.enabled) {
+  app.use(
+    opentelemetry({
+      serviceName: appConfig.telemetry.serviceName,
+    })
+  );
+}
+
+app.use(swagger(createSwaggerConfig())).use(createBrowserRoutes).onError(createErrorHandler());
 
 export default app;
