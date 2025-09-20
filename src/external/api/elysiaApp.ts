@@ -7,73 +7,139 @@ import { container } from '../../core/shared/container';
 import { TOKENS } from '../../core/shared/tokens';
 import type { LoggerPort } from '../../core/shared/logger/logger.port';
 
+interface TraceProcessStopEvent {
+  error?: unknown;
+}
+
+interface TraceProcess {
+  onStop(callback: (event?: TraceProcessStopEvent) => void): void;
+}
+
+interface TracingPluginParams {
+  context: TracingContext;
+  response: unknown;
+  onHandle: (callback: (process: TraceProcess) => void) => void;
+  onAfterResponse: (callback: (process: TraceProcess) => void) => void;
+  onError: (callback: (process: TraceProcess) => void) => void;
+}
+
+interface TracingContext {
+  route?: string;
+  path?: string;
+  request: {
+    method: string;
+    url: string;
+  };
+  set?: {
+    status?: number | string;
+  };
+}
+
 const logger = container.resolve<LoggerPort>(TOKENS.Logger);
 const tracer = trace.getTracer('elysia-app');
 
-const app = new Elysia()
-  .use(
-    swagger({
-      documentation: {
-        info: {
-          title: 'Elysia Clean Architecture Backend API',
-          version: '1.0.0',
-          description: 'API documentation for the Clean Architecture Backend with Drizzle ORM',
-        },
-        tags: [{ name: 'Users', description: 'User management endpoints' }],
-        servers: [
-          {
-            url: 'http://localhost:3000',
-            description: 'Development server',
-          },
-        ],
+const COMMON_BROWSER_PATHS = ['/favicon.ico', '/sw.js', '/manifest.json', '/robots.txt'];
+
+const createSwaggerConfig = () => ({
+  documentation: {
+    info: {
+      title: 'Elysia Clean Architecture Backend API',
+      version: '1.0.0',
+      description: 'API documentation for the Clean Architecture Backend with Drizzle ORM',
+    },
+    tags: [{ name: 'Users', description: 'User management endpoints' }],
+    servers: [
+      {
+        url: 'http://localhost:3000',
+        description: 'Development server',
       },
-    })
-  )
-  // Handle common browser requests
-  .get('/favicon.ico', () => new Response(null, { status: 204 }))
-  .get(
-    '/sw.js',
-    () =>
-      new Response('// Service worker not implemented', {
-        headers: { 'Content-Type': 'application/javascript' },
-      })
-  )
-  .get('/manifest.json', () => Response.json({ error: 'Not found' }, { status: 404 }))
-  .get(
-    '/robots.txt',
-    () =>
-      new Response('User-agent: *\nDisallow: /', {
-        headers: { 'Content-Type': 'text/plain' },
-      })
-  )
-  .trace(({ context, response, onHandle, onAfterResponse, onError }) => {
+    ],
+  },
+});
+
+const createBrowserRoutes = (app: Elysia) => {
+  return app
+    .get('/favicon.ico', () => new Response(null, { status: 204 }))
+    .get(
+      '/sw.js',
+      () =>
+        new Response('// Service worker not implemented', {
+          headers: { 'Content-Type': 'application/javascript' },
+        })
+    )
+    .get('/manifest.json', () => Response.json({ error: 'Not found' }, { status: 404 }))
+    .get(
+      '/robots.txt',
+      () =>
+        new Response('User-agent: *\nDisallow: /', {
+          headers: { 'Content-Type': 'text/plain' },
+        })
+    );
+};
+
+const createSpanAttributes = (context: TracingContext, requestUrl: URL | null) => {
+  const route = context.route ?? requestUrl?.pathname ?? context.path;
+  const baseAttributes: Record<string, string | number | boolean> = {
+    'http.method': context.request.method,
+    'http.route': route ?? '',
+    'http.target': requestUrl?.pathname ?? context.path ?? '',
+    'http.url': requestUrl?.toString() ?? context.request.url,
+  };
+
+  if (requestUrl?.host) {
+    baseAttributes['http.host'] = requestUrl.host;
+  }
+
+  if (requestUrl?.protocol) {
+    baseAttributes['http.scheme'] = requestUrl.protocol.replace(':', '');
+  }
+
+  return { route, baseAttributes };
+};
+
+const parseRequestUrl = (url: string): URL | null => {
+  try {
+    return new URL(url);
+  } catch {
+    return null;
+  }
+};
+
+const isCommonBrowserRequest = (url?: string): boolean => {
+  if (!url) return false;
+  return COMMON_BROWSER_PATHS.some(path => url.includes(path));
+};
+
+const handleBrowserRequestError = (url: string) => {
+  if (url.includes('/favicon.ico')) {
+    return new Response(null, { status: 204 });
+  }
+  if (url.includes('/sw.js')) {
+    return new Response('// Service worker not implemented', {
+      status: 404,
+      headers: { 'Content-Type': 'application/javascript' },
+    });
+  }
+  if (url.includes('/manifest.json')) {
+    return Response.json({ error: 'Not found' }, { status: 404 });
+  }
+  if (url.includes('/robots.txt')) {
+    return new Response('User-agent: *\nDisallow: /', {
+      status: 404,
+      headers: { 'Content-Type': 'text/plain' },
+    });
+  }
+  return null;
+};
+
+const createTracingPlugin = () => {
+  return ({ context, response, onHandle, onAfterResponse, onError }: TracingPluginParams) => {
     let span: Span | null = null;
     let spanEnded = false;
 
-    const requestUrl = (() => {
-      try {
-        return new URL(context.request.url);
-      } catch {
-        return null;
-      }
-    })();
-
-    const route = context.route ?? requestUrl?.pathname ?? context.path;
+    const requestUrl = parseRequestUrl(context.request.url);
+    const { route, baseAttributes } = createSpanAttributes(context, requestUrl);
     const spanName = `${context.request.method} ${route}`;
-    const baseAttributes: Record<string, string | number | boolean> = {
-      'http.method': context.request.method,
-      'http.route': route,
-      'http.target': requestUrl?.pathname ?? context.path,
-      'http.url': requestUrl?.toString() ?? context.request.url,
-    };
-
-    if (requestUrl?.host) {
-      baseAttributes['http.host'] = requestUrl.host;
-    }
-
-    if (requestUrl?.protocol) {
-      baseAttributes['http.scheme'] = requestUrl.protocol.replace(':', '');
-    }
 
     const createSpan = (): Span =>
       tracer.startSpan(spanName, {
@@ -90,41 +156,38 @@ const app = new Elysia()
     };
 
     const endSpan = () => {
-      if (!span || spanEnded) {
-        return;
-      }
-
+      if (!span || spanEnded) return;
       span.end();
       spanEnded = true;
       span = null;
+    };
+
+    const recordError = (error: Error) => {
+      const activeSpan = ensureSpan();
+      activeSpan.recordException(error);
+      activeSpan.setStatus({ code: SpanStatusCode.ERROR, message: error.message });
+      endSpan();
     };
 
     onHandle(process => {
       span = createSpan();
       spanEnded = false;
 
-      process.onStop(({ error }) => {
-        if (!span || spanEnded) {
-          return;
-        }
-
-        if (error) {
-          span.recordException(error);
-          span.setStatus({ code: SpanStatusCode.ERROR, message: error.message });
-          endSpan();
-        }
+      process.onStop(({ error } = {}) => {
+        if (!error || !span || spanEnded) return;
+        const normalizedError = error instanceof Error ? error : new Error(String(error));
+        recordError(normalizedError);
       });
     });
 
     onAfterResponse(process => {
       process.onStop(() => {
-        if (!span || spanEnded) {
-          return;
-        }
+        if (!span || spanEnded) return;
 
+        const contextStatus = context.set?.status;
         const status =
-          typeof context.set.status === 'number'
-            ? context.set.status
+          typeof contextStatus === 'number'
+            ? contextStatus
             : response instanceof Response
               ? response.status
               : undefined;
@@ -141,75 +204,60 @@ const app = new Elysia()
     });
 
     onError(process => {
-      process.onStop(({ error }) => {
-        if (!error) {
-          return;
-        }
-
-        const activeSpan = ensureSpan();
-        activeSpan.recordException(error);
-        activeSpan.setStatus({ code: SpanStatusCode.ERROR, message: error.message });
-        endSpan();
+      process.onStop(({ error } = {}) => {
+        if (!error) return;
+        const normalizedError = error instanceof Error ? error : new Error(String(error));
+        recordError(normalizedError);
       });
     });
-  })
-  .onError(({ error, code, request }) => {
+  };
+};
+
+interface ErrorHandlerParams {
+  error: unknown;
+  code: number | string;
+  request?: {
+    url?: string;
+  };
+}
+
+const createErrorHandler = () => {
+  return ({ error, code, request }: ErrorHandlerParams) => {
     const normalizedError = error instanceof Error ? error : new Error('Unknown error');
-
-    // Skip logging for common browser requests that don't exist
     const url = request?.url;
-    const isCommonBrowserRequest =
-      url &&
-      (url.includes('/favicon.ico') ||
-        url.includes('/sw.js') ||
-        url.includes('/manifest.json') ||
-        url.includes('/robots.txt'));
+    const isBrowserRequest = isCommonBrowserRequest(url);
 
-    if (!isCommonBrowserRequest) {
+    if (!isBrowserRequest) {
       logger.error('Request handling failed', {
         code,
-        url: request?.url,
+        url,
         error: normalizedError,
       });
     }
 
-    // Handle validation errors with custom messages
-    if (code === 'VALIDATION') {
+    if (code === 'VALIDATION' || code === 400) {
       return Response.json(
         {
           error: 'VALIDATION_ERROR',
           message: normalizedError.message,
         },
-        {
-          status: 400,
-        }
+        { status: 400 }
       );
     }
 
-    // Handle 404 errors for common browser requests with appropriate responses
-    if (code === 'NOT_FOUND' && isCommonBrowserRequest) {
-      if (url?.includes('/favicon.ico')) {
-        return new Response(null, { status: 204 }); // No Content for favicon
-      }
-      if (url?.includes('/sw.js')) {
-        return new Response('// Service worker not implemented', {
-          status: 404,
-          headers: { 'Content-Type': 'application/javascript' },
-        });
-      }
-      if (url?.includes('/manifest.json')) {
-        return Response.json({ error: 'Not found' }, { status: 404 });
-      }
-      if (url?.includes('/robots.txt')) {
-        return new Response('User-agent: *\nDisallow: /', {
-          status: 404,
-          headers: { 'Content-Type': 'text/plain' },
-        });
-      }
+    if ((code === 'NOT_FOUND' || code === 404) && isBrowserRequest && url) {
+      const browserResponse = handleBrowserRequestError(url);
+      if (browserResponse) return browserResponse;
     }
 
-    // Handle all other errors using ErrorMapper
     return ErrorMapper.handleError(normalizedError);
-  });
+  };
+};
+
+const app = new Elysia()
+  .use(swagger(createSwaggerConfig()))
+  .use(createBrowserRoutes)
+  .trace(createTracingPlugin())
+  .onError(createErrorHandler());
 
 export default app;
