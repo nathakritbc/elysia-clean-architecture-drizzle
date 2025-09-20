@@ -76,6 +76,10 @@ services:
     volumes:
       - ./docker/loki/loki-config.yml:/etc/loki/config/loki-config.yml:ro
       - loki-data:/loki
+    environment:
+      - LOKI_SERVER_HTTP_LISTEN_PORT=3100
+    expose:
+      - '7946'
     ports:
       - '3100:3100'
     networks:
