@@ -57,6 +57,7 @@ export class UpdateUserByIdController {
         response: {
           200: UpdateUserResponseDto,
           404: ErrorResponseDto,
+          500: ErrorResponseDto,
         },
         detail: {
           summary: 'Update user by ID',
