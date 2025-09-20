@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import Elysia from 'elysia';
 import { swagger } from '@elysiajs/swagger';
 import { SpanKind, SpanStatusCode, trace } from '@opentelemetry/api';
@@ -6,6 +7,7 @@ import { ErrorMapper } from '../../core/shared/errors/error-mapper';
 import { container } from '../../core/shared/container';
 import { TOKENS } from '../../core/shared/tokens';
 import type { LoggerPort } from '../../core/shared/logger/logger.port';
+import { createSwaggerConfig } from '../config/swagger.config';
 
 interface TraceProcessStopEvent {
   error?: unknown;
@@ -47,23 +49,6 @@ const logger = container.resolve<LoggerPort>(TOKENS.Logger);
 const tracer = trace.getTracer('elysia-app');
 
 const COMMON_BROWSER_PATHS = ['/favicon.ico', '/sw.js', '/manifest.json', '/robots.txt'];
-
-const createSwaggerConfig = () => ({
-  documentation: {
-    info: {
-      title: 'Elysia Clean Architecture Backend API',
-      version: '1.0.0',
-      description: 'API documentation for the Clean Architecture Backend with Drizzle ORM',
-    },
-    tags: [{ name: 'Users', description: 'User management endpoints' }],
-    servers: [
-      {
-        url: 'http://localhost:3000',
-        description: 'Development server',
-      },
-    ],
-  },
-});
 
 const createBrowserRoutes = (app: Elysia) => {
   return app
