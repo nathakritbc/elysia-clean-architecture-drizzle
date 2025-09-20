@@ -114,7 +114,31 @@ bun run test:e2e              # Run end-to-end tests
 bun run dev
 ```
 
-The server will start at `http://localhost:3000`
+The server will start at `http://localhost:7000`
+
+## 🐳 Docker & Observability Stack
+
+This project now ships with a full Docker Compose setup that runs the API, PostgreSQL, and a Grafana/Prometheus/Loki observability stack.
+
+```bash
+docker compose up -d
+```
+
+The compose file builds the Bun application image, starts the database, and launches the monitoring services:
+
+- **API** – `http://localhost:7000` (depends on the environment variables defined in the compose file)
+- **PostgreSQL** – exposed on `localhost:5432`
+- **Prometheus** – available at `http://localhost:9090`
+- **Grafana** – available at `http://localhost:3000` (default credentials: `admin` / `admin`)
+- **Loki** – log storage, queried via Grafana Explore
+
+Promtail tails Docker container logs and pushes them to Loki. The OpenTelemetry Collector receives OTLP traces/metrics from the application and exposes them for Prometheus scraping. If you need additional metrics, enable the relevant OpenTelemetry instrumentation in the application and they will automatically flow into Prometheus/Grafana.
+
+To tear everything down:
+
+```bash
+docker compose down -v
+```
 
 ## 📚 API Endpoints
 
