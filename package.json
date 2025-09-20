@@ -2,6 +2,9 @@
   "name": "elysia-architecture-backend",
   "version": "1.0.50",
   "scripts": {
+    "lint": "oxlint --tsconfig tsconfig.json src tests",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
     "test": "vitest run",
     "test:watch": "vitest --watch",
     "test:cov": "vitest run --coverage",
@@ -32,6 +35,8 @@
     "@vitest/ui": "^3.2.4",
     "bun-types": "latest",
     "drizzle-kit": "^0.31.4",
+    "oxlint": "^1.16.0",
+    "prettier": "^3.6.2",
     "vite-tsconfig-paths": "^5.1.4",
     "vitest": "^3.2.4"
   },
