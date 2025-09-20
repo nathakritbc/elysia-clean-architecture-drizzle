@@ -63,15 +63,21 @@ const telemetryEndpoint = process.env.OTEL_EXPORTER_OTLP_ENDPOINT;
 const databaseUrl = process.env.DATABASE_URL ?? '';
 
 //Logger
-const loggerTransport =
-  env === 'development'
-    ? {
-        target: 'pino-pretty',
-        options: {
-          colorize: true,
-        },
-      }
-    : undefined;
+// const loggerTransport =
+//   env === 'development'
+//     ? {
+//         target: 'pino-pretty',
+//         options: {
+//           colorize: true,
+//         },
+//       }
+//     : undefined;
+const loggerTransport = {
+  target: 'pino-pretty',
+  options: {
+    colorize: true,
+  },
+};
 
 export const appConfig: AppConfig = {
   env,
