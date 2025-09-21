@@ -2,7 +2,6 @@ import Elysia from 'elysia';
 import { inject, injectable } from 'tsyringe';
 import { GetUserByIdUseCase } from '../../core/domain/users/use-case/get-user-by-id.usecase';
 import { UserId } from '../../core/domain/users/entity/user.entity';
-import { UserMapper } from './mappers/user.mapper';
 import { TOKENS } from '../../core/shared/tokens';
 import type { LoggerPort } from '../../core/shared/logger/logger.port';
 import { GetUserResponseDto, ErrorResponseDto, UserIdParamsDto } from './dtos/user.dto';
@@ -24,7 +23,7 @@ export class GetUserByIdController {
           const user = await this.useCase.execute(id);
 
           this.logger.debug('User fetched successfully', { id });
-          return UserMapper.mapToDto(user);
+          return user;
         } catch (error) {
           const normalizedError = error instanceof Error ? error : new Error('Unknown error');
           this.logger.error('Failed to fetch user by id', { id, error: normalizedError });

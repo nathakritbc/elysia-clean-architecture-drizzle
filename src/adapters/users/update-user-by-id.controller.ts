@@ -9,7 +9,6 @@ import {
   UserPassword,
   UserStatus,
 } from '../../core/domain/users/entity/user.entity';
-import { UserMapper } from './mappers/user.mapper';
 import { TOKENS } from '../../core/shared/tokens';
 import type { LoggerPort } from '../../core/shared/logger/logger.port';
 import { UpdateUserRequestDto, UpdateUserResponseDto, ErrorResponseDto, UserIdParamsDto } from './dtos/user.dto';
@@ -43,7 +42,7 @@ export class UpdateUserByIdController {
 
           const updatedUser = await this.useCase.execute(user);
           this.logger.info('User updated successfully', { id });
-          return UserMapper.mapToDto(updatedUser);
+          return updatedUser;
         } catch (error) {
           const normalizedError = error instanceof Error ? error : new Error('Unknown error');
           this.logger.error('Failed to update user', { id, error: normalizedError });
