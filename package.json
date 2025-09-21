@@ -11,7 +11,8 @@
     "test:e2e": "vitest --config ./test/vitest-e2e.json",
     "dev": "bun run --watch src/index.ts",
     "db:generate": "drizzle-kit generate",
-    "db:migrate": "drizzle-kit migrate",
+    "db:migrate": "node ./scripts/run-migrations.mjs",
+    "db:migrate:raw": "drizzle-kit migrate",
     "db:push": "drizzle-kit push",
     "prepare": "husky"
   },

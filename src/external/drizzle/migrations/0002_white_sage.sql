@@ -1,0 +1,1 @@
+-- Placeholder migration: legacy entry referenced in meta journal
