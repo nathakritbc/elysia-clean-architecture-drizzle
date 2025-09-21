@@ -1,6 +1,6 @@
 import 'reflect-metadata';
 import { beforeEach, describe, expect, it } from 'vitest';
-import { mock, mockReset } from 'vitest-mock-extended';
+import { mock } from 'vitest-mock-extended';
 import { RefreshSessionUseCase } from './refresh-session.usecase';
 import { RefreshTokenRepository } from '../service/refresh-token.repository';
 import { UserRepository } from '../../users/service/user.repository';
@@ -35,10 +35,11 @@ describe('RefreshSessionUseCase', () => {
   };
 
   beforeEach(() => {
-    mockReset(refreshTokenRepository);
-    mockReset(userRepository);
-    mockReset(authTokenService);
     useCase = new RefreshSessionUseCase(refreshTokenRepository, userRepository, authTokenService);
+  });
+
+  afterEach(() => {
+    vi.resetAllMocks();
   });
 
   it('throws unauthorized if refresh token not found', async () => {

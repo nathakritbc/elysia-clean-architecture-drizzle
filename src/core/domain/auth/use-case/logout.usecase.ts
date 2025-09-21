@@ -26,14 +26,19 @@ export class LogoutUseCase implements IUseCase<LogoutInput, LogoutOutput> {
     }
 
     const refreshTokenString = input.refreshToken;
-    const [jti] = refreshTokenString.split('.');
+    const jti = await this.validateRefreshToken(refreshTokenString);
+    await this.refreshTokenRepository.revokeByJti(jti, new Date() as RefreshTokenRevokedAt);
+
+    return { success: true };
+  }
+
+  private async validateRefreshToken(refreshToken: RefreshTokenPlain): Promise<RefreshTokenJti> {
+    const [jti] = refreshToken.split('.');
 
     if (!jti) {
       throw new UnauthorizedError('Invalid refresh token');
     }
 
-    await this.refreshTokenRepository.revokeByJti(jti as RefreshTokenJti, new Date() as RefreshTokenRevokedAt);
-
-    return { success: true };
+    return jti as RefreshTokenJti;
   }
 }
