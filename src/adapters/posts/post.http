@@ -1,0 +1,26 @@
+### Create User
+POST {{baseUrl}}/posts
+Content-Type: application/json
+
+{
+  "title": "Title test 1",
+  "content": "content test",
+}
+
+### Get All Users
+GET {{baseUrl}}/posts
+
+### Get User by ID
+GET {{baseUrl}}/posts/d5c7f5ce-ae98-446f-8d61-4cdacbdf2ccc
+
+### Update User
+PUT {{baseUrl}}/posts/eafbfd10-331f-415c-99a4-1bd50730bd2d
+Content-Type: application/json
+
+{
+  "title": "Title updated",
+  "content": "content updated",
+}
+
+### Delete User
+DELETE {{baseUrl}}/posts/d5c7f5ce-ae98-446f-8d61-4cdacbdf2ccc
