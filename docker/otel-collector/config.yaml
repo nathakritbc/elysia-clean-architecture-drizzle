@@ -5,25 +5,39 @@ receivers:
       http:
 
 processors:
-  batch: {}
+  memory_limiter:
+    limit_mib: 256
+    spike_limit_mib: 128
+    check_interval: 5s
+  batch:
+  resource:
+    attributes:
+      - key: service.namespace
+        action: insert
+        value: elysia
+      - key: deployment.environment
+        action: insert
+        value: development
 
 exporters:
   prometheus:
     endpoint: 0.0.0.0:9464
   logging:
     verbosity: basic
+  otlphttp/tempo:
+    endpoint: http://tempo:4318
 
 service:
   pipelines:
     metrics:
       receivers: [otlp]
-      processors: [batch]
+      processors: [memory_limiter, batch, resource]
       exporters: [prometheus]
     traces:
       receivers: [otlp]
-      processors: [batch]
-      exporters: [logging]
+      processors: [memory_limiter, batch, resource]
+      exporters: [logging, otlphttp/tempo]
     logs:
       receivers: [otlp]
-      processors: [batch]
+      processors: [memory_limiter, batch, resource]
       exporters: [logging]
