@@ -47,7 +47,7 @@ export interface AuthConfig {
 const accessTokenExpiresIn = process.env.JWT_ACCESS_EXPIRES_IN ?? DEFAULT_ACCESS_TOKEN_EXPIRES_IN;
 const refreshTokenExpiresIn = process.env.JWT_REFRESH_EXPIRES_IN ?? DEFAULT_REFRESH_TOKEN_EXPIRES_IN;
 
-const refreshCookieSecureDefault = process.env.NODE_ENV === 'production';
+const cookieSecureDefault = process.env.NODE_ENV === 'production';
 
 export const authConfig: AuthConfig = {
   jwt: {
@@ -62,7 +62,7 @@ export const authConfig: AuthConfig = {
     path: process.env.REFRESH_TOKEN_COOKIE_PATH ?? '/',
     domain: process.env.REFRESH_TOKEN_COOKIE_DOMAIN,
     sameSite: normalizeSameSite(process.env.REFRESH_TOKEN_COOKIE_SAME_SITE),
-    secure: normalizeBoolean(process.env.REFRESH_TOKEN_COOKIE_SECURE, refreshCookieSecureDefault),
+    secure: normalizeBoolean(process.env.REFRESH_TOKEN_COOKIE_SECURE, cookieSecureDefault),
     httpOnly: true,
     maxAgeSeconds: durationToSeconds(refreshTokenExpiresIn, DEFAULT_REFRESH_TOKEN_EXPIRES_IN),
   },

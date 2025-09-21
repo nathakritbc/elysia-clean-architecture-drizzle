@@ -1,0 +1,46 @@
+@useCookieJar
+@baseUrl = http://localhost:7000
+
+### Optional: create a user if not registered yet
+# POST {{baseUrl}}/auth/signup
+# Content-Type: application/json
+#
+# {
+#   "name": "User One",
+#   "email": "user1@gmail.com",
+#   "password": "12345678"
+# }
+
+### Sign in
+# @name login
+POST {{baseUrl}}/auth/signin
+Content-Type: application/json
+
+{
+  "email": "user1@gmail.com",
+  "password": "12345678"
+}
+###
+@accessToken = {{login.response.body.accessToken}}
+
+### Sign in (curl)
+# curl -i -c cookies.txt \
+#   -H "Content-Type: application/json" \
+#   -d '{"email":"user1@gmail.com","password":"12345678"}' \
+#   {{baseUrl}}/auth/signin
+
+### Fetch posts via bearer header (curl)
+# curl -i \
+#   -H "Authorization: Bearer {{accessToken}}" \
+#   {{baseUrl}}/posts
+
+### Protected request via bearer header
+GET {{baseUrl}}/posts
+Authorization: Bearer {{accessToken}}
+
+### Logout
+POST {{baseUrl}}/auth/logout
+
+### Logout (curl)
+# curl -i -b cookies.txt \
+#   {{baseUrl}}/auth/logout

@@ -1,4 +1,5 @@
 import type { AuthConfig } from '../../external/config/auth.config';
+import type { RefreshTokenCookieConfig } from '../../external/config/auth.config';
 
 const sameSiteLabel = {
   lax: 'Lax',
@@ -27,18 +28,21 @@ export const parseCookies = (header: string | null | undefined): CookieRecord =>
   }, {});
 };
 
-const buildBaseCookieAttributes = (config: AuthConfig) => {
-  const attributes = [`Path=${config.refreshTokenCookie.path}`];
+const buildBaseCookieAttributes = (cookieConfig: RefreshTokenCookieConfig) => {
+  const attributes = [`Path=${cookieConfig.path}`];
 
-  if (config.refreshTokenCookie.domain) {
-    attributes.push(`Domain=${config.refreshTokenCookie.domain}`);
+  if (cookieConfig.domain) {
+    attributes.push(`Domain=${cookieConfig.domain}`);
   }
 
-  const sameSiteKey = config.refreshTokenCookie.sameSite as SameSiteKey;
+  const sameSiteKey = cookieConfig.sameSite as SameSiteKey;
   attributes.push(`SameSite=${sameSiteLabel[sameSiteKey]}`);
-  attributes.push('HttpOnly');
 
-  if (config.refreshTokenCookie.secure) {
+  if (cookieConfig.httpOnly) {
+    attributes.push('HttpOnly');
+  }
+
+  if (cookieConfig.secure) {
     attributes.push('Secure');
   }
 
@@ -46,7 +50,7 @@ const buildBaseCookieAttributes = (config: AuthConfig) => {
 };
 
 export const buildRefreshTokenCookie = (token: string, expiresAt: Date, config: AuthConfig): string => {
-  const base = buildBaseCookieAttributes(config);
+  const base = buildBaseCookieAttributes(config.refreshTokenCookie);
   base.unshift(
     `${config.refreshTokenCookie.name}=${encodeURIComponent(token)}`,
     `Max-Age=${config.refreshTokenCookie.maxAgeSeconds}`,
@@ -57,7 +61,7 @@ export const buildRefreshTokenCookie = (token: string, expiresAt: Date, config: 
 };
 
 export const buildClearRefreshTokenCookie = (config: AuthConfig): string => {
-  const base = buildBaseCookieAttributes(config);
+  const base = buildBaseCookieAttributes(config.refreshTokenCookie);
   base.unshift(`${config.refreshTokenCookie.name}=`, 'Max-Age=0', 'Expires=Thu, 01 Jan 1970 00:00:00 GMT');
   return base.join('; ');
 };

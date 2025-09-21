@@ -38,15 +38,21 @@ export class SignInController {
           const { user, tokens } = result;
 
           set.status = StatusCodes.OK;
-          const cookieHeader = buildRefreshTokenCookie(
+          const cookie = buildRefreshTokenCookie(
             tokens.refreshToken,
-            tokens.refreshTokenExpiresAt,
+            tokens.refreshTokenExpiresAt as unknown as Date,
             this.authConfig
           );
-          if (set.headers) {
-            set.headers['Set-Cookie'] = cookieHeader;
+
+          set.headers = set.headers ?? {};
+          const existing = set.headers['Set-Cookie'];
+
+          if (!existing) {
+            set.headers['Set-Cookie'] = cookie;
+          } else if (Array.isArray(existing)) {
+            set.headers['Set-Cookie'] = [...existing, cookie];
           } else {
-            set.headers = { 'Set-Cookie': cookieHeader };
+            set.headers['Set-Cookie'] = [existing, cookie];
           }
 
           return {

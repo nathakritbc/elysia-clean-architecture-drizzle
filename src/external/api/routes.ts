@@ -7,17 +7,21 @@ import { DeletePostByIdController } from '../../adapters/posts/delete-post-by-id
 import { SignUpController } from '../../adapters/auth/sign-up.controller';
 import { SignInController } from '../../adapters/auth/sign-in.controller';
 import { RefreshSessionController } from '../../adapters/auth/refresh-session.controller';
+import { LogoutController } from '../../adapters/auth/logout.controller';
+import { withAuth } from '../../adapters/auth/auth.guard';
 import createElysiaApp from './elysia-app';
 import type { Elysia } from 'elysia';
 import type { AppConfig } from '../config/app-config';
 
 export const createRoutes = (appConfig: AppConfig) => {
   const app = createElysiaApp(appConfig);
+  const elysiaApp = app as unknown as Elysia;
 
   // Resolve controllers from DI container
   const signUpController = container.resolve(SignUpController);
   const signInController = container.resolve(SignInController);
   const refreshSessionController = container.resolve(RefreshSessionController);
+  const logoutController = container.resolve(LogoutController);
   const createPostController = container.resolve(CreatePostController);
   const deletePostByIdController = container.resolve(DeletePostByIdController);
   const getAllPostsController = container.resolve(GetAllPostsController);
@@ -25,16 +29,18 @@ export const createRoutes = (appConfig: AppConfig) => {
   const updatePostByIdController = container.resolve(UpdatePostByIdController);
 
   // Register auth routes
-  signUpController.register(app as unknown as Elysia);
-  signInController.register(app as unknown as Elysia);
-  refreshSessionController.register(app as unknown as Elysia);
+  signUpController.register(elysiaApp);
+  signInController.register(elysiaApp);
+  refreshSessionController.register(elysiaApp);
+  logoutController.register(elysiaApp);
 
-  // Register post routes
-  createPostController.register(app as unknown as Elysia);
-  deletePostByIdController.register(app as unknown as Elysia);
-  getAllPostsController.register(app as unknown as Elysia);
-  getPostByIdController.register(app as unknown as Elysia);
-  updatePostByIdController.register(app as unknown as Elysia);
+  // Register post routes with auth guard
+  const protectedApp = withAuth(elysiaApp);
+  createPostController.register(protectedApp);
+  deletePostByIdController.register(protectedApp);
+  getAllPostsController.register(protectedApp);
+  getPostByIdController.register(protectedApp);
+  updatePostByIdController.register(protectedApp);
 
   return app;
 };

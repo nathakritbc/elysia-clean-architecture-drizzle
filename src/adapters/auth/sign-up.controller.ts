@@ -40,15 +40,20 @@ export class SignUpController {
           const { user, tokens } = result;
 
           set.status = StatusCodes.CREATED;
-          const cookieHeader = buildRefreshTokenCookie(
+          set.headers = set.headers ?? {};
+          const cookie = buildRefreshTokenCookie(
             tokens.refreshToken,
-            tokens.refreshTokenExpiresAt,
+            tokens.refreshTokenExpiresAt as unknown as Date,
             this.authConfig
           );
-          if (set.headers) {
-            set.headers['Set-Cookie'] = cookieHeader;
+
+          const existing = set.headers['Set-Cookie'];
+          if (!existing) {
+            set.headers['Set-Cookie'] = cookie;
+          } else if (Array.isArray(existing)) {
+            set.headers['Set-Cookie'] = [...existing, cookie];
           } else {
-            set.headers = { 'Set-Cookie': cookieHeader };
+            set.headers['Set-Cookie'] = [existing, cookie];
           }
 
           return {
