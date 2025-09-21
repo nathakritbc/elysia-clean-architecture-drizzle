@@ -7,7 +7,6 @@ import type { AuthConfig } from '../../external/config/auth.config';
 import { buildClearRefreshTokenCookie, parseCookies } from './cookie.util';
 import { LogoutUseCase } from '../../core/domain/auth/use-case/logout.usecase';
 import type { RefreshTokenPlain } from '../../core/domain/auth/entity/refresh-token.entity';
-import { UnauthorizedError } from '../../core/shared/errors/error-mapper';
 
 @injectable()
 export class LogoutController {
@@ -21,10 +20,6 @@ export class LogoutController {
     app.post('/auth/logout', async ({ request, set }) => {
       const cookies = parseCookies(request.headers.get('cookie'));
       const refreshToken = cookies[this.authConfig.refreshTokenCookie.name];
-
-      if (!refreshToken) {
-        throw new UnauthorizedError('Refresh token not found');
-      }
 
       await this.logoutUseCase.execute({ refreshToken: refreshToken as RefreshTokenPlain });
 

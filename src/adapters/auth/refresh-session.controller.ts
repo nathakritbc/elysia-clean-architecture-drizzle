@@ -9,7 +9,6 @@ import type { AuthConfig } from '../../external/config/auth.config';
 import { buildRefreshTokenCookie, parseCookies } from './cookie.util';
 import { RefreshResponseDto, ErrorResponseDto } from './dtos/auth.dto';
 import { toUserResponse } from './transformers';
-import { UnauthorizedError } from '../../core/shared/errors/error-mapper';
 import type { RefreshTokenPlain } from '../../core/domain/auth/entity/refresh-token.entity';
 
 @injectable()
@@ -28,10 +27,6 @@ export class RefreshSessionController {
           const cookieHeader = request.headers.get('cookie') ?? request.headers.get('Cookie');
           const cookies = parseCookies(cookieHeader);
           const refreshTokenValue = cookies[this.authConfig.refreshTokenCookie.name];
-
-          if (!refreshTokenValue) {
-            throw new UnauthorizedError('Refresh token not found');
-          }
 
           const input = StrictBuilder<RefreshSessionInput>()
             .refreshToken(refreshTokenValue as RefreshTokenPlain)

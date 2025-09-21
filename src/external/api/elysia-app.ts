@@ -106,18 +106,20 @@ const createErrorHandler = () => {
   };
 };
 
+const createJwtPlugin = () => {
+  return jwt({
+    name: 'jwt',
+    secret: authConfig.jwt.secret,
+    iss: authConfig.jwt.issuer,
+    aud: authConfig.jwt.audience,
+    exp: authConfig.jwt.accessTokenExpiresIn,
+  });
+};
+
 export const createElysiaApp = (appConfig: AppConfig) => {
   const app = ErrorMapper.register(new Elysia())
     .use(bearer())
-    .use(
-      jwt({
-        name: 'jwt',
-        secret: authConfig.jwt.secret,
-        iss: authConfig.jwt.issuer,
-        aud: authConfig.jwt.audience,
-        exp: authConfig.jwt.accessTokenExpiresIn,
-      })
-    )
+    .use(createJwtPlugin())
     .use(openapi())
     .use(appConfig.cors)
     .use(swagger(createSwaggerConfig()))

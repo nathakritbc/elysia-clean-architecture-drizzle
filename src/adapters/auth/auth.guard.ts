@@ -5,6 +5,13 @@ import { UnauthorizedError } from '../../core/shared/errors/error-mapper';
 
 type JwtDecorator = ReturnType<typeof jwt>['decorator']['jwt'];
 
+interface JwtPayload {
+  sub: string;
+  email: string;
+  jti: string;
+  type: string;
+}
+
 export const withAuth = (app: Elysia) =>
   app.guard({
     headers: t.Object({
@@ -32,8 +39,7 @@ export const withAuth = (app: Elysia) =>
         throw new UnauthorizedError('Missing access token');
       }
 
-      const payload = await ctx.jwt.verify(token);
-
+      const payload: JwtPayload = await ctx.jwt.verify(token);
       if (!payload || typeof payload !== 'object') {
         throw new UnauthorizedError('Invalid access token');
       }

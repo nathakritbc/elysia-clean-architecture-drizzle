@@ -30,7 +30,7 @@ export class RefreshSessionUseCase implements IUseCase<RefreshSessionInput, Auth
   ) {}
 
   async execute(input: RefreshSessionInput): Promise<AuthenticatedUser> {
-    const tokenString = input.refreshToken as unknown as string;
+    const tokenString = input.refreshToken;
     const parts = tokenString.split('.');
     const [jti, secret] = parts;
 
