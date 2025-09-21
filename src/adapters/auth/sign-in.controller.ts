@@ -10,6 +10,7 @@ import { buildRefreshTokenCookie } from './cookie.util';
 import { SignInRequestDto, AuthResponseDto, ErrorResponseDto } from './dtos/auth.dto';
 import type { UserEmail, UserPassword } from '../../core/domain/users/entity/user.entity';
 import { toUserResponse } from './transformers';
+import { nanoid } from 'nanoid';
 
 @injectable()
 export class SignInController {
@@ -22,16 +23,18 @@ export class SignInController {
   register(app: Elysia) {
     app.post(
       '/auth/signin',
-      async ({ body, set, request }) => {
+      async ({ body, set }) => {
         const input = StrictBuilder<SignInInput>()
           .email(body.email as UserEmail)
           .password(body.password as UserPassword)
           .build();
 
+        const requestId = nanoid();
+
         try {
           this.logger.info('Handling sign-in request', {
             email: body.email,
-            requestId: request?.id,
+            requestId,
           });
 
           const result = await this.signInUseCase.execute(input);
@@ -67,7 +70,7 @@ export class SignInController {
           const normalizedError = error instanceof Error ? error : new Error('Unknown error');
           this.logger.error('Failed to sign in user', {
             email: body.email,
-            requestId: request?.id,
+            requestId,
             error: normalizedError,
           });
           throw error;
