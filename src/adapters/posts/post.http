@@ -3,7 +3,7 @@ POST {{baseUrl}}/posts
 Content-Type: application/json
 
 {
-  "title": "Title test 1",
+  "title": "Title test 2sss",
   "content": "content test",
 }
 

@@ -1,4 +1,4 @@
-import { and, asc, desc, eq, ilike, or, sql } from 'drizzle-orm';
+import { and, asc, desc, eq, ilike, not, or, sql } from 'drizzle-orm';
 import type { SQL } from 'drizzle-orm';
 import { injectable } from 'tsyringe';
 import { db } from '../connection';
@@ -21,18 +21,27 @@ import {
   GetAllUsersReturnType,
   UserRepository,
 } from '../../../core/domain/users/service/user.repository';
+import { EStatus } from '../../../core/shared/status.enum';
 
 @injectable()
 export class UserDrizzleRepository extends UserRepository {
-  async deleteById(id: UserId): Promise<void> {
-    await db.delete(users).where(eq(users.id, id as string));
+  async create(user: IUser): Promise<IUser> {
+    const result = await db
+      .insert(users)
+      .values({
+        name: user.name as string,
+        email: user.email as string,
+        password: user.password as string,
+      })
+      .returning();
+    return this.toDomain(result[0]);
   }
 
   async getById(id: UserId): Promise<IUser | undefined> {
     const result = await db
       .select()
       .from(users)
-      .where(eq(users.id, id as string))
+      .where(and(eq(users.id, id as string), not(eq(users.status, EStatus.deleted))))
       .limit(1);
 
     return result[0] ? this.toDomain(result[0]) : undefined;
@@ -46,6 +55,9 @@ export class UserDrizzleRepository extends UserRepository {
     const offset = (safePage - 1) * safeLimit;
 
     const filters: SQL[] = [];
+
+    // Always exclude deleted users
+    filters.push(not(eq(users.status, EStatus.deleted)));
 
     if (search) {
       const searchValue = `%${search}%`;
@@ -103,7 +115,11 @@ export class UserDrizzleRepository extends UserRepository {
   }
 
   async getByEmail(email: UserEmail): Promise<IUser | undefined> {
-    const result = await db.select().from(users).where(eq(users.email, email)).limit(1);
+    const result = await db
+      .select()
+      .from(users)
+      .where(and(eq(users.email, email), not(eq(users.status, EStatus.deleted))))
+      .limit(1);
     return result[0] ? this.toDomain(result[0]) : undefined;
   }
 
@@ -111,21 +127,17 @@ export class UserDrizzleRepository extends UserRepository {
     const result = await db
       .update(users)
       .set(user)
-      .where(eq(users.id, user.id as string))
+      .where(and(eq(users.id, user.id as string), not(eq(users.status, EStatus.deleted))))
       .returning();
     return this.toDomain(result[0]);
   }
 
-  async create(user: IUser): Promise<IUser> {
-    const result = await db
-      .insert(users)
-      .values({
-        name: user.name as string,
-        email: user.email as string,
-        password: user.password as string,
-      })
-      .returning();
-    return this.toDomain(result[0]);
+  async deleteById(id: UserId): Promise<void> {
+    // await db.delete(users).where(eq(users.id, id as string));
+    await db
+      .update(users)
+      .set({ status: EStatus.deleted })
+      .where(eq(users.id, id as string));
   }
 
   private toDomain(drizzleUser: DrizzleUser): IUser {

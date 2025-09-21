@@ -1,4 +1,5 @@
-import { and, asc, desc, ilike, sql, eq, or, type SQL } from 'drizzle-orm';
+import { and, asc, desc, eq, ilike, not, or, sql } from 'drizzle-orm';
+import type { SQL } from 'drizzle-orm';
 import { injectable } from 'tsyringe';
 import { db } from '../connection';
 import { posts, type Post as DrizzlePost } from './post.schema';
@@ -19,13 +20,10 @@ import {
   GetAllPostsReturnType,
   PostRepository,
 } from '../../../core/domain/posts/service/post.repository';
+import { EStatus } from '../../../core/shared/status.enum';
 
 @injectable()
 export class PostDrizzleRepository extends PostRepository {
-  async deleteById(id: PostId): Promise<void> {
-    await db.delete(posts).where(eq(posts.id, id as string));
-  }
-
   async create(post: IPost): Promise<IPost> {
     const result = await db
       .insert(posts)
@@ -47,6 +45,9 @@ export class PostDrizzleRepository extends PostRepository {
     const offset = (safePage - 1) * safeLimit;
 
     const filters: SQL[] = [];
+
+    // Always exclude deleted posts
+    filters.push(not(eq(posts.status, EStatus.deleted)));
 
     if (search) {
       const searchValue = `%${search}%`;
@@ -96,7 +97,7 @@ export class PostDrizzleRepository extends PostRepository {
     const result = await db
       .select()
       .from(posts)
-      .where(eq(posts.id, id as string))
+      .where(and(eq(posts.id, id as string), not(eq(posts.status, EStatus.deleted))))
       .limit(1);
 
     return result[0] ? this.toDomain(result[0]) : undefined;
@@ -106,9 +107,17 @@ export class PostDrizzleRepository extends PostRepository {
     const result = await db
       .update(posts)
       .set(post)
-      .where(eq(posts.id, post.id as string))
+      .where(and(eq(posts.id, post.id as string), not(eq(posts.status, EStatus.deleted))))
       .returning();
     return this.toDomain(result[0]);
+  }
+
+  async deleteById(id: PostId): Promise<void> {
+    // await db.delete(posts).where(eq(posts.id, id as string));
+    await db
+      .update(posts)
+      .set({ status: EStatus.deleted })
+      .where(eq(posts.id, id as string));
   }
 
   private toDomain(drizzlePost: DrizzlePost): IPost {
