@@ -40,6 +40,15 @@ export class UserDrizzleRepository extends UserRepository {
     return result[0] ? this.toDomain(result[0]) : undefined;
   }
 
+  async getById(id: UserId): Promise<IUser | undefined> {
+    const result = await db
+      .select()
+      .from(users)
+      .where(and(eq(users.id, id), not(eq(users.status, EStatus.deleted))))
+      .limit(1);
+    return result[0] ? this.toDomain(result[0]) : undefined;
+  }
+
   private toDomain(drizzleUser: DrizzleUser): IUser {
     return Builder(User)
       .id(drizzleUser.id as UserId)

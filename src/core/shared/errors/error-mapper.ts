@@ -73,6 +73,16 @@ export class ConflictError extends AppError {
   }
 }
 
+export class UnauthorizedError extends AppError {
+  constructor(message: string = 'Unauthorized') {
+    super({
+      status: StatusCodes.UNAUTHORIZED,
+      message,
+      code: 'UNAUTHORIZED',
+    });
+  }
+}
+
 export class ErrorMapper {
   static register(app: Elysia) {
     return app.error({
@@ -81,6 +91,7 @@ export class ErrorMapper {
       ValidationError,
       InternalServerError,
       ConflictError,
+      UnauthorizedError,
     });
   }
 

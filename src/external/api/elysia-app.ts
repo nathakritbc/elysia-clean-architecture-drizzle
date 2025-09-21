@@ -10,6 +10,7 @@ import type { AppConfig } from '../config/app-config';
 import { openapi } from '@elysiajs/openapi';
 import { opentelemetry } from '@elysiajs/opentelemetry';
 import { createTraceExporter } from '../telemetry/opentelemetry';
+import { jwt } from '@elysiajs/jwt';
 
 const logger = container.resolve<LoggerPort>(TOKENS.Logger);
 
@@ -105,6 +106,13 @@ const createErrorHandler = () => {
 
 export const createElysiaApp = (appConfig: AppConfig) => {
   const app = ErrorMapper.register(new Elysia())
+    //TODO : Extract config
+    .use(
+      jwt({
+        name: 'jwt',
+        secret: 'Fischl von Luftschloss Narfidort',
+      })
+    )
     .use(openapi())
     .use(appConfig.cors)
     .use(swagger(createSwaggerConfig()))

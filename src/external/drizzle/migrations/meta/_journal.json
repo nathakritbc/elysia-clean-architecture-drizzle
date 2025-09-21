@@ -43,6 +43,13 @@
       "when": 1758443179973,
       "tag": "0005_wonderful_omega_red",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1758450374000,
+      "tag": "0006_secure_refresh_tokens",
+      "breakpoints": true
     }
   ]
 }
