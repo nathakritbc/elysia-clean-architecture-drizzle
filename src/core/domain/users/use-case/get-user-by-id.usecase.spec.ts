@@ -1,18 +1,18 @@
 import 'reflect-metadata';
 import { UserRepository } from '../service/user.repository';
-import { getUserByIdUseCase } from './get-user-by-id.usecase';
+import { GetUserByIdUseCase } from './get-user-by-id.usecase';
 import { faker } from '@faker-js/faker';
 import { vi } from 'vitest';
 import { mock } from 'vitest-mock-extended';
 import { IUser, UserId } from '../entity/user.entity';
 import { NotFoundError } from '../../../shared/errors/error-mapper';
 
-describe('getUserByIdUseCase', () => {
-  let useCase: getUserByIdUseCase;
+describe('GetUserByIdUseCase', () => {
+  let useCase: GetUserByIdUseCase;
   const userRepository = mock<UserRepository>();
 
   beforeEach(() => {
-    useCase = new getUserByIdUseCase(userRepository);
+    useCase = new GetUserByIdUseCase(userRepository);
   });
 
   afterEach(() => {

@@ -1,6 +1,6 @@
 import Elysia from 'elysia';
 import { inject, injectable } from 'tsyringe';
-import { getUserByIdUseCase } from '../../core/domain/users/use-case/get-user-by-id.usecase';
+import { GetUserByIdUseCase } from '../../core/domain/users/use-case/get-user-by-id.usecase';
 import { UserId } from '../../core/domain/users/entity/user.entity';
 import { UserMapper } from './mappers/user.mapper';
 import { TOKENS } from '../../core/shared/tokens';
@@ -10,7 +10,7 @@ import { GetUserResponseDto, ErrorResponseDto, UserIdParamsDto } from './dtos/us
 @injectable()
 export class GetUserByIdController {
   constructor(
-    @inject(getUserByIdUseCase) private readonly useCase: getUserByIdUseCase,
+    @inject(GetUserByIdUseCase) private readonly useCase: GetUserByIdUseCase,
     @inject(TOKENS.Logger) private readonly logger: LoggerPort
   ) {}
 

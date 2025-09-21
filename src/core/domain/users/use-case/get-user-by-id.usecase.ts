@@ -6,7 +6,7 @@ import { TOKENS } from '../../../shared/tokens';
 import { NotFoundError } from '../../../shared/errors/error-mapper';
 
 @injectable()
-export class getUserByIdUseCase implements IUseCase<UserId, IUser> {
+export class GetUserByIdUseCase implements IUseCase<UserId, IUser> {
   constructor(
     @inject(TOKENS.IUserRepository)
     private readonly userRepository: UserRepository

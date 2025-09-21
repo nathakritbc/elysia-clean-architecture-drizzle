@@ -22,6 +22,10 @@ import {
 
 @injectable()
 export class PostDrizzleRepository extends PostRepository {
+  async deleteById(id: PostId): Promise<void> {
+    await db.delete(posts).where(eq(posts.id, id as string));
+  }
+
   async create(post: IPost): Promise<IPost> {
     const result = await db
       .insert(posts)
@@ -96,6 +100,15 @@ export class PostDrizzleRepository extends PostRepository {
       .limit(1);
 
     return result[0] ? this.toDomain(result[0]) : undefined;
+  }
+
+  async updateById(post: IPost): Promise<IPost> {
+    const result = await db
+      .update(posts)
+      .set(post)
+      .where(eq(posts.id, post.id as string))
+      .returning();
+    return this.toDomain(result[0]);
   }
 
   private toDomain(drizzlePost: DrizzlePost): IPost {

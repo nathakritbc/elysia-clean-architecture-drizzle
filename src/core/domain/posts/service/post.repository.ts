@@ -10,6 +10,8 @@ export interface GetAllPostsReturnType {
 
 export abstract class PostRepository {
   abstract create(post: IPost): Promise<IPost>;
+  abstract deleteById(id: PostId): Promise<void>;
   abstract getAll(query: GetAllPostsQuery): Promise<GetAllPostsReturnType>;
   abstract getById(id: PostId): Promise<IPost | undefined>;
+  abstract updateById(post: IPost): Promise<IPost>;
 }
