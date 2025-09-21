@@ -1,6 +1,6 @@
 import { drizzle } from 'drizzle-orm/postgres-js';
 import postgres from 'postgres';
-import * as schema from './users/user.schema';
+import { schema } from './schema';
 import { appConfig } from '../config/app-config';
 
 const { url } = appConfig.database;
