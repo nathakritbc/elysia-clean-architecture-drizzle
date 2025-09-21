@@ -50,10 +50,12 @@ export class SignUpController {
           const existing = set.headers['Set-Cookie'];
           if (!existing) {
             set.headers['Set-Cookie'] = cookie;
-          } else if (Array.isArray(existing)) {
-            set.headers['Set-Cookie'] = [...existing, cookie];
+          }
+
+          if (Array.isArray(existing)) {
+            set.headers['Set-Cookie'] = [...existing, cookie].join('; ');
           } else {
-            set.headers['Set-Cookie'] = [existing, cookie];
+            set.headers['Set-Cookie'] = [existing, cookie].join('; ');
           }
 
           return {

@@ -35,7 +35,7 @@ export const createRoutes = (appConfig: AppConfig) => {
   logoutController.register(elysiaApp);
 
   // Register post routes with auth guard
-  const protectedApp = withAuth(elysiaApp);
+  const protectedApp = withAuth(elysiaApp) as unknown as Elysia;
   createPostController.register(protectedApp);
   deletePostByIdController.register(protectedApp);
   getAllPostsController.register(protectedApp);

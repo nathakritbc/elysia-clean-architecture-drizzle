@@ -26,7 +26,7 @@ export class LogoutController {
         throw new UnauthorizedError('Refresh token not found');
       }
 
-      await this.logoutUseCase.execute(refreshToken as RefreshTokenPlain);
+      await this.logoutUseCase.execute({ refreshToken: refreshToken as RefreshTokenPlain });
 
       const clearCookie = buildClearRefreshTokenCookie(this.authConfig);
       set.status = StatusCodes.OK;
