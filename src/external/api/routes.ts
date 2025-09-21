@@ -4,21 +4,26 @@ import { GetUserByIdController } from '../../adapters/users/get-user-by-id.contr
 import { GetAllUsersController } from '../../adapters/users/get-all-users.controller';
 import { UpdateUserByIdController } from '../../adapters/users/update-user-by-id.controller';
 import { DeleteUserByIdController } from '../../adapters/users/delete-user-by-id.controller';
-import app from './elysia-app';
+import createElysiaApp from './elysia-app';
 import type { Elysia } from 'elysia';
+import type { AppConfig } from '../config/app-config';
 
-// Resolve controllers from DI container and register routes
-const createUserController = container.resolve(CreateUserController);
-const findUsersController = container.resolve(GetAllUsersController);
-const findUserByIdController = container.resolve(GetUserByIdController);
-const updateUserByIdController = container.resolve(UpdateUserByIdController);
-const deleteUserByIdController = container.resolve(DeleteUserByIdController);
+export const createRoutes = (appConfig: AppConfig): Elysia => {
+  const app = createElysiaApp(appConfig);
 
-// Register routes
-createUserController.register(app as unknown as Elysia);
-findUsersController.register(app as unknown as Elysia);
-findUserByIdController.register(app as unknown as Elysia);
-updateUserByIdController.register(app as unknown as Elysia);
-deleteUserByIdController.register(app as unknown as Elysia);
+  const createUserController = container.resolve(CreateUserController);
+  const findUsersController = container.resolve(GetAllUsersController);
+  const findUserByIdController = container.resolve(GetUserByIdController);
+  const updateUserByIdController = container.resolve(UpdateUserByIdController);
+  const deleteUserByIdController = container.resolve(DeleteUserByIdController);
 
-export default app;
+  createUserController.register(app as unknown as Elysia);
+  findUsersController.register(app as unknown as Elysia);
+  findUserByIdController.register(app as unknown as Elysia);
+  updateUserByIdController.register(app as unknown as Elysia);
+  deleteUserByIdController.register(app as unknown as Elysia);
+
+  return app;
+};
+
+export default createRoutes;

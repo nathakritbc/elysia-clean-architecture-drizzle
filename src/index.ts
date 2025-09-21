@@ -1,5 +1,5 @@
 import 'reflect-metadata';
-import routes from './external/api/routes';
+import { createRoutes } from './external/api/routes';
 import { container } from './core/shared/container';
 import { TOKENS } from './core/shared/tokens';
 import type { LoggerPort } from './core/shared/logger/logger.port';
@@ -17,14 +17,16 @@ const bootstrap = async () => {
     logger.error('Failed to initialize telemetry', { error });
   }
 
-  routes.listen({
+  const app = createRoutes(config);
+
+  app.listen({
     port: config.server.port,
     hostname: config.server.host,
   });
 
   const messageContext = {
-    hostname: routes.server?.hostname,
-    port: routes.server?.port,
+    hostname: app.server?.hostname,
+    port: app.server?.port,
   };
 
   logger.info('🦊 Elysia is running', messageContext);
@@ -33,7 +35,7 @@ const bootstrap = async () => {
     logger.warn('Received shutdown signal, closing server', { signal });
 
     try {
-      await routes.stop();
+      await app.stop();
       logger.info('HTTP server stopped');
     } catch (error) {
       logger.error('Error while stopping server', { error });

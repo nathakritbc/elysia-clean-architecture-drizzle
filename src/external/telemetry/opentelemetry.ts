@@ -12,6 +12,33 @@ export type TelemetryController = {
 
 let sdk: NodeSDK | undefined;
 
+const buildCollectorUrl = (endpoint: string, resourcePath: string): string => {
+  const normalizedPath = resourcePath.startsWith('/') ? resourcePath : `/${resourcePath}`;
+  const base = endpoint.endsWith('/') ? endpoint.slice(0, -1) : endpoint;
+  return new URL(normalizedPath, `${base}/`).toString();
+};
+
+export const createTraceExporter = (
+  endpoint: string | undefined,
+  logger: LoggerPort,
+  options: { warnOnMissing?: boolean } = {}
+): OTLPTraceExporter | undefined => {
+  if (!endpoint) {
+    if (options.warnOnMissing ?? true) {
+      logger.warn('OTLP endpoint not configured; traces will not be exported');
+    }
+    return undefined;
+  }
+
+  try {
+    const url = buildCollectorUrl(endpoint, 'v1/traces');
+    return new OTLPTraceExporter({ url });
+  } catch (error) {
+    logger.error('Invalid OTLP exporter endpoint', { endpoint, error });
+    return undefined;
+  }
+};
+
 export const initializeTelemetry = async (
   config: AppConfig,
   logger: LoggerPort
@@ -22,9 +49,7 @@ export const initializeTelemetry = async (
   }
 
   try {
-    const exporter = config.telemetry.otlpEndpoint
-      ? new OTLPTraceExporter({ url: config.telemetry.otlpEndpoint })
-      : undefined;
+    const exporter = createTraceExporter(config.telemetry.otlpEndpoint, logger);
 
     sdk = new NodeSDK({
       resource: resourceFromAttributes({
