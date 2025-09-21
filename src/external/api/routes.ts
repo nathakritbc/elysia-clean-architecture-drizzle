@@ -8,7 +8,7 @@ import createElysiaApp from './elysia-app';
 import type { Elysia } from 'elysia';
 import type { AppConfig } from '../config/app-config';
 
-export const createRoutes = (appConfig: AppConfig): Elysia => {
+export const createRoutes = (appConfig: AppConfig) => {
   const app = createElysiaApp(appConfig);
 
   const createUserController = container.resolve(CreateUserController);
