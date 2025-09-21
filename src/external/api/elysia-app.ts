@@ -9,11 +9,9 @@ import { createSwaggerConfig } from '../config/swagger.config';
 import type { AppConfig } from '../config/app-config';
 import { openapi } from '@elysiajs/openapi';
 import { opentelemetry } from '@elysiajs/opentelemetry';
-import { BatchSpanProcessor } from '@opentelemetry/sdk-trace-node';
-import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-proto';
+import { createTraceExporter } from '../telemetry/opentelemetry';
 
 const logger = container.resolve<LoggerPort>(TOKENS.Logger);
-const appConfig = container.resolve<AppConfig>(TOKENS.AppConfig);
 
 const COMMON_BROWSER_PATHS = ['/favicon.ico', '/sw.js', '/manifest.json', '/robots.txt'];
 
@@ -105,20 +103,28 @@ const createErrorHandler = () => {
   };
 };
 
-const app = ErrorMapper.register(new Elysia())
-  .use(openapi())
-  .use(appConfig.cors)
-  .use(swagger(createSwaggerConfig()))
-  .use(createBrowserRoutes)
-  .onError(createErrorHandler());
+export const createElysiaApp = (appConfig: AppConfig) => {
+  const app = ErrorMapper.register(new Elysia())
+    .use(openapi())
+    .use(appConfig.cors)
+    .use(swagger(createSwaggerConfig()))
+    .use(createBrowserRoutes)
+    .onError(createErrorHandler());
 
-if (appConfig.telemetry.enabled) {
-  app.use(
-    opentelemetry({
-      serviceName: appConfig.telemetry.serviceName,
-      spanProcessors: [new BatchSpanProcessor(new OTLPTraceExporter())],
-    })
-  );
-}
+  if (appConfig.telemetry.enabled) {
+    const traceExporter = createTraceExporter(appConfig.telemetry.otlpEndpoint, logger, {
+      warnOnMissing: false,
+    });
 
-export default app;
+    app.use(
+      opentelemetry({
+        serviceName: appConfig.telemetry.serviceName,
+        traceExporter,
+      })
+    );
+  }
+
+  return app;
+};
+
+export default createElysiaApp;

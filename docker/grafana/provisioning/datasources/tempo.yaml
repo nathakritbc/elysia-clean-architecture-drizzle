@@ -1,0 +1,21 @@
+apiVersion: 1
+datasources:
+  - name: Tempo
+    type: tempo
+    uid: tempo
+    access: proxy
+    url: http://tempo:3200
+    isDefault: false
+    jsonData:
+      httpMethod: GET
+      tracesToLogs:
+        datasourceUid: loki # ชี้ไปยัง Loki datasource (ดูไฟล์ด้านล่าง)
+        mappedTags:
+          - key: service.name
+            value: service
+        mapTagNamesEnabled: true
+        spanStartTimeShift: '-1h'
+        spanEndTimeShift: '1h'
+        filterByTraceID: true
+      serviceMap:
+        datasourceUid: prometheus # ถ้ามี Prometheus ก็เชื่อม service graph ได้
