@@ -31,8 +31,23 @@ export class RefreshSessionController extends BaseAuthController {
           const csrfCookieValue = cookies[this.authConfig.refreshTokenCsrfCookie.name];
           const csrfHeaderValue = request.headers.get('x-csrf-token');
 
+          this.logger.debug('CSRF token validation debug', {
+            refreshTokenCookieName: this.authConfig.refreshTokenCookie.name,
+            refreshTokenCsrfCookieName: this.authConfig.refreshTokenCsrfCookie.name,
+            csrfHeaderValue,
+            csrfCookieValue,
+            allCookies: cookies,
+            refreshTokenValue: refreshTokenValue ? 'present' : 'missing',
+          });
+
           if (!csrfHeaderValue || !csrfCookieValue || csrfHeaderValue !== csrfCookieValue) {
-            this.logger.warn('CSRF token validation failed for refresh session');
+            this.logger.warn('CSRF token validation failed for refresh session', {
+              hasHeader: !!csrfHeaderValue,
+              hasCookie: !!csrfCookieValue,
+              headerValue: csrfHeaderValue,
+              cookieValue: csrfCookieValue,
+              tokensMatch: csrfHeaderValue === csrfCookieValue,
+            });
             throw new UnauthorizedError('Invalid CSRF token');
           }
 
@@ -44,9 +59,9 @@ export class RefreshSessionController extends BaseAuthController {
           const { user, tokens } = result;
 
           set.status = StatusCodes.OK;
-          this.setAuthCookies(set, tokens);
+          const csrfToken = this.setAuthCookies(set, tokens);
 
-          return this.createAuthResponse(user, tokens);
+          return this.createAuthResponse(user, tokens, csrfToken);
         } catch (error) {
           this.handleError(error, 'refresh session');
         }

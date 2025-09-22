@@ -34,8 +34,9 @@ export class BaseAuthController {
 
   /**
    * Sets authentication cookies (refresh token and CSRF token)
+   * Returns the generated CSRF token
    */
-  protected setAuthCookies(set: unknown, tokens: AuthTokens): void {
+  protected setAuthCookies(set: unknown, tokens: AuthTokens): string {
     const csrfToken = nanoid();
     const cookies = [
       buildRefreshTokenCookie(tokens.refreshToken, tokens.refreshTokenExpiresAt, this.authConfig),
@@ -43,6 +44,7 @@ export class BaseAuthController {
     ];
 
     this.setCookies(set, cookies);
+    return csrfToken;
   }
 
   /**
@@ -79,12 +81,13 @@ export class BaseAuthController {
   /**
    * Creates a standardized auth response
    */
-  protected createAuthResponse(user: IUser, tokens: AuthTokens) {
+  protected createAuthResponse(user: IUser, tokens: AuthTokens, csrfToken: string) {
     return {
       user: toUserResponse(user),
       accessToken: tokens.accessToken,
       accessTokenExpiresAt: tokens.accessTokenExpiresAt,
       refreshTokenExpiresAt: tokens.refreshTokenExpiresAt,
+      csrf_token: csrfToken,
     };
   }
 

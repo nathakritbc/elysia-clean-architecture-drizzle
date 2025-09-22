@@ -1,3 +1,4 @@
+import 'reflect-metadata';
 import { eq } from 'drizzle-orm';
 import { Builder } from 'builder-pattern';
 import { injectable } from 'tsyringe';

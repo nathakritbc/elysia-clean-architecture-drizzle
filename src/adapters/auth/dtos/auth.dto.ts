@@ -26,6 +26,7 @@ export const AuthResponseDto = t.Object({
   accessToken: t.String(),
   accessTokenExpiresAt: t.Date(),
   refreshTokenExpiresAt: t.Date(),
+  csrf_token: t.String(),
 });
 
 export const RefreshResponseDto = AuthResponseDto;

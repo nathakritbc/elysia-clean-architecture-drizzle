@@ -41,9 +41,9 @@ export class SignInController extends BaseAuthController {
           const { user, tokens } = result;
 
           set.status = StatusCodes.OK;
-          this.setAuthCookies(set, tokens);
+          const csrfToken = this.setAuthCookies(set, tokens);
 
-          return this.createAuthResponse(user, tokens);
+          return this.createAuthResponse(user, tokens, csrfToken);
         } catch (error) {
           this.handleError(error, 'sign in user', {
             email: body.email,

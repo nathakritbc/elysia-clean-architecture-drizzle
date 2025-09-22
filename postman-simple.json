@@ -1,0 +1,97 @@
+{
+  "info": {
+    "name": "Elysia Auth API - Simple",
+    "description": "Simple Authentication API Collection",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:7000",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "1. Sign In",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"user1@gmail.com\",\n  \"password\": \"12345678\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/auth/signin",
+          "host": ["{{baseUrl}}"],
+          "path": ["auth", "signin"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "2. Refresh Token (Manual Headers)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "X-CSRF-Token",
+            "value": "PASTE_CSRF_TOKEN_HERE",
+            "description": "Copy csrf_token from Sign In response body"
+          },
+          {
+            "key": "Cookie",
+            "value": "refresh_token=PASTE_REFRESH_TOKEN_HERE; refresh_token_csrf=PASTE_CSRF_TOKEN_HERE",
+            "description": "Copy refresh_token and csrf_token values from Sign In response"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": ""
+        },
+        "url": {
+          "raw": "{{baseUrl}}/auth/refresh",
+          "host": ["{{baseUrl}}"],
+          "path": ["auth", "refresh"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "3. Logout",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Cookie",
+            "value": "refresh_token=PASTE_REFRESH_TOKEN_HERE",
+            "description": "Copy refresh_token from Sign In response"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": ""
+        },
+        "url": {
+          "raw": "{{baseUrl}}/auth/logout",
+          "host": ["{{baseUrl}}"],
+          "path": ["auth", "logout"]
+        }
+      },
+      "response": []
+    }
+  ]
+}

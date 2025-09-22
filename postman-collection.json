@@ -1,0 +1,243 @@
+{
+  "info": {
+    "name": "Elysia Auth API",
+    "description": "Authentication API Collection for Elysia Clean Architecture",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:7000",
+      "type": "string"
+    },
+    {
+      "key": "csrf_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "refresh_token",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Sign Up",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"John Doe\",\n  \"email\": \"john.doe@example.com\",\n  \"password\": \"SecurePass123\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/signup",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "signup"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Sign In",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Extract CSRF token and refresh token from response",
+                  "if (pm.response.code === 200) {",
+                  "    const responseJson = pm.response.json();",
+                  "    ",
+                  "    // Set CSRF token variable",
+                  "    if (responseJson.csrf_token) {",
+                  "        pm.collectionVariables.set('csrf_token', responseJson.csrf_token);",
+                  "        console.log('CSRF Token saved:', responseJson.csrf_token);",
+                  "    }",
+                  "    ",
+                  "    // Extract refresh token from cookies",
+                  "    const cookies = pm.response.headers.get('Set-Cookie');",
+                  "    if (cookies) {",
+                  "        const refreshTokenMatch = cookies.match(/refresh_token=([^;]+)/);",
+                  "        if (refreshTokenMatch) {",
+                  "            pm.collectionVariables.set('refresh_token', refreshTokenMatch[1]);",
+                  "            console.log('Refresh Token saved:', refreshTokenMatch[1]);",
+                  "        }",
+                  "    }",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"user1@gmail.com\",\n  \"password\": \"12345678\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/signin",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "signin"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Refresh Token",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "// Get cookies from Postman's cookie jar",
+                  "const cookies = pm.cookies.all();",
+                  "let refreshToken = '';",
+                  "let csrfToken = '';",
+                  "",
+                  "// Find refresh_token and refresh_token_csrf cookies",
+                  "cookies.forEach(cookie => {",
+                  "    if (cookie.name === 'refresh_token') {",
+                  "        refreshToken = cookie.value;",
+                  "    }",
+                  "    if (cookie.name === 'refresh_token_csrf') {",
+                  "        csrfToken = cookie.value;",
+                  "    }",
+                  "});",
+                  "",
+                  "// Set headers",
+                  "pm.request.headers.add({",
+                  "    key: 'X-CSRF-Token',",
+                  "    value: csrfToken",
+                  "});",
+                  "",
+                  "// Set cookie header manually",
+                  "if (refreshToken && csrfToken) {",
+                  "    pm.request.headers.add({",
+                  "        key: 'Cookie',",
+                  "        value: `refresh_token=${refreshToken}; refresh_token_csrf=${csrfToken}`",
+                  "    });",
+                  "    console.log('Refresh token cookies set:', { refreshToken, csrfToken });",
+                  "} else {",
+                  "    console.log('Missing cookies:', { refreshToken, csrfToken });",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": ""
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/refresh",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "refresh"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Cookie",
+                "value": "refresh_token={{refresh_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": ""
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/logout",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "logout"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Posts",
+      "item": [
+        {
+          "name": "Get All Posts",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/posts",
+              "host": ["{{baseUrl}}"],
+              "path": ["posts"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Post",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Test Post\",\n  \"content\": \"This is a test post content\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/posts",
+              "host": ["{{baseUrl}}"],
+              "path": ["posts"]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}

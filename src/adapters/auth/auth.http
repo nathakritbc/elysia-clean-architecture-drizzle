@@ -21,20 +21,19 @@ Content-Type: application/json
 ###
 
 @myAccessToken = {{signin.response.body.accessToken}}
-@myRefreshToken = {{signin.response.body.refresh_token}}
 @myCsrfToken = {{signin.response.body.csrf_token}}
 
 ### Refresh Session
+# Note: refresh_token is automatically sent via cookie from sign-in response
 POST {{baseUrl}}/auth/refresh
 Content-Type: application/json
 X-CSRF-Token: {{myCsrfToken}}
-Cookie: refresh_token={{myRefreshToken}}; csrf_token={{myCsrfToken}}
 
 ### Logout
+# Note: refresh_token is automatically sent via cookie
 POST {{baseUrl}}/auth/logout
 Content-Type: application/json
-Cookie: refresh_token={{myRefreshToken}}
 
 ### Variables (replace with actual values from responses)
 # @csrf_token = {{myCsrfToken}}
-# @refresh_token = {{myRefreshToken}}
+# Note: refresh_token is stored in cookie and sent automatically
