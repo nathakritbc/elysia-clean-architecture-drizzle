@@ -1,4 +1,4 @@
-import type { Elysia } from 'elysia';
+import type { Context, Elysia } from 'elysia';
 import jwt from '@elysiajs/jwt';
 import { t } from 'elysia';
 import { UnauthorizedError } from '../../core/shared/errors/error-mapper';
@@ -11,6 +11,28 @@ interface JwtPayload {
   jti: string;
   type: string;
 }
+
+const validateToken = async (ctx: Context): Promise<string> => {
+  const token = ctx.request.headers.get('authorization')?.slice('bearer '.length).trim();
+  if (!token) {
+    throw new UnauthorizedError('Missing access token');
+  }
+  return token;
+};
+
+const validatePayload = async (payload: JwtPayload): Promise<void> => {
+  if (!payload || typeof payload !== 'object') {
+    throw new UnauthorizedError('Invalid access token');
+  }
+};
+
+const validateUserId = async (payload: JwtPayload): Promise<string | undefined> => {
+  const userId = 'sub' in payload ? payload.sub : undefined;
+  if (!userId || typeof userId !== 'string') {
+    throw new UnauthorizedError('Invalid access token');
+  }
+  return userId;
+};
 
 export const withAuth = (app: Elysia) =>
   app.guard({
@@ -26,22 +48,11 @@ export const withAuth = (app: Elysia) =>
         store: Record<string, unknown>;
       };
 
-      const token = ctx.request.headers.get('authorization')?.slice('bearer '.length).trim();
-      if (!token) {
-        throw new UnauthorizedError('Missing access token');
-      }
+      const token = await validateToken(ctx);
 
       const payload: JwtPayload = await ctx.jwt.verify(token);
-      if (!payload || typeof payload !== 'object') {
-        throw new UnauthorizedError('Invalid access token');
-      }
+      await validatePayload(payload);
 
-      const userId = 'sub' in payload ? payload.sub : undefined;
-
-      if (!userId || typeof userId !== 'string') {
-        throw new UnauthorizedError('Invalid access token');
-      }
-
-      ctx.store.userId = userId;
+      ctx.store.userId = await validateUserId(payload);
     },
   });
