@@ -37,7 +37,7 @@ export const validateUserId = async (payload: JwtPayload): Promise<string | unde
 export const withAuth = (app: Elysia) =>
   app.guard({
     headers: t.Object({
-      authorization: t.String({ pattern: '^Bearer\\s+.+$' }),
+      // authorization: t.String({ pattern: '^Bearer\\s+.+$' }),
     }),
     beforeHandle: async context => {
       const ctx = context as typeof context & {
