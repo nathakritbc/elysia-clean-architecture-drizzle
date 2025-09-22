@@ -3,16 +3,16 @@ import jwt from '@elysiajs/jwt';
 import { t } from 'elysia';
 import { UnauthorizedError } from '../../core/shared/errors/error-mapper';
 
-type JwtDecorator = ReturnType<typeof jwt>['decorator']['jwt'];
+export type JwtDecorator = ReturnType<typeof jwt>['decorator']['jwt'];
 
-interface JwtPayload {
+export interface JwtPayload {
   sub: string;
   email: string;
   jti: string;
   type: string;
 }
 
-const validateToken = async (ctx: Context): Promise<string> => {
+export const validateToken = async (ctx: Context): Promise<string> => {
   const token = ctx.request.headers.get('authorization')?.slice('bearer '.length).trim();
   if (!token) {
     throw new UnauthorizedError('Missing access token');
@@ -20,13 +20,13 @@ const validateToken = async (ctx: Context): Promise<string> => {
   return token;
 };
 
-const validatePayload = async (payload: JwtPayload): Promise<void> => {
+export const validatePayload = async (payload: JwtPayload): Promise<void> => {
   if (!payload || typeof payload !== 'object') {
     throw new UnauthorizedError('Invalid access token');
   }
 };
 
-const validateUserId = async (payload: JwtPayload): Promise<string | undefined> => {
+export const validateUserId = async (payload: JwtPayload): Promise<string | undefined> => {
   const userId = 'sub' in payload ? payload.sub : undefined;
   if (!userId || typeof userId !== 'string') {
     throw new UnauthorizedError('Invalid access token');
