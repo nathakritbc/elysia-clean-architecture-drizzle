@@ -1,4 +1,4 @@
-@useCookieJar
+# @useCookieJar
 @baseUrl = http://localhost:7000
 
 ### Optional: create a user if not registered yet
@@ -37,6 +37,13 @@ Content-Type: application/json
 ### Protected request via bearer header
 GET {{baseUrl}}/posts
 Authorization: Bearer {{accessToken}}
+
+### Refresh session (requires CSRF header)
+# The CSRF header must match the refresh_token_csrf cookie value.
+@csrfToken = {{cookie refresh_token_csrf}}
+
+POST {{baseUrl}}/auth/refresh
+X-CSRF-Token: {{csrfToken}}
 
 ### Logout
 POST {{baseUrl}}/auth/logout

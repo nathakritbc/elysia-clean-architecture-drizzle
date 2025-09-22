@@ -60,8 +60,25 @@ export const buildRefreshTokenCookie = (token: string, expiresAt: Date, config: 
   return base.join('; ');
 };
 
+export const buildRefreshTokenCsrfCookie = (token: string, expiresAt: Date, config: AuthConfig): string => {
+  const base = buildBaseCookieAttributes(config.refreshTokenCsrfCookie);
+  base.unshift(
+    `${config.refreshTokenCsrfCookie.name}=${encodeURIComponent(token)}`,
+    `Max-Age=${config.refreshTokenCsrfCookie.maxAgeSeconds}`,
+    `Expires=${expiresAt.toUTCString()}`
+  );
+
+  return base.join('; ');
+};
+
 export const buildClearRefreshTokenCookie = (config: AuthConfig): string => {
   const base = buildBaseCookieAttributes(config.refreshTokenCookie);
   base.unshift(`${config.refreshTokenCookie.name}=`, 'Max-Age=0', 'Expires=Thu, 01 Jan 1970 00:00:00 GMT');
+  return base.join('; ');
+};
+
+export const buildClearRefreshTokenCsrfCookie = (config: AuthConfig): string => {
+  const base = buildBaseCookieAttributes(config.refreshTokenCsrfCookie);
+  base.unshift(`${config.refreshTokenCsrfCookie.name}=`, 'Max-Age=0', 'Expires=Thu, 01 Jan 1970 00:00:00 GMT');
   return base.join('; ');
 };

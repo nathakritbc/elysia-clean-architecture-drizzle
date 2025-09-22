@@ -4,7 +4,7 @@ import { StatusCodes } from 'http-status-codes';
 import { TOKENS } from '../../core/shared/tokens';
 import type { LoggerPort } from '../../core/shared/logger/logger.port';
 import type { AuthConfig } from '../../external/config/auth.config';
-import { buildClearRefreshTokenCookie, parseCookies } from './cookie.util';
+import { buildClearRefreshTokenCookie, buildClearRefreshTokenCsrfCookie, parseCookies } from './cookie.util';
 import { LogoutUseCase } from '../../core/domain/auth/use-case/logout.usecase';
 import type { RefreshTokenPlain } from '../../core/domain/auth/entity/refresh-token.entity';
 
@@ -23,10 +23,15 @@ export class LogoutController {
 
       await this.logoutUseCase.execute({ refreshToken: refreshToken as RefreshTokenPlain });
 
-      const clearCookie = buildClearRefreshTokenCookie(this.authConfig);
+      const cookiesToClear = [
+        buildClearRefreshTokenCookie(this.authConfig),
+        buildClearRefreshTokenCsrfCookie(this.authConfig),
+      ];
       set.status = StatusCodes.OK;
       set.headers = set.headers ?? {};
-      set.headers['Set-Cookie'] = clearCookie;
+      const existing = set.headers['Set-Cookie'];
+      const currentCookies = Array.isArray(existing) ? existing : existing ? [existing] : [];
+      set.headers['Set-Cookie'] = [...currentCookies, ...cookiesToClear].join('; ');
 
       this.logger.info('User logged out');
 

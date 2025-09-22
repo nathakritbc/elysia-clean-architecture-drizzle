@@ -42,6 +42,7 @@ export interface RefreshTokenCookieConfig {
 export interface AuthConfig {
   jwt: JwtConfig;
   refreshTokenCookie: RefreshTokenCookieConfig;
+  refreshTokenCsrfCookie: RefreshTokenCookieConfig;
 }
 
 const accessTokenExpiresIn = process.env.JWT_ACCESS_EXPIRES_IN ?? DEFAULT_ACCESS_TOKEN_EXPIRES_IN;
@@ -64,6 +65,15 @@ export const authConfig: AuthConfig = {
     sameSite: normalizeSameSite(process.env.REFRESH_TOKEN_COOKIE_SAME_SITE),
     secure: normalizeBoolean(process.env.REFRESH_TOKEN_COOKIE_SECURE, cookieSecureDefault),
     httpOnly: true,
+    maxAgeSeconds: durationToSeconds(refreshTokenExpiresIn, DEFAULT_REFRESH_TOKEN_EXPIRES_IN),
+  },
+  refreshTokenCsrfCookie: {
+    name: process.env.REFRESH_TOKEN_CSRF_COOKIE_NAME ?? 'refresh_token_csrf',
+    path: process.env.REFRESH_TOKEN_CSRF_COOKIE_PATH ?? '/',
+    domain: process.env.REFRESH_TOKEN_CSRF_COOKIE_DOMAIN,
+    sameSite: normalizeSameSite(process.env.REFRESH_TOKEN_CSRF_COOKIE_SAME_SITE),
+    secure: normalizeBoolean(process.env.REFRESH_TOKEN_CSRF_COOKIE_SECURE, cookieSecureDefault),
+    httpOnly: false,
     maxAgeSeconds: durationToSeconds(refreshTokenExpiresIn, DEFAULT_REFRESH_TOKEN_EXPIRES_IN),
   },
 };

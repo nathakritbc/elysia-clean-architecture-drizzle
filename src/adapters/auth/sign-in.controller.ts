@@ -6,7 +6,7 @@ import { SignInUseCase, SignInInput } from '../../core/domain/auth/use-case/sign
 import { TOKENS } from '../../core/shared/tokens';
 import type { LoggerPort } from '../../core/shared/logger/logger.port';
 import type { AuthConfig } from '../../external/config/auth.config';
-import { buildRefreshTokenCookie } from './cookie.util';
+import { buildRefreshTokenCookie, buildRefreshTokenCsrfCookie } from './cookie.util';
 import { SignInRequestDto, AuthResponseDto, ErrorResponseDto } from './dtos/auth.dto';
 import type { UserEmail, UserPassword } from '../../core/domain/users/entity/user.entity';
 import { toUserResponse } from './transformers';
@@ -41,24 +41,21 @@ export class SignInController {
           const { user, tokens } = result;
 
           set.status = StatusCodes.OK;
-          const cookie = buildRefreshTokenCookie(
-            tokens.refreshToken,
-            tokens.refreshTokenExpiresAt as unknown as Date,
-            this.authConfig
-          );
+          const csrfToken = nanoid();
+          const cookies = [
+            buildRefreshTokenCookie(
+              tokens.refreshToken,
+              tokens.refreshTokenExpiresAt as unknown as Date,
+              this.authConfig
+            ),
+            buildRefreshTokenCsrfCookie(csrfToken, tokens.refreshTokenExpiresAt as unknown as Date, this.authConfig),
+          ];
 
           set.headers = set.headers ?? {};
           const existing = set.headers['Set-Cookie'];
+          const currentCookies = Array.isArray(existing) ? existing : existing ? [existing] : [];
 
-          if (!existing) {
-            set.headers['Set-Cookie'] = cookie;
-          }
-
-          if (Array.isArray(existing)) {
-            set.headers['Set-Cookie'] = [...existing, cookie].join('; ');
-          } else {
-            set.headers['Set-Cookie'] = [existing, cookie].join('; ');
-          }
+          set.headers['Set-Cookie'] = [...currentCookies, ...cookies].join('; ');
 
           return {
             user: toUserResponse(user),

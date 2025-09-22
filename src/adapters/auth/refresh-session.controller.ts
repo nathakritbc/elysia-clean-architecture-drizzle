@@ -6,10 +6,12 @@ import { RefreshSessionUseCase, RefreshSessionInput } from '../../core/domain/au
 import { TOKENS } from '../../core/shared/tokens';
 import type { LoggerPort } from '../../core/shared/logger/logger.port';
 import type { AuthConfig } from '../../external/config/auth.config';
-import { buildRefreshTokenCookie, parseCookies } from './cookie.util';
+import { buildRefreshTokenCookie, buildRefreshTokenCsrfCookie, parseCookies } from './cookie.util';
 import { RefreshResponseDto, ErrorResponseDto } from './dtos/auth.dto';
 import { toUserResponse } from './transformers';
 import type { RefreshTokenPlain } from '../../core/domain/auth/entity/refresh-token.entity';
+import { nanoid } from 'nanoid';
+import { UnauthorizedError } from '../../core/shared/errors/error-mapper';
 
 @injectable()
 export class RefreshSessionController {
@@ -27,6 +29,13 @@ export class RefreshSessionController {
           const cookieHeader = request.headers.get('cookie') ?? request.headers.get('Cookie');
           const cookies = parseCookies(cookieHeader);
           const refreshTokenValue = cookies[this.authConfig.refreshTokenCookie.name];
+          const csrfCookieValue = cookies[this.authConfig.refreshTokenCsrfCookie.name];
+          const csrfHeaderValue = request.headers.get('x-csrf-token');
+
+          if (!csrfHeaderValue || !csrfCookieValue || csrfHeaderValue !== csrfCookieValue) {
+            this.logger.warn('CSRF token validation failed for refresh session');
+            throw new UnauthorizedError('Invalid CSRF token');
+          }
 
           const input = StrictBuilder<RefreshSessionInput>()
             .refreshToken(refreshTokenValue as RefreshTokenPlain)
@@ -37,21 +46,21 @@ export class RefreshSessionController {
 
           set.status = StatusCodes.OK;
           set.headers = set.headers ?? {};
-          const cookie = buildRefreshTokenCookie(
-            tokens.refreshToken,
-            tokens.refreshTokenExpiresAt as unknown as Date,
-            this.authConfig
-          );
+          const csrfToken = nanoid();
+          const cookiesToSet = [
+            buildRefreshTokenCookie(
+              tokens.refreshToken,
+              tokens.refreshTokenExpiresAt as unknown as Date,
+              this.authConfig
+            ),
+            buildRefreshTokenCsrfCookie(csrfToken, tokens.refreshTokenExpiresAt as unknown as Date, this.authConfig),
+          ];
 
-          const existing = set.headers['Set-Cookie'];
-          if (!existing) {
-            set.headers['Set-Cookie'] = cookie;
-          }
-          if (Array.isArray(existing)) {
-            set.headers['Set-Cookie'] = [...existing, cookie].join('; ');
-          } else {
-            set.headers['Set-Cookie'] = [existing, cookie].join('; ');
-          }
+          const existing = set.headers?.['Set-Cookie'];
+          const currentCookies = Array.isArray(existing) ? existing : existing ? [existing] : [];
+
+          set.headers = set.headers ?? {};
+          set.headers['Set-Cookie'] = [...currentCookies, ...cookiesToSet].join('; ');
 
           return {
             user: toUserResponse(user),

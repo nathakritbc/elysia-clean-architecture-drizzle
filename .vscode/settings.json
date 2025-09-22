@@ -26,6 +26,7 @@
     "dtos",
     "Elysia",
     "elysiajs",
-    "tsyringe"
+    "tsyringe",
+    "usecase"
   ]
 }

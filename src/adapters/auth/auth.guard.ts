@@ -26,15 +26,7 @@ export const withAuth = (app: Elysia) =>
         store: Record<string, unknown>;
       };
 
-      let token = ctx.bearer?.token?.trim();
-
-      if (!token) {
-        const authorization = ctx.request.headers.get('authorization');
-        if (authorization?.toLowerCase().startsWith('bearer ')) {
-          token = authorization.slice('bearer '.length).trim();
-        }
-      }
-
+      const token = ctx.request.headers.get('authorization')?.slice('bearer '.length).trim();
       if (!token) {
         throw new UnauthorizedError('Missing access token');
       }
