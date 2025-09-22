@@ -1,4 +1,4 @@
-import { and, eq, not } from 'drizzle-orm';
+import { and, eq } from 'drizzle-orm';
 import { injectable } from 'tsyringe';
 import { db } from '../connection';
 import { users, type User as DrizzleUser } from './user.schema';
@@ -35,7 +35,7 @@ export class UserDrizzleRepository extends UserRepository {
     const result = await db
       .select()
       .from(users)
-      .where(and(eq(users.email, email), not(eq(users.status, EStatus.deleted))))
+      .where(and(eq(users.email, email), eq(users.status, EStatus.active)))
       .limit(1);
     return result[0] ? this.toDomain(result[0]) : undefined;
   }
@@ -44,7 +44,7 @@ export class UserDrizzleRepository extends UserRepository {
     const result = await db
       .select()
       .from(users)
-      .where(and(eq(users.id, id), not(eq(users.status, EStatus.deleted))))
+      .where(and(eq(users.id, id), eq(users.status, EStatus.active)))
       .limit(1);
     return result[0] ? this.toDomain(result[0]) : undefined;
   }
