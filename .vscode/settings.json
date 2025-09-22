@@ -28,5 +28,6 @@
     "elysiajs",
     "tsyringe",
     "usecase"
-  ]
+  ],
+  "oxc.enable": true
 }

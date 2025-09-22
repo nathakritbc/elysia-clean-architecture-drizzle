@@ -6,28 +6,27 @@ import { RefreshSessionUseCase, RefreshSessionInput } from '../../core/domain/au
 import { TOKENS } from '../../core/shared/tokens';
 import type { LoggerPort } from '../../core/shared/logger/logger.port';
 import type { AuthConfig } from '../../external/config/auth.config';
-import { buildRefreshTokenCookie, buildRefreshTokenCsrfCookie, parseCookies } from './cookie.util';
 import { RefreshResponseDto, ErrorResponseDto } from './dtos/auth.dto';
-import { toUserResponse } from './transformers';
 import type { RefreshTokenPlain } from '../../core/domain/auth/entity/refresh-token.entity';
-import { nanoid } from 'nanoid';
 import { UnauthorizedError } from '../../core/shared/errors/error-mapper';
+import { BaseAuthController } from './base-auth.controller';
 
 @injectable()
-export class RefreshSessionController {
+export class RefreshSessionController extends BaseAuthController {
   constructor(
     @inject(RefreshSessionUseCase) private readonly refreshSessionUseCase: RefreshSessionUseCase,
-    @inject(TOKENS.AuthConfig) private readonly authConfig: AuthConfig,
-    @inject(TOKENS.Logger) private readonly logger: LoggerPort
-  ) {}
+    @inject(TOKENS.AuthConfig) authConfig: AuthConfig,
+    @inject(TOKENS.Logger) logger: LoggerPort
+  ) {
+    super(authConfig, logger);
+  }
 
   register(app: Elysia) {
     app.post(
       '/auth/refresh',
       async ({ set, request }) => {
         try {
-          const cookieHeader = request.headers.get('cookie') ?? request.headers.get('Cookie');
-          const cookies = parseCookies(cookieHeader);
+          const cookies = this.parseRequestCookies(request);
           const refreshTokenValue = cookies[this.authConfig.refreshTokenCookie.name];
           const csrfCookieValue = cookies[this.authConfig.refreshTokenCsrfCookie.name];
           const csrfHeaderValue = request.headers.get('x-csrf-token');
@@ -45,35 +44,11 @@ export class RefreshSessionController {
           const { user, tokens } = result;
 
           set.status = StatusCodes.OK;
-          set.headers = set.headers ?? {};
-          const csrfToken = nanoid();
-          const cookiesToSet = [
-            buildRefreshTokenCookie(
-              tokens.refreshToken,
-              tokens.refreshTokenExpiresAt as unknown as Date,
-              this.authConfig
-            ),
-            buildRefreshTokenCsrfCookie(csrfToken, tokens.refreshTokenExpiresAt as unknown as Date, this.authConfig),
-          ];
+          this.setAuthCookies(set, tokens);
 
-          const existing = set.headers?.['Set-Cookie'];
-          const currentCookies = Array.isArray(existing) ? existing : existing ? [existing] : [];
-
-          set.headers = set.headers ?? {};
-          set.headers['Set-Cookie'] = [...currentCookies, ...cookiesToSet].join('; ');
-
-          return {
-            user: toUserResponse(user),
-            accessToken: tokens.accessToken,
-            accessTokenExpiresAt: tokens.accessTokenExpiresAt,
-            refreshTokenExpiresAt: tokens.refreshTokenExpiresAt,
-          };
+          return this.createAuthResponse(user, tokens);
         } catch (error) {
-          const normalizedError = error instanceof Error ? error : new Error('Unknown error');
-          this.logger.error('Failed to refresh session', {
-            error: normalizedError,
-          });
-          throw error;
+          this.handleError(error, 'refresh session');
         }
       },
       {

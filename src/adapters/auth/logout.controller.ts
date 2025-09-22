@@ -4,38 +4,36 @@ import { StatusCodes } from 'http-status-codes';
 import { TOKENS } from '../../core/shared/tokens';
 import type { LoggerPort } from '../../core/shared/logger/logger.port';
 import type { AuthConfig } from '../../external/config/auth.config';
-import { buildClearRefreshTokenCookie, buildClearRefreshTokenCsrfCookie, parseCookies } from './cookie.util';
 import { LogoutUseCase } from '../../core/domain/auth/use-case/logout.usecase';
 import type { RefreshTokenPlain } from '../../core/domain/auth/entity/refresh-token.entity';
+import { BaseAuthController } from './base-auth.controller';
 
 @injectable()
-export class LogoutController {
+export class LogoutController extends BaseAuthController {
   constructor(
     @inject(LogoutUseCase) private readonly logoutUseCase: LogoutUseCase,
-    @inject(TOKENS.AuthConfig) private readonly authConfig: AuthConfig,
-    @inject(TOKENS.Logger) private readonly logger: LoggerPort
-  ) {}
+    @inject(TOKENS.AuthConfig) authConfig: AuthConfig,
+    @inject(TOKENS.Logger) logger: LoggerPort
+  ) {
+    super(authConfig, logger);
+  }
 
   register(app: Elysia) {
     app.post('/auth/logout', async ({ request, set }) => {
-      const cookies = parseCookies(request.headers.get('cookie'));
-      const refreshToken = cookies[this.authConfig.refreshTokenCookie.name];
+      try {
+        const cookies = this.parseRequestCookies(request);
+        const refreshToken = cookies[this.authConfig.refreshTokenCookie.name];
 
-      await this.logoutUseCase.execute({ refreshToken: refreshToken as RefreshTokenPlain });
+        await this.logoutUseCase.execute({ refreshToken: refreshToken as RefreshTokenPlain });
 
-      const cookiesToClear = [
-        buildClearRefreshTokenCookie(this.authConfig),
-        buildClearRefreshTokenCsrfCookie(this.authConfig),
-      ];
-      set.status = StatusCodes.OK;
-      set.headers = set.headers ?? {};
-      const existing = set.headers['Set-Cookie'];
-      const currentCookies = Array.isArray(existing) ? existing : existing ? [existing] : [];
-      set.headers['Set-Cookie'] = [...currentCookies, ...cookiesToClear].join('; ');
+        set.status = StatusCodes.OK;
+        this.clearAuthCookies(set);
+        this.logSuccess('User logged out');
 
-      this.logger.info('User logged out');
-
-      return { success: true };
+        return { success: true };
+      } catch (error) {
+        this.handleError(error, 'logout user');
+      }
     });
   }
 }

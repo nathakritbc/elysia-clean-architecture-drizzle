@@ -1,5 +1,5 @@
-import type { AuthConfig } from '../../external/config/auth.config';
-import type { RefreshTokenCookieConfig } from '../../external/config/auth.config';
+import type { AuthConfig } from '../../../external/config/auth.config';
+import type { RefreshTokenCookieConfig } from '../../../external/config/auth.config';
 
 const sameSiteLabel = {
   lax: 'Lax',

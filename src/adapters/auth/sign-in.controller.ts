@@ -6,19 +6,19 @@ import { SignInUseCase, SignInInput } from '../../core/domain/auth/use-case/sign
 import { TOKENS } from '../../core/shared/tokens';
 import type { LoggerPort } from '../../core/shared/logger/logger.port';
 import type { AuthConfig } from '../../external/config/auth.config';
-import { buildRefreshTokenCookie, buildRefreshTokenCsrfCookie } from './cookie.util';
 import { SignInRequestDto, AuthResponseDto, ErrorResponseDto } from './dtos/auth.dto';
 import type { UserEmail, UserPassword } from '../../core/domain/users/entity/user.entity';
-import { toUserResponse } from './transformers';
-import { nanoid } from 'nanoid';
+import { BaseAuthController } from './base-auth.controller';
 
 @injectable()
-export class SignInController {
+export class SignInController extends BaseAuthController {
   constructor(
     @inject(SignInUseCase) private readonly signInUseCase: SignInUseCase,
-    @inject(TOKENS.AuthConfig) private readonly authConfig: AuthConfig,
-    @inject(TOKENS.Logger) private readonly logger: LoggerPort
-  ) {}
+    @inject(TOKENS.AuthConfig) authConfig: AuthConfig,
+    @inject(TOKENS.Logger) logger: LoggerPort
+  ) {
+    super(authConfig, logger);
+  }
 
   register(app: Elysia) {
     app.post(
@@ -29,10 +29,10 @@ export class SignInController {
           .password(body.password as UserPassword)
           .build();
 
-        const requestId = nanoid();
+        const requestId = this.generateRequestId();
 
         try {
-          this.logger.info('Handling sign-in request', {
+          this.logSuccess('Handling sign-in request', {
             email: body.email,
             requestId,
           });
@@ -41,36 +41,14 @@ export class SignInController {
           const { user, tokens } = result;
 
           set.status = StatusCodes.OK;
-          const csrfToken = nanoid();
-          const cookies = [
-            buildRefreshTokenCookie(
-              tokens.refreshToken,
-              tokens.refreshTokenExpiresAt as unknown as Date,
-              this.authConfig
-            ),
-            buildRefreshTokenCsrfCookie(csrfToken, tokens.refreshTokenExpiresAt as unknown as Date, this.authConfig),
-          ];
+          this.setAuthCookies(set, tokens);
 
-          set.headers = set.headers ?? {};
-          const existing = set.headers['Set-Cookie'];
-          const currentCookies = Array.isArray(existing) ? existing : existing ? [existing] : [];
-
-          set.headers['Set-Cookie'] = [...currentCookies, ...cookies].join('; ');
-
-          return {
-            user: toUserResponse(user),
-            accessToken: tokens.accessToken,
-            accessTokenExpiresAt: tokens.accessTokenExpiresAt,
-            refreshTokenExpiresAt: tokens.refreshTokenExpiresAt,
-          };
+          return this.createAuthResponse(user, tokens);
         } catch (error) {
-          const normalizedError = error instanceof Error ? error : new Error('Unknown error');
-          this.logger.error('Failed to sign in user', {
+          this.handleError(error, 'sign in user', {
             email: body.email,
             requestId,
-            error: normalizedError,
           });
-          throw error;
         }
       },
       {
