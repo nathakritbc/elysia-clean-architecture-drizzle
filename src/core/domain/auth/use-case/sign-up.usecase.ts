@@ -1,16 +1,15 @@
+import 'reflect-metadata';
 import { Builder } from 'builder-pattern';
 import { inject, injectable } from 'tsyringe';
 import { ConflictError } from '../../../shared/errors/error-mapper';
-import { TOKENS } from '../../../shared/tokens';
-import { IUseCase } from '../../../shared/useCase';
 import { EStatus } from '../../../shared/status.enum';
-import type { IUser, BUserName, UserEmail, UserPassword, UserStatus } from '../../users/entity/user.entity';
+import type { BUserName, UserEmail, UserPassword, UserStatus } from '../../users/entity/user.entity';
 import { User } from '../../users/entity/user.entity';
+import { BaseAuthUseCase, type AuthenticatedUser } from './base-auth.usecase';
 import { UserRepository } from '../../users/service/user.repository';
-import type { GeneratedAuthTokens } from '../service/auth-token.service';
-import { AuthTokenService } from '../service/auth-token.service';
+import { TOKENS } from '../../../shared/tokens';
 import { RefreshTokenRepository } from '../service/refresh-token.repository';
-import { RefreshToken } from '../entity/refresh-token.entity';
+import { AuthTokenService } from '../service/auth-token.service';
 
 export interface SignUpInput {
   name: BUserName;
@@ -18,21 +17,18 @@ export interface SignUpInput {
   password: UserPassword;
 }
 
-export interface AuthenticatedUser {
-  user: IUser;
-  tokens: GeneratedAuthTokens;
-}
-
 @injectable()
-export class SignUpUseCase implements IUseCase<SignUpInput, AuthenticatedUser> {
+export class SignUpUseCase extends BaseAuthUseCase<SignUpInput, AuthenticatedUser> {
   constructor(
     @inject(TOKENS.IUserRepository)
-    private readonly userRepository: UserRepository,
+    protected readonly userRepository: UserRepository,
     @inject(TOKENS.RefreshTokenRepository)
-    private readonly refreshTokenRepository: RefreshTokenRepository,
+    protected readonly refreshTokenRepository: RefreshTokenRepository,
     @inject(TOKENS.AuthTokenService)
-    private readonly authTokenService: AuthTokenService
-  ) {}
+    protected readonly authTokenService: AuthTokenService
+  ) {
+    super(userRepository, refreshTokenRepository, authTokenService);
+  }
 
   async execute(input: SignUpInput): Promise<AuthenticatedUser> {
     const existingUser = await this.userRepository.getByEmail(input.email);
@@ -50,22 +46,8 @@ export class SignUpUseCase implements IUseCase<SignUpInput, AuthenticatedUser> {
     await user.setHashPassword(input.password);
 
     const createdUser = await this.userRepository.create(user);
-    const tokens = await this.authTokenService.generateTokens(createdUser);
 
-    const refreshToken = Builder(RefreshToken)
-      .userId(createdUser.id)
-      .jti(tokens.jti)
-      .tokenHash(tokens.refreshTokenHash)
-      .expiresAt(tokens.refreshTokenExpiresAt)
-      .build();
-
-    await this.refreshTokenRepository.create(refreshToken);
-
-    createdUser.hiddenPassword();
-
-    return {
-      user: createdUser,
-      tokens,
-    };
+    // Use the common token generation method from base class
+    return await this.generateTokensForUser(createdUser);
   }
 }

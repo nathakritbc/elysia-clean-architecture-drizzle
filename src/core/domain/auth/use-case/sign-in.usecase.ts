@@ -1,14 +1,12 @@
-import { Builder } from 'builder-pattern';
+import 'reflect-metadata';
 import { inject, injectable } from 'tsyringe';
 import { UnauthorizedError } from '../../../shared/errors/error-mapper';
-import { TOKENS } from '../../../shared/tokens';
-import { IUseCase } from '../../../shared/useCase';
 import type { UserEmail, UserPassword } from '../../users/entity/user.entity';
+import { BaseAuthUseCase, type AuthenticatedUser } from './base-auth.usecase';
 import { UserRepository } from '../../users/service/user.repository';
-import { AuthTokenService } from '../service/auth-token.service';
+import { TOKENS } from '../../../shared/tokens';
 import { RefreshTokenRepository } from '../service/refresh-token.repository';
-import { RefreshToken, RefreshTokenRevokedAt } from '../entity/refresh-token.entity';
-import type { AuthenticatedUser } from './sign-up.usecase';
+import { AuthTokenService } from '../service/auth-token.service';
 
 export interface SignInInput {
   email: UserEmail;
@@ -16,16 +14,17 @@ export interface SignInInput {
 }
 
 @injectable()
-export class SignInUseCase implements IUseCase<SignInInput, AuthenticatedUser> {
+export class SignInUseCase extends BaseAuthUseCase<SignInInput, AuthenticatedUser> {
   constructor(
     @inject(TOKENS.IUserRepository)
-    private readonly userRepository: UserRepository,
+    protected readonly userRepository: UserRepository,
     @inject(TOKENS.RefreshTokenRepository)
-    private readonly refreshTokenRepository: RefreshTokenRepository,
+    protected readonly refreshTokenRepository: RefreshTokenRepository,
     @inject(TOKENS.AuthTokenService)
-    private readonly authTokenService: AuthTokenService
-  ) {}
-
+    protected readonly authTokenService: AuthTokenService
+  ) {
+    super(userRepository, refreshTokenRepository, authTokenService);
+  }
   async execute(input: SignInInput): Promise<AuthenticatedUser> {
     const user = await this.userRepository.getByEmail(input.email);
 
@@ -39,25 +38,7 @@ export class SignInUseCase implements IUseCase<SignInInput, AuthenticatedUser> {
       throw new UnauthorizedError('Invalid credentials');
     }
 
-    const revokedAt = new Date() as RefreshTokenRevokedAt;
-    await this.refreshTokenRepository.revokeAllByUserId(user.id, revokedAt);
-
-    const tokens = await this.authTokenService.generateTokens(user);
-
-    const refreshToken = Builder(RefreshToken)
-      .userId(user.id)
-      .jti(tokens.jti)
-      .tokenHash(tokens.refreshTokenHash)
-      .expiresAt(tokens.refreshTokenExpiresAt)
-      .build();
-
-    await this.refreshTokenRepository.create(refreshToken);
-
-    user.hiddenPassword();
-
-    return {
-      user,
-      tokens,
-    };
+    // Use the common token generation method from base class
+    return await this.generateTokensForUser(user);
   }
 }

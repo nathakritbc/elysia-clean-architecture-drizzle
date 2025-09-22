@@ -1,88 +1,29 @@
-import { Builder } from 'builder-pattern';
-import { inject, injectable } from 'tsyringe';
+import 'reflect-metadata';
+import { injectable } from 'tsyringe';
 import { UnauthorizedError } from '../../../shared/errors/error-mapper';
-import { TOKENS } from '../../../shared/tokens';
-import { IUseCase } from '../../../shared/useCase';
-import { AuthTokenService } from '../service/auth-token.service';
-import { RefreshTokenRepository } from '../service/refresh-token.repository';
-import {
-  RefreshToken,
-  RefreshTokenJti,
-  RefreshTokenPlain,
-  RefreshTokenRevokedAt,
-} from '../entity/refresh-token.entity';
-import type { AuthenticatedUser } from './sign-up.usecase';
-import { UserRepository } from '../../users/service/user.repository';
+import { RefreshTokenPlain } from '../entity/refresh-token.entity';
+import { BaseAuthUseCase, type AuthenticatedUser } from './base-auth.usecase';
 
 export interface RefreshSessionInput {
   refreshToken: RefreshTokenPlain;
 }
 
 @injectable()
-export class RefreshSessionUseCase implements IUseCase<RefreshSessionInput, AuthenticatedUser> {
-  constructor(
-    @inject(TOKENS.RefreshTokenRepository)
-    private readonly refreshTokenRepository: RefreshTokenRepository,
-    @inject(TOKENS.IUserRepository)
-    private readonly userRepository: UserRepository,
-    @inject(TOKENS.AuthTokenService)
-    private readonly authTokenService: AuthTokenService
-  ) {}
-
+export class RefreshSessionUseCase extends BaseAuthUseCase<RefreshSessionInput, AuthenticatedUser> {
   async execute(input: RefreshSessionInput): Promise<AuthenticatedUser> {
-    const tokenString = input.refreshToken;
-    const parts = tokenString.split('.');
-    const [jti, secret] = parts;
+    // Validate and retrieve the refresh token using common method
+    const { storedToken } = await this.validateAndRetrieveRefreshToken(input.refreshToken);
 
-    if (!jti || !secret || parts.length !== 2) {
-      throw new UnauthorizedError('Invalid refresh token');
-    }
+    // Revoke the old token
+    await this.revokeRefreshTokenByJti(storedToken.jti);
 
-    const storedToken = await this.refreshTokenRepository.findByJti(jti as RefreshTokenJti);
-
-    if (!storedToken) {
-      throw new UnauthorizedError('Invalid refresh token');
-    }
-
-    if (storedToken.isRevoked()) {
-      throw new UnauthorizedError('Refresh token has been revoked');
-    }
-
-    if (storedToken.isExpired()) {
-      throw new UnauthorizedError('Refresh token has expired');
-    }
-
-    const isValid = await storedToken.compareToken(input.refreshToken);
-
-    if (!isValid) {
-      throw new UnauthorizedError('Invalid refresh token');
-    }
-
-    const revokedAt = new Date() as RefreshTokenRevokedAt;
-    await this.refreshTokenRepository.revokeByJti(storedToken.jti, revokedAt);
-
+    // Get the user
     const user = await this.userRepository.getById(storedToken.userId);
-
     if (!user) {
       throw new UnauthorizedError('Associated user not found');
     }
 
-    const tokens = await this.authTokenService.generateTokens(user);
-
-    const newRefreshToken = Builder(RefreshToken)
-      .userId(user.id)
-      .jti(tokens.jti)
-      .tokenHash(tokens.refreshTokenHash)
-      .expiresAt(tokens.refreshTokenExpiresAt)
-      .build();
-
-    await this.refreshTokenRepository.create(newRefreshToken);
-
-    user.hiddenPassword();
-
-    return {
-      user,
-      tokens,
-    };
+    // Generate new tokens (without revoking since we already revoked above)
+    return await this.generateTokensForUserWithoutRevoke(user);
   }
 }
