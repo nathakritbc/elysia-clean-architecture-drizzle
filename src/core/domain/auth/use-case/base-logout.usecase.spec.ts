@@ -1,9 +1,10 @@
-import { mock } from 'vitest-mock-extended';
 import { vi } from 'vitest';
-import { BaseLogoutUseCase, LogoutOutput } from './base-logout.usecase';
+import { mock } from 'vitest-mock-extended';
+
 import { RefreshTokenJti, RefreshTokenPlain, RefreshTokenRevokedAt } from '../entity/refresh-token.entity';
-import { LogoutInput } from './logout.usecase';
 import { RefreshTokenRepository } from '../service/refresh-token.repository';
+import { BaseLogoutUseCase, LogoutOutput } from './base-logout.usecase';
+import { LogoutInput } from './logout.usecase';
 
 describe('BaseLogoutUseCase', () => {
   class BaseLogoutUseCaseMock extends BaseLogoutUseCase<LogoutInput, LogoutOutput> {

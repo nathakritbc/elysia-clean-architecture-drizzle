@@ -1,7 +1,8 @@
 import { inject, injectable } from 'tsyringe';
-import { IUseCase } from '../../../shared/useCase';
-import { TOKENS } from '../../../shared/tokens';
+
 import { NotFoundError } from '../../../shared/errors/error-mapper';
+import { TOKENS } from '../../../shared/tokens';
+import { IUseCase } from '../../../shared/useCase';
 import { PostId } from '../entity/post.entity';
 import { PostRepository } from '../service/post.repository';
 

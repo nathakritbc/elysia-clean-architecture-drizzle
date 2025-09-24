@@ -1,17 +1,18 @@
+import { nanoid } from 'nanoid';
 import { inject, injectable } from 'tsyringe';
-import { TOKENS } from '../../core/shared/tokens';
+
+import type { IUser } from '../../core/domain/users/entity/user.entity';
 import type { LoggerPort } from '../../core/shared/logger/logger.port';
-import type { AuthConfig } from '../../external/config/auth.config';
+import { TOKENS } from '../../core/shared/tokens';
 import {
-  buildRefreshTokenCookie,
-  buildRefreshTokenCsrfCookie,
   buildClearRefreshTokenCookie,
   buildClearRefreshTokenCsrfCookie,
+  buildRefreshTokenCookie,
+  buildRefreshTokenCsrfCookie,
   parseCookies,
 } from '../../core/shared/utils/cookie.util';
+import type { AuthConfig } from '../../external/config/auth.config';
 import { toUserResponse } from './transformers';
-import { nanoid } from 'nanoid';
-import type { IUser } from '../../core/domain/users/entity/user.entity';
 
 export interface AuthTokens {
   accessToken: string;

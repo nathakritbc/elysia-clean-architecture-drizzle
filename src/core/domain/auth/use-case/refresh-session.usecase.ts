@@ -1,12 +1,13 @@
 import 'reflect-metadata';
 import { inject, injectable } from 'tsyringe';
+
 import { UnauthorizedError } from '../../../shared/errors/error-mapper';
-import { RefreshTokenPlain } from '../entity/refresh-token.entity';
-import { BaseAuthUseCase, type AuthenticatedUser } from './base-auth.usecase';
 import { TOKENS } from '../../../shared/tokens';
-import { RefreshTokenRepository } from '../service/refresh-token.repository';
 import { UserRepository } from '../../users/service/user.repository';
+import { RefreshTokenPlain } from '../entity/refresh-token.entity';
 import { AuthTokenService } from '../service/auth-token.service';
+import { RefreshTokenRepository } from '../service/refresh-token.repository';
+import { type AuthenticatedUser, BaseAuthUseCase } from './base-auth.usecase';
 
 export interface RefreshSessionInput {
   refreshToken: RefreshTokenPlain;

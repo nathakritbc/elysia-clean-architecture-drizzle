@@ -1,6 +1,6 @@
-import { users } from './users/user.schema';
-import { posts } from './posts/post.schema';
 import { refreshTokens } from './auth/refresh-token.schema';
+import { posts } from './posts/post.schema';
+import { users } from './users/user.schema';
 
 // Export all tables for Drizzle
 export { users, posts, refreshTokens };

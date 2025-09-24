@@ -1,20 +1,22 @@
+import { Builder } from 'builder-pattern';
 import 'reflect-metadata';
-import { mock } from 'vitest-mock-extended';
 import { vi } from 'vitest';
-import { BaseAuthUseCase, AuthenticatedUser } from './base-auth.usecase';
+import { mock } from 'vitest-mock-extended';
+
+import { faker } from '@faker-js/faker';
+
+import { IUser, User } from '../../users/entity/user.entity';
 import { UserRepository } from '../../users/service/user.repository';
-import { AuthTokenService, GeneratedAuthTokens } from '../service/auth-token.service';
-import { RefreshTokenRepository } from '../service/refresh-token.repository';
 import {
+  IRefreshToken,
   RefreshToken,
   RefreshTokenJti,
   RefreshTokenPlain,
-  IRefreshToken,
   RefreshTokenRevokedAt,
 } from '../entity/refresh-token.entity';
-import { IUser, User } from '../../users/entity/user.entity';
-import { Builder } from 'builder-pattern';
-import { faker } from '@faker-js/faker';
+import { AuthTokenService, GeneratedAuthTokens } from '../service/auth-token.service';
+import { RefreshTokenRepository } from '../service/refresh-token.repository';
+import { AuthenticatedUser, BaseAuthUseCase } from './base-auth.usecase';
 
 describe('BaseAuthUseCase', () => {
   class BaseAuthUseCaseMock extends BaseAuthUseCase<unknown, unknown> {

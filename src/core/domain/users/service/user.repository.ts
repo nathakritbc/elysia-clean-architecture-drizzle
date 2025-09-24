@@ -1,5 +1,5 @@
 import { GetAllMetaType, GetAllParamsType } from '../../../shared/common.type';
-import { UserEmail, IUser, BUserName, UserId } from '../entity/user.entity';
+import { BUserName, IUser, UserEmail, UserId } from '../entity/user.entity';
 
 export interface GetAllUsersQuery extends GetAllParamsType {
   name?: BUserName;

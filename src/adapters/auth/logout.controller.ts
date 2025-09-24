@@ -1,11 +1,12 @@
 import Elysia from 'elysia';
-import { inject, injectable } from 'tsyringe';
 import { StatusCodes } from 'http-status-codes';
-import { TOKENS } from '../../core/shared/tokens';
-import type { LoggerPort } from '../../core/shared/logger/logger.port';
-import type { AuthConfig } from '../../external/config/auth.config';
-import { LogoutUseCase } from '../../core/domain/auth/use-case/logout.usecase';
+import { inject, injectable } from 'tsyringe';
+
 import type { RefreshTokenPlain } from '../../core/domain/auth/entity/refresh-token.entity';
+import { LogoutUseCase } from '../../core/domain/auth/use-case/logout.usecase';
+import type { LoggerPort } from '../../core/shared/logger/logger.port';
+import { TOKENS } from '../../core/shared/tokens';
+import type { AuthConfig } from '../../external/config/auth.config';
 import { BaseAuthController } from './base-auth.controller';
 
 @injectable()

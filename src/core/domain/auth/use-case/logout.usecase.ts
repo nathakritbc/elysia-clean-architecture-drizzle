@@ -1,10 +1,11 @@
 import 'reflect-metadata';
 import { inject, injectable } from 'tsyringe';
-import { RefreshTokenPlain } from '../entity/refresh-token.entity';
-import { BaseLogoutUseCase, type LogoutOutput } from './base-logout.usecase';
+
 import { UnauthorizedError } from '../../../shared/errors/error-mapper';
-import { RefreshTokenRepository } from '../service/refresh-token.repository';
 import { TOKENS } from '../../../shared/tokens';
+import { RefreshTokenPlain } from '../entity/refresh-token.entity';
+import { RefreshTokenRepository } from '../service/refresh-token.repository';
+import { BaseLogoutUseCase, type LogoutOutput } from './base-logout.usecase';
 
 export interface LogoutInput {
   refreshToken: RefreshTokenPlain;

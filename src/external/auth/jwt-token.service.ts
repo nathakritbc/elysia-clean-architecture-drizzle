@@ -1,22 +1,24 @@
-import { injectable, inject } from 'tsyringe';
-import { nanoid } from 'nanoid';
 import * as argon2 from 'argon2';
+import { nanoid } from 'nanoid';
+import { inject, injectable } from 'tsyringe';
+
 import jwt from '@elysiajs/jwt';
+
 import {
-  AuthTokenService,
-  GeneratedAuthTokens,
-  AccessTokenExpiresAt,
-} from '../../core/domain/auth/service/auth-token.service';
-import type { IUser } from '../../core/domain/users/entity/user.entity';
-import {
+  RefreshTokenExpiresAt,
   RefreshTokenHash,
   RefreshTokenJti,
-  RefreshTokenExpiresAt,
 } from '../../core/domain/auth/entity/refresh-token.entity';
-import type { AuthConfig } from '../config/auth.config';
-import { DEFAULT_ACCESS_TOKEN_EXPIRES_IN, DEFAULT_REFRESH_TOKEN_EXPIRES_IN } from '../config/auth.config';
+import {
+  AccessTokenExpiresAt,
+  AuthTokenService,
+  GeneratedAuthTokens,
+} from '../../core/domain/auth/service/auth-token.service';
+import type { IUser } from '../../core/domain/users/entity/user.entity';
 import { TOKENS } from '../../core/shared/tokens';
 import { addDuration } from '../../core/shared/utils/duration';
+import type { AuthConfig } from '../config/auth.config';
+import { DEFAULT_ACCESS_TOKEN_EXPIRES_IN, DEFAULT_REFRESH_TOKEN_EXPIRES_IN } from '../config/auth.config';
 import { argon2Config } from '../config/auth.config';
 
 type JwtSignFunction = ReturnType<typeof jwt>['decorator']['jwt']['sign'];

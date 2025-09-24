@@ -1,14 +1,16 @@
+import * as argon2 from 'argon2';
 import { Builder } from 'builder-pattern';
+import { vi } from 'vitest';
+
+import { faker } from '@faker-js/faker';
+
 import {
   RefreshToken,
-  RefreshTokenPlain,
-  RefreshTokenHash,
   RefreshTokenExpiresAt,
+  RefreshTokenHash,
+  RefreshTokenPlain,
   RefreshTokenRevokedAt,
 } from './refresh-token.entity';
-import { faker } from '@faker-js/faker';
-import { vi } from 'vitest';
-import * as argon2 from 'argon2';
 
 describe('RefreshToken', () => {
   afterEach(() => {

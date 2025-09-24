@@ -1,20 +1,21 @@
 import 'reflect-metadata';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { mock } from 'vitest-mock-extended';
-import { RefreshSessionUseCase } from './refresh-session.usecase';
-import { RefreshTokenRepository } from '../service/refresh-token.repository';
+
+import { UnauthorizedError } from '../../../shared/errors/error-mapper';
+import type { IUser, UserId } from '../../users/entity/user.entity';
 import { UserRepository } from '../../users/service/user.repository';
-import { AuthTokenService } from '../service/auth-token.service';
 import type {
   IRefreshToken,
-  RefreshTokenJti,
-  RefreshTokenHash,
   RefreshTokenExpiresAt,
+  RefreshTokenHash,
+  RefreshTokenJti,
   RefreshTokenPlain,
 } from '../entity/refresh-token.entity';
-import type { IUser, UserId } from '../../users/entity/user.entity';
+import { AuthTokenService } from '../service/auth-token.service';
 import type { AccessTokenExpiresAt } from '../service/auth-token.service';
-import { UnauthorizedError } from '../../../shared/errors/error-mapper';
+import { RefreshTokenRepository } from '../service/refresh-token.repository';
+import { RefreshSessionUseCase } from './refresh-session.usecase';
 
 const refreshTokenString = 'token-jti.random-secret';
 

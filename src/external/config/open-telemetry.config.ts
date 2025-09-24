@@ -1,4 +1,5 @@
 import 'dotenv/config';
+
 export interface OpenTelemetryConfig {
   enabled: boolean;
   serviceName: string;

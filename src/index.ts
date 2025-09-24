@@ -1,8 +1,9 @@
 import 'reflect-metadata';
-import { createRoutes } from './external/api/routes';
+
 import { container } from './core/shared/container';
-import { TOKENS } from './core/shared/tokens';
 import type { LoggerPort } from './core/shared/logger/logger.port';
+import { TOKENS } from './core/shared/tokens';
+import { createRoutes } from './external/api/routes';
 import type { AppConfig } from './external/config/app-config';
 import { initializeTelemetry, TelemetryController } from './external/telemetry/opentelemetry';
 

@@ -1,11 +1,12 @@
-import { inject, injectable } from 'tsyringe';
-import { IUseCase } from '../../../shared/useCase';
-import { Post, PostTitle, PostContent, PostStatus, PostUpdatedAt, PostCreatedAt, IPost } from '../entity/post.entity';
-import { TOKENS } from '../../../shared/tokens';
-import { EStatus } from '../../../shared/status.enum';
 import { Builder } from 'builder-pattern';
-import { PostRepository } from '../service/post.repository';
 import dayjs from 'dayjs';
+import { inject, injectable } from 'tsyringe';
+
+import { EStatus } from '../../../shared/status.enum';
+import { TOKENS } from '../../../shared/tokens';
+import { IUseCase } from '../../../shared/useCase';
+import { IPost, Post, PostContent, PostCreatedAt, PostStatus, PostTitle, PostUpdatedAt } from '../entity/post.entity';
+import { PostRepository } from '../service/post.repository';
 
 export interface CreatePostInput {
   title: PostTitle;

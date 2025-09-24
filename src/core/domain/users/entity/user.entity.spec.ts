@@ -1,6 +1,8 @@
 import { Builder } from 'builder-pattern';
 import { vi } from 'vitest';
+
 import { User, UserPassword } from './user.entity';
+
 describe('User', () => {
   afterEach(() => {
     vi.resetAllMocks();

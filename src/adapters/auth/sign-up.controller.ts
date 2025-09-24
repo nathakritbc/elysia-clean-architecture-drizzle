@@ -1,14 +1,15 @@
-import Elysia from 'elysia';
 import { StrictBuilder } from 'builder-pattern';
-import { inject, injectable } from 'tsyringe';
+import Elysia from 'elysia';
 import { StatusCodes } from 'http-status-codes';
-import { SignUpUseCase, SignUpInput } from '../../core/domain/auth/use-case/sign-up.usecase';
-import { TOKENS } from '../../core/shared/tokens';
-import type { LoggerPort } from '../../core/shared/logger/logger.port';
-import type { AuthConfig } from '../../external/config/auth.config';
-import { SignUpRequestDto, AuthResponseDto, ErrorResponseDto } from './dtos/auth.dto';
+import { inject, injectable } from 'tsyringe';
+
+import { SignUpInput, SignUpUseCase } from '../../core/domain/auth/use-case/sign-up.usecase';
 import type { BUserName, UserEmail, UserPassword } from '../../core/domain/users/entity/user.entity';
+import type { LoggerPort } from '../../core/shared/logger/logger.port';
+import { TOKENS } from '../../core/shared/tokens';
+import type { AuthConfig } from '../../external/config/auth.config';
 import { BaseAuthController } from './base-auth.controller';
+import { AuthResponseDto, ErrorResponseDto, SignUpRequestDto } from './dtos/auth.dto';
 
 @injectable()
 export class SignUpController extends BaseAuthController {

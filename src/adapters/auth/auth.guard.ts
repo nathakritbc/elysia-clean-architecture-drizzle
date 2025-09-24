@@ -1,6 +1,8 @@
-import jwt from '@elysiajs/jwt';
 import type { Context, Elysia } from 'elysia';
 import { t } from 'elysia';
+
+import jwt from '@elysiajs/jwt';
+
 import { UnauthorizedError } from '../../core/shared/errors/error-mapper';
 
 export type JwtDecorator = ReturnType<typeof jwt>['decorator']['jwt'];

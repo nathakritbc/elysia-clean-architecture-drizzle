@@ -1,4 +1,5 @@
-import { pgTable, text, timestamp, uuid, varchar, index } from 'drizzle-orm/pg-core';
+import { index, pgTable, text, timestamp, uuid, varchar } from 'drizzle-orm/pg-core';
+
 import { EStatus } from '../../../core/shared/status.enum';
 
 export const posts = pgTable(

@@ -1,11 +1,11 @@
 import 'reflect-metadata';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { mock } from 'vitest-mock-extended';
-import { RefreshTokenRepository } from '../service/refresh-token.repository';
-import { LogoutInput, LogoutUseCase } from './logout.usecase';
+
 import { UnauthorizedError } from '../../../shared/errors/error-mapper';
 import { RefreshTokenPlain } from '../entity/refresh-token.entity';
+import { RefreshTokenRepository } from '../service/refresh-token.repository';
+import { LogoutInput, LogoutUseCase } from './logout.usecase';
 
 describe('LogoutUseCase', () => {
   const refreshTokenRepository = mock<RefreshTokenRepository>();

@@ -1,13 +1,15 @@
 import 'dotenv/config';
+
+import { corsConfig } from './cors.config';
+import { loggerTransport, LoggingConfig, logLevel } from './logger.config';
 import {
   OpenTelemetryConfig,
   telemetryEnabled,
   telemetryEndpoint,
   telemetryServiceName,
 } from './open-telemetry.config';
-import { loggerTransport, LoggingConfig, logLevel } from './logger.config';
 import { DatabaseConfig, databaseUrl } from './postgres-db.config';
-import { corsConfig } from './cors.config';
+
 export interface AppConfig {
   env: string;
   server: ServerConfig;

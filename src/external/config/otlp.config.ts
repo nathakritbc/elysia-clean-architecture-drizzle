@@ -1,4 +1,5 @@
 import 'dotenv/config';
+
 export const otlpExporterUrl = process.env.OTLP_EXPORTER_URL || 'http://localhost';
 
 export const k8s = {

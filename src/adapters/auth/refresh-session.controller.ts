@@ -1,15 +1,16 @@
-import Elysia from 'elysia';
 import { StrictBuilder } from 'builder-pattern';
-import { inject, injectable } from 'tsyringe';
+import Elysia from 'elysia';
 import { StatusCodes } from 'http-status-codes';
-import { RefreshSessionUseCase, RefreshSessionInput } from '../../core/domain/auth/use-case/refresh-session.usecase';
-import { TOKENS } from '../../core/shared/tokens';
-import type { LoggerPort } from '../../core/shared/logger/logger.port';
-import type { AuthConfig } from '../../external/config/auth.config';
-import { RefreshResponseDto, ErrorResponseDto } from './dtos/auth.dto';
+import { inject, injectable } from 'tsyringe';
+
 import type { RefreshTokenPlain } from '../../core/domain/auth/entity/refresh-token.entity';
+import { RefreshSessionInput, RefreshSessionUseCase } from '../../core/domain/auth/use-case/refresh-session.usecase';
 import { UnauthorizedError } from '../../core/shared/errors/error-mapper';
+import type { LoggerPort } from '../../core/shared/logger/logger.port';
+import { TOKENS } from '../../core/shared/tokens';
+import type { AuthConfig } from '../../external/config/auth.config';
 import { BaseAuthController } from './base-auth.controller';
+import { ErrorResponseDto, RefreshResponseDto } from './dtos/auth.dto';
 
 @injectable()
 export class RefreshSessionController extends BaseAuthController {

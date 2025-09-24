@@ -1,14 +1,15 @@
 import 'reflect-metadata';
-import { mock, mockReset } from 'vitest-mock-extended';
 import { beforeEach, describe, expect, it } from 'vitest';
-import { SignUpUseCase } from './sign-up.usecase';
-import { UserRepository } from '../../users/service/user.repository';
-import { RefreshTokenRepository } from '../service/refresh-token.repository';
-import { AuthTokenService, GeneratedAuthTokens } from '../service/auth-token.service';
-import type { IUser, BUserName, UserEmail, UserPassword } from '../../users/entity/user.entity';
-import type { RefreshTokenHash, RefreshTokenJti, RefreshTokenExpiresAt } from '../entity/refresh-token.entity';
-import type { AccessTokenExpiresAt } from '../service/auth-token.service';
+import { mock, mockReset } from 'vitest-mock-extended';
+
 import { ConflictError } from '../../../shared/errors/error-mapper';
+import type { BUserName, IUser, UserEmail, UserPassword } from '../../users/entity/user.entity';
+import { UserRepository } from '../../users/service/user.repository';
+import type { RefreshTokenExpiresAt, RefreshTokenHash, RefreshTokenJti } from '../entity/refresh-token.entity';
+import { AuthTokenService, GeneratedAuthTokens } from '../service/auth-token.service';
+import type { AccessTokenExpiresAt } from '../service/auth-token.service';
+import { RefreshTokenRepository } from '../service/refresh-token.repository';
+import { SignUpUseCase } from './sign-up.usecase';
 
 const toUserInput = () => ({
   name: 'Jane Doe' as BUserName,

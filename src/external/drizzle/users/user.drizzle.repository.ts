@@ -1,21 +1,22 @@
+import { Builder } from 'builder-pattern';
 import { and, eq } from 'drizzle-orm';
 import { injectable } from 'tsyringe';
-import { db } from '../connection';
-import { users, type User as DrizzleUser } from './user.schema';
+
 import {
   BUserName,
+  IUser,
   User,
   UserCreatedAt,
   UserEmail,
   UserId,
-  UserStatus,
   UserPassword,
+  UserStatus,
   UserUpdatedAt,
-  IUser,
 } from '../../../core/domain/users/entity/user.entity';
-import { Builder } from 'builder-pattern';
 import { UserRepository } from '../../../core/domain/users/service/user.repository';
 import { EStatus } from '../../../core/shared/status.enum';
+import { db } from '../connection';
+import { type User as DrizzleUser, users } from './user.schema';
 
 @injectable()
 export class UserDrizzleRepository extends UserRepository {

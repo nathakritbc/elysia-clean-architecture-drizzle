@@ -1,5 +1,6 @@
 import { randomBytes } from 'crypto';
 import 'dotenv/config';
+
 import { durationToSeconds } from '../../core/shared/utils/duration';
 
 export const DEFAULT_ACCESS_TOKEN_EXPIRES_IN = '15m';

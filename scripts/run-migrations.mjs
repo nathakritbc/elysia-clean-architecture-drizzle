@@ -1,11 +1,11 @@
 import 'dotenv/config';
+import { sql } from 'drizzle-orm';
+import { drizzle } from 'drizzle-orm/postgres-js';
+import { migrate } from 'drizzle-orm/postgres-js/migrator';
 import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
 import postgres from 'postgres';
-import { drizzle } from 'drizzle-orm/postgres-js';
-import { migrate } from 'drizzle-orm/postgres-js/migrator';
-import { sql } from 'drizzle-orm';
 
 const MIGRATIONS_DIR = path.resolve(process.cwd(), 'src/external/drizzle/migrations');
 const JOURNAL_PATH = path.join(MIGRATIONS_DIR, 'meta', '_journal.json');

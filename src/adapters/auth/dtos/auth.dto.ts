@@ -1,4 +1,5 @@
 import { t } from 'elysia';
+
 import { StatusDto } from '../../../core/shared/dtos/common.dto';
 
 export const UserResponseDto = t.Object({

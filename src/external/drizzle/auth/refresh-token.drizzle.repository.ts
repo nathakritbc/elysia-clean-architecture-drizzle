@@ -1,9 +1,8 @@
-import 'reflect-metadata';
-import { eq } from 'drizzle-orm';
 import { Builder } from 'builder-pattern';
+import { eq } from 'drizzle-orm';
+import 'reflect-metadata';
 import { injectable } from 'tsyringe';
-import { db } from '../connection';
-import { refreshTokens, type RefreshToken as DrizzleRefreshToken } from './refresh-token.schema';
+
 import {
   IRefreshToken,
   RefreshToken,
@@ -16,6 +15,8 @@ import {
 } from '../../../core/domain/auth/entity/refresh-token.entity';
 import { RefreshTokenRepository } from '../../../core/domain/auth/service/refresh-token.repository';
 import type { UserId } from '../../../core/domain/users/entity/user.entity';
+import { db } from '../connection';
+import { type RefreshToken as DrizzleRefreshToken, refreshTokens } from './refresh-token.schema';
 
 @injectable()
 export class RefreshTokenDrizzleRepository extends RefreshTokenRepository {

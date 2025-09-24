@@ -1,10 +1,11 @@
 import { Context } from 'elysia';
-import { afterEach } from 'vitest';
-import { vi } from 'vitest';
+import { afterEach, vi } from 'vitest';
 import { mock } from 'vitest-mock-extended';
+
+import { faker } from '@faker-js/faker';
+
 import { UnauthorizedError } from '../../core/shared/errors/error-mapper';
 import { JwtPayload, validatePayload, validateToken, validateUserId } from './auth.guard';
-import { faker } from '@faker-js/faker';
 
 describe('Auth Guard', () => {
   afterEach(() => {

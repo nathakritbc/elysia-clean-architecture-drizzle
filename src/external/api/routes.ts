@@ -1,17 +1,18 @@
-import { container } from '../../core/shared/container';
-import { GetAllPostsController } from '../../adapters/posts/get-all-posts.controller';
+import type { Elysia } from 'elysia';
+
+import { withAuth } from '../../adapters/auth/auth.guard';
+import { LogoutController } from '../../adapters/auth/logout.controller';
+import { RefreshSessionController } from '../../adapters/auth/refresh-session.controller';
+import { SignInController } from '../../adapters/auth/sign-in.controller';
+import { SignUpController } from '../../adapters/auth/sign-up.controller';
 import { CreatePostController } from '../../adapters/posts/create-post.controller';
+import { DeletePostByIdController } from '../../adapters/posts/delete-post-by-id.controller';
+import { GetAllPostsController } from '../../adapters/posts/get-all-posts.controller';
 import { GetPostByIdController } from '../../adapters/posts/get-post-by-id.controller';
 import { UpdatePostByIdController } from '../../adapters/posts/update-post-by-id.controller';
-import { DeletePostByIdController } from '../../adapters/posts/delete-post-by-id.controller';
-import { SignUpController } from '../../adapters/auth/sign-up.controller';
-import { SignInController } from '../../adapters/auth/sign-in.controller';
-import { RefreshSessionController } from '../../adapters/auth/refresh-session.controller';
-import { LogoutController } from '../../adapters/auth/logout.controller';
-import { withAuth } from '../../adapters/auth/auth.guard';
-import createElysiaApp from './elysia-app';
-import type { Elysia } from 'elysia';
+import { container } from '../../core/shared/container';
 import type { AppConfig } from '../config/app-config';
+import createElysiaApp from './elysia-app';
 
 export const createRoutes = (appConfig: AppConfig) => {
   const app = createElysiaApp(appConfig);

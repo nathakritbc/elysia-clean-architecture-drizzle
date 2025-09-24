@@ -1,15 +1,16 @@
-import 'reflect-metadata';
 import { Builder } from 'builder-pattern';
+import 'reflect-metadata';
 import { inject, injectable } from 'tsyringe';
+
 import { ConflictError } from '../../../shared/errors/error-mapper';
 import { EStatus } from '../../../shared/status.enum';
+import { TOKENS } from '../../../shared/tokens';
 import type { BUserName, UserEmail, UserPassword, UserStatus } from '../../users/entity/user.entity';
 import { User } from '../../users/entity/user.entity';
-import { BaseAuthUseCase, type AuthenticatedUser } from './base-auth.usecase';
 import { UserRepository } from '../../users/service/user.repository';
-import { TOKENS } from '../../../shared/tokens';
-import { RefreshTokenRepository } from '../service/refresh-token.repository';
 import { AuthTokenService } from '../service/auth-token.service';
+import { RefreshTokenRepository } from '../service/refresh-token.repository';
+import { type AuthenticatedUser, BaseAuthUseCase } from './base-auth.usecase';
 
 export interface SignUpInput {
   name: BUserName;

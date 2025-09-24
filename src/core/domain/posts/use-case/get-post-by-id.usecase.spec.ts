@@ -1,11 +1,13 @@
 import 'reflect-metadata';
-import { PostRepository } from '../service/post.repository';
-import { GetPostByIdUseCase } from './get-post-by-id.usecase';
-import { faker } from '@faker-js/faker';
 import { vi } from 'vitest';
 import { mock } from 'vitest-mock-extended';
-import { IPost, PostId } from '../entity/post.entity';
+
+import { faker } from '@faker-js/faker';
+
 import { NotFoundError } from '../../../shared/errors/error-mapper';
+import { IPost, PostId } from '../entity/post.entity';
+import { PostRepository } from '../service/post.repository';
+import { GetPostByIdUseCase } from './get-post-by-id.usecase';
 
 describe('GetPostByIdUseCase', () => {
   let useCase: GetPostByIdUseCase;

@@ -1,21 +1,22 @@
-import 'reflect-metadata';
 import { Builder } from 'builder-pattern';
+import 'reflect-metadata';
 import { inject } from 'tsyringe';
+
+import { UnauthorizedError } from '../../../shared/errors/error-mapper';
 import { TOKENS } from '../../../shared/tokens';
 import { IUseCase } from '../../../shared/useCase';
+import type { IUser } from '../../users/entity/user.entity';
 import { UserRepository } from '../../users/service/user.repository';
-import { AuthTokenService } from '../service/auth-token.service';
-import { RefreshTokenRepository } from '../service/refresh-token.repository';
 import {
+  IRefreshToken,
   RefreshToken,
-  RefreshTokenRevokedAt,
   RefreshTokenJti,
   RefreshTokenPlain,
-  IRefreshToken,
+  RefreshTokenRevokedAt,
 } from '../entity/refresh-token.entity';
-import type { IUser } from '../../users/entity/user.entity';
+import { AuthTokenService } from '../service/auth-token.service';
 import type { GeneratedAuthTokens } from '../service/auth-token.service';
-import { UnauthorizedError } from '../../../shared/errors/error-mapper';
+import { RefreshTokenRepository } from '../service/refresh-token.repository';
 
 export interface AuthenticatedUser {
   user: IUser;
