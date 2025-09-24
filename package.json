@@ -3,6 +3,8 @@
   "version": "1.0.50",
   "scripts": {
     "lint": "oxlint --tsconfig tsconfig.json src tests",
+    "lint:fix": "oxlint --fix --tsconfig tsconfig.json src tests",
+    "format:all": "bun run lint:fix && bun run format",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "test": "vitest run",

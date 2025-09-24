@@ -1,5 +1,5 @@
-import type { Context, Elysia } from 'elysia';
 import jwt from '@elysiajs/jwt';
+import type { Context, Elysia } from 'elysia';
 import { t } from 'elysia';
 import { UnauthorizedError } from '../../core/shared/errors/error-mapper';
 

@@ -1,15 +1,18 @@
 # Auth Use Cases Refactoring
 
 ## Overview
+
 This directory contains refactored authentication use cases that use base classes to share common logic and reduce code duplication.
 
 ## Design Patterns Used
 
 ### 1. Template Method Pattern
+
 - **BaseAuthUseCase**: Provides common token generation and user management logic
 - **BaseLogoutUseCase**: Provides common token validation and revocation logic
 
 ### 2. Inheritance Hierarchy
+
 ```
 BaseAuthUseCase (abstract)
 ├── SignInUseCase
@@ -23,26 +26,32 @@ BaseLogoutUseCase (abstract)
 ## Base Classes
 
 ### BaseAuthUseCase
+
 **Purpose**: Handles authentication flows that return `AuthenticatedUser`
 
 **Common Methods**:
+
 - `generateTokensForUser(user)`: Generates tokens and revokes existing ones
 - `generateTokensForUserWithoutRevoke(user)`: Generates tokens without revoking existing ones
 - `revokeRefreshTokenByJti(jti)`: Revokes refresh token by JTI
 
 **Dependencies**:
+
 - `UserRepository`
 - `RefreshTokenRepository`
 - `AuthTokenService`
 
 ### BaseLogoutUseCase
+
 **Purpose**: Handles logout-related operations
 
 **Common Methods**:
+
 - `validateRefreshToken(token)`: Validates refresh token format and extracts JTI
 - `revokeRefreshTokenByJti(jti)`: Revokes refresh token by JTI
 
 **Dependencies**:
+
 - `RefreshTokenRepository`
 
 ## Benefits
@@ -61,7 +70,7 @@ export class SignInUseCase extends BaseAuthUseCase<SignInInput, AuthenticatedUse
   async execute(input: SignInInput): Promise<AuthenticatedUser> {
     // Specific business logic
     const user = await this.userRepository.getByEmail(input.email);
-    
+
     if (!user) {
       throw new UnauthorizedError('Invalid credentials');
     }

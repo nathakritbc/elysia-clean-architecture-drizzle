@@ -1,9 +1,5 @@
 import type { UserId } from '../../users/entity/user.entity';
-import type {
-  IRefreshToken,
-  RefreshTokenJti,
-  RefreshTokenRevokedAt,
-} from '../entity/refresh-token.entity';
+import type { IRefreshToken, RefreshTokenJti, RefreshTokenRevokedAt } from '../entity/refresh-token.entity';
 
 export abstract class RefreshTokenRepository {
   abstract create(token: IRefreshToken): Promise<IRefreshToken>;

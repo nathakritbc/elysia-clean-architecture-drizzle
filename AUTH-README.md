@@ -25,21 +25,25 @@
 ## Authentication Flow
 
 ### 1. Sign Up Process
+
 ```
 User → POST /auth/signup → SignUpController → SignUpUseCase → UserRepository → Database
 ```
 
 ### 2. Sign In Process
+
 ```
 User → POST /auth/signin → SignInController → SignInUseCase → UserRepository → JWT Service
 ```
 
 ### 3. Token Refresh Process
+
 ```
 User → POST /auth/refresh → RefreshController → RefreshSessionUseCase → RefreshTokenRepository
 ```
 
 ### 4. Logout Process
+
 ```
 User → POST /auth/logout → LogoutController → LogoutUseCase → RefreshTokenRepository
 ```
@@ -47,15 +51,18 @@ User → POST /auth/logout → LogoutController → LogoutUseCase → RefreshTok
 ## Security Features
 
 ### JWT Token Structure
+
 - **Access Token**: ใช้สำหรับ API calls (อายุสั้น)
 - **Refresh Token**: ใช้สำหรับ refresh access token (อายุยาว)
 - **JTI (JWT ID)**: Unique identifier สำหรับ token tracking
 
 ### Password Security
+
 - ใช้ Argon2id สำหรับ password hashing
 - Salt และ memory cost ที่เหมาะสม
 
 ### Token Security
+
 - Refresh token ถูก hash ก่อนเก็บใน database
 - JTI ใช้สำหรับ token revocation
 - Automatic token revocation เมื่อ sign in ใหม่
@@ -63,34 +70,42 @@ User → POST /auth/logout → LogoutController → LogoutUseCase → RefreshTok
 ## Use Cases
 
 ### BaseAuthUseCase
+
 Base class ที่มี common logic สำหรับ:
+
 - Token generation
 - User preparation
 - Refresh token management
 
 ### BaseLogoutUseCase
+
 Base class สำหรับ logout operations:
+
 - Token validation
 - Token revocation
 
 ### Specific Use Cases
 
 #### SignInUseCase
+
 - Validate user credentials
 - Generate tokens
 - Revoke existing tokens
 
 #### SignUpUseCase
+
 - Create new user
 - Hash password
 - Generate initial tokens
 
 #### RefreshSessionUseCase
+
 - Validate refresh token
 - Generate new tokens
 - Revoke old refresh token
 
 #### LogoutUseCase
+
 - Validate refresh token
 - Revoke token
 
@@ -98,19 +113,21 @@ Base class สำหรับ logout operations:
 
 ### Authentication Endpoints
 
-| Method | Endpoint | Description | Request Body |
-|--------|----------|-------------|--------------|
-| POST | `/auth/signup` | Register new user | `{name, email, password}` |
-| POST | `/auth/signin` | Sign in user | `{email, password}` |
-| POST | `/auth/refresh` | Refresh access token | `{refreshToken}` |
-| POST | `/auth/logout` | Logout user | `{refreshToken}` |
+| Method | Endpoint        | Description          | Request Body              |
+| ------ | --------------- | -------------------- | ------------------------- |
+| POST   | `/auth/signup`  | Register new user    | `{name, email, password}` |
+| POST   | `/auth/signin`  | Sign in user         | `{email, password}`       |
+| POST   | `/auth/refresh` | Refresh access token | `{refreshToken}`          |
+| POST   | `/auth/logout`  | Logout user          | `{refreshToken}`          |
 
 ### Protected Endpoints
+
 Protected endpoints ต้องมี `Authorization: Bearer <access_token>` header
 
 ## Configuration
 
 ### Environment Variables
+
 ```env
 JWT_SECRET=your-secret-key
 JWT_ISSUER=your-app-name
@@ -120,6 +137,7 @@ JWT_REFRESH_TOKEN_EXPIRES_IN=7d
 ```
 
 ### Auth Config
+
 ```typescript
 interface AuthConfig {
   jwt: {
@@ -141,11 +159,13 @@ interface AuthConfig {
 ## Error Handling
 
 ### Common Errors
+
 - `401 Unauthorized`: Invalid credentials หรือ expired token
 - `409 Conflict`: Email already exists (signup)
 - `400 Bad Request`: Invalid request format
 
 ### Error Response Format
+
 ```json
 {
   "error": "Error message",
@@ -157,6 +177,7 @@ interface AuthConfig {
 ## Database Schema
 
 ### Users Table
+
 ```sql
 CREATE TABLE users (
   id UUID PRIMARY KEY,
@@ -170,6 +191,7 @@ CREATE TABLE users (
 ```
 
 ### Refresh Tokens Table
+
 ```sql
 CREATE TABLE refresh_tokens (
   id UUID PRIMARY KEY,
@@ -195,15 +217,18 @@ CREATE TABLE refresh_tokens (
 ## Testing
 
 ### Unit Tests
+
 - Use case tests
 - Service tests
 - Entity tests
 
 ### Integration Tests
+
 - Controller tests
 - End-to-end authentication flow
 
 ### Test Commands
+
 ```bash
 # Run all tests
 npm test
@@ -218,12 +243,14 @@ npm run test:coverage
 ## Monitoring and Logging
 
 ### Logging
+
 - Authentication attempts
 - Token generation
 - Security events
 - Error tracking
 
 ### Metrics
+
 - Login success/failure rates
 - Token refresh frequency
 - Session duration
