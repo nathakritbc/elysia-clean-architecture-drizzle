@@ -7,10 +7,10 @@ export type AccessTokenExpiresAt = Brand<Date, 'AccessTokenExpiresAt'>;
 export interface GeneratedAuthTokens {
   accessToken: string;
   accessTokenExpiresAt: AccessTokenExpiresAt;
-  refreshToken: string;
-  refreshTokenHash: RefreshTokenHash;
-  refreshTokenExpiresAt: RefreshTokenExpiresAt;
   jti: RefreshTokenJti;
+  refreshToken: string;
+  refreshTokenExpiresAt: RefreshTokenExpiresAt;
+  refreshTokenHash: RefreshTokenHash;
 }
 
 export abstract class AuthTokenService {
