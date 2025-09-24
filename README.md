@@ -1,15 +1,23 @@
-# Elysia Architecture Backend with Drizzle ORM
+# Elysia Clean Architecture Backend with JWT Authentication
 
-A modern TypeScript backend application built with Clean Architecture principles, using Elysia framework, Drizzle ORM, and TSyringe dependency injection.
+A modern TypeScript backend application built with Clean Architecture principles, featuring JWT authentication, posts management, and comprehensive observability stack using Elysia framework, Drizzle ORM, and TSyringe dependency injection.
 
 ## 🏗️ Architecture Overview
 
-This project follows **Clean Architecture** principles with clear separation of concerns:
+This project follows **Clean Architecture** principles with clear separation of concerns across multiple domains:
 
-```
+```text
 src/
 ├── core/                    # Business Logic Layer
 │   ├── domain/             # Domain Layer
+│   │   ├── auth/           # Authentication Domain
+│   │   │   ├── entity/     # Auth Entities (RefreshToken)
+│   │   │   ├── service/    # Domain Services & Interfaces
+│   │   │   └── use-case/   # Auth Use Cases (SignIn, SignUp, etc.)
+│   │   ├── posts/          # Posts Domain
+│   │   │   ├── entity/     # Post Entities
+│   │   │   ├── service/    # Domain Services & Interfaces
+│   │   │   └── use-case/   # Posts Use Cases (CRUD Operations)
 │   │   └── users/          # User Domain
 │   │       ├── entity/     # Domain Entities
 │   │       ├── service/    # Domain Services & Interfaces
@@ -17,37 +25,101 @@ src/
 │   └── shared/             # Shared Components
 │       ├── container.ts    # DI Container Configuration
 │       ├── tokens.ts       # DI Tokens
-│       ├── Entity.ts       # Base Entity Class
-│       ├── UseCase.ts      # Use Case Interface
+│       ├── common.entity.ts # Base Entity Class
+│       ├── useCase.ts      # Use Case Interface
+│       ├── logger/         # Logger Port
+│       ├── errors/         # Error Handling
 │       └── dtos/           # Data Transfer Objects
 ├── adapters/               # Interface Adapters
-│   └── users/              # User Controllers
-│       ├── createUser.controller.ts
-│       ├── findUserById.controller.ts
-│       └── findUsers.controller.ts
+│   ├── auth/               # Authentication Controllers
+│   │   ├── sign-up.controller.ts
+│   │   ├── sign-in.controller.ts
+│   │   ├── refresh-session.controller.ts
+│   │   ├── logout.controller.ts
+│   │   ├── auth.guard.ts   # JWT Authentication Guard
+│   │   └── dtos/           # Auth DTOs
+│   └── posts/              # Posts Controllers
+│       ├── create-post.controller.ts
+│       ├── get-all-posts.controller.ts
+│       ├── get-post-by-id.controller.ts
+│       ├── update-post-by-id.controller.ts
+│       ├── delete-post-by-id.controller.ts
+│       └── dtos/           # Post DTOs
 ├── external/               # External Layer
 │   ├── api/                # Web API
-│   │   ├── config.ts       # Elysia App Configuration
+│   │   ├── elysia-app.ts   # Elysia App Configuration
 │   │   └── routes.ts       # Route Registration
-│   └── drizzle/            # Database Layer
-│       ├── schema.ts       # Database Schema
-│       ├── connection.ts   # Database Connection
-│       ├── migrations/     # Database Migrations
-│       └── users/          # User Repository Implementation
+│   ├── auth/               # Authentication Services
+│   │   └── jwt-token.service.ts # JWT Service Implementation
+│   ├── config/             # Configuration
+│   │   ├── app-config.ts   # App Configuration
+│   │   ├── auth.config.ts  # Auth Configuration
+│   │   ├── cors.config.ts  # CORS Configuration
+│   │   └── open-telemetry.config.ts # Observability Config
+│   ├── drizzle/            # Database Layer
+│   │   ├── schema.ts       # Database Schema
+│   │   ├── connection.ts   # Database Connection
+│   │   ├── migrations/     # Database Migrations
+│   │   ├── auth/           # Auth Repository Implementation
+│   │   ├── posts/          # Posts Repository Implementation
+│   │   └── users/          # Users Repository Implementation
+│   ├── logging/            # Logging Implementation
+│   └── telemetry/          # OpenTelemetry Setup
 ├── test/                   # Test Files
 └── index.ts                # Application Entry Point
 ```
 
 ## 🚀 Tech Stack
 
+### Core Framework
+
 - **Runtime**: Bun (JavaScript runtime)
 - **Framework**: Elysia (Fast web framework with TypeBox validation)
+- **Language**: TypeScript
+- **DI Container**: TSyringe (Dependency injection)
+
+### Database & ORM
+
 - **ORM**: Drizzle ORM (Type-safe SQL ORM)
 - **Database**: PostgreSQL
-- **DI Container**: TSyringe (Dependency injection)
-- **Testing**: Vitest (Unit & E2E testing)
-- **Language**: TypeScript
+- **Migrations**: Drizzle Kit
+
+### Authentication & Security
+
+- **Authentication**: JWT (JSON Web Tokens)
+- **Token Strategy**: Access Token + Refresh Token pattern
+- **Password Hashing**: Argon2id
+- **CSRF Protection**: Custom CSRF token implementation
+- **CORS**: Configurable cross-origin resource sharing
+
+### API & Documentation
+
 - **API Documentation**: Swagger/OpenAPI (via Elysia)
+- **Validation**: TypeBox schema validation
+- **HTTP Client**: Bearer token authentication
+
+### Testing & Quality
+
+- **Testing**: Vitest (Unit & E2E testing)
+- **Linting**: Oxlint
+- **Code Formatting**: Prettier
+- **Git Hooks**: Husky
+
+### Observability & Monitoring
+
+- **Telemetry**: OpenTelemetry
+- **Tracing**: OTLP (OpenTelemetry Protocol)
+- **Logging**: Pino (High-performance logging)
+- **Metrics**: Prometheus
+- **Dashboards**: Grafana
+- **Log Aggregation**: Loki
+- **Log Collection**: Promtail
+
+### Development & DevOps
+
+- **Containerization**: Docker & Docker Compose
+- **Hot Reload**: Bun development server
+- **Environment**: dotenv configuration
 
 ## 📦 Installation
 
@@ -142,59 +214,103 @@ docker compose down -v
 
 ## 📚 API Endpoints
 
-### User Management
+### Authentication
 
-| Method | Endpoint     | Description       | Request Body                                        |
-| ------ | ------------ | ----------------- | --------------------------------------------------- |
-| `POST` | `/users`     | Create a new user | `{ name: string, email: string, password: string }` |
-| `GET`  | `/users`     | Get all users     | -                                                   |
-| `GET`  | `/users/:id` | Get user by ID    | -                                                   |
+| Method | Endpoint        | Description                  | Authentication | Request Body                                        |
+| ------ | --------------- | ---------------------------- | -------------- | --------------------------------------------------- |
+| `POST` | `/auth/signup`  | Create a new user account    | None           | `{ name: string, email: string, password: string }` |
+| `POST` | `/auth/signin`  | Sign in with credentials     | None           | `{ email: string, password: string }`               |
+| `POST` | `/auth/refresh` | Refresh access token         | Refresh Token  | None (uses refresh token cookie + CSRF header)      |
+| `POST` | `/auth/logout`  | Logout and invalidate tokens | Refresh Token  | None (uses refresh token cookie)                    |
+
+### Posts Management (Protected Routes)
+
+| Method   | Endpoint     | Description                     | Authentication | Request Body                                               |
+| -------- | ------------ | ------------------------------- | -------------- | ---------------------------------------------------------- |
+| `POST`   | `/posts`     | Create a new post               | JWT + CSRF     | `{ title: string, content: string }`                       |
+| `GET`    | `/posts`     | Get all posts (with pagination) | JWT + CSRF     | Query: `?page=1&limit=10&search=term&sort=title&order=asc` |
+| `GET`    | `/posts/:id` | Get post by ID                  | JWT + CSRF     | -                                                          |
+| `PUT`    | `/posts/:id` | Update post by ID               | JWT + CSRF     | `{ title: string, content: string, status: string }`       |
+| `DELETE` | `/posts/:id` | Delete post by ID               | JWT + CSRF     | -                                                          |
 
 ### Example Requests
 
-**Create User**
+#### Sign Up
 
 ```bash
-curl -X POST http://localhost:3000/users \
+curl -X POST http://localhost:7000/auth/signup \
   -H "Content-Type: application/json" \
   -d '{
     "name": "John Doe",
     "email": "john@example.com",
-    "password": "securepassword"
+    "password": "SecurePass123"
   }'
 ```
 
-**Get All Users**
+#### Sign In
 
 ```bash
-curl http://localhost:3000/users
+curl -X POST http://localhost:7000/auth/signin \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "john@example.com",
+    "password": "SecurePass123"
+  }'
 ```
 
-**Get User by ID**
+#### Create Post (Protected)
 
 ```bash
-curl http://localhost:3000/users/1
+curl -X POST http://localhost:7000/posts \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN" \
+  -H "X-CSRF-Token: YOUR_CSRF_TOKEN" \
+  -d '{
+    "title": "My First Post",
+    "content": "This is the content of my post"
+  }'
 ```
+
+#### Get All Posts (Protected)
+
+```bash
+curl -X GET "http://localhost:7000/posts?page=1&limit=10" \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN" \
+  -H "X-CSRF-Token: YOUR_CSRF_TOKEN"
+```
+
+### Authentication Flow
+
+1. **Sign Up/Sign In**: Receive access token (short-lived) and refresh token (long-lived, HTTP-only cookie)
+2. **API Requests**: Use access token in Authorization header + CSRF token in X-CSRF-Token header
+3. **Token Refresh**: When access token expires, use refresh endpoint with refresh token cookie + CSRF token
+4. **Logout**: Invalidate refresh token and clear cookies
 
 ## 🏛️ Clean Architecture Layers
 
 ### 1. Domain Layer (`src/core/domain/`)
 
-- **Entities**: Core business objects (`User.ts`)
-- **Use Cases**: Business logic implementation
-- **Services**: Domain service interfaces
+- **Entities**: Core business objects across three domains:
+  - **Auth Domain**: User authentication, refresh tokens
+  - **Posts Domain**: Post management entities
+  - **Users Domain**: User profile and account management
+- **Use Cases**: Business logic implementation for all domains
+- **Services**: Domain service interfaces and contracts
 
 ### 2. Application Layer (`src/adapters/`)
 
-- **Controllers**: Handle HTTP requests and responses
+- **Controllers**: Handle HTTP requests and responses for each domain
+- **Guards**: Authentication and authorization middleware
 - **DTOs**: Data Transfer Objects with TypeBox validation
-- **Presenters**: Format data for external interfaces
+- **Transformers**: Data transformation utilities
 
 ### 3. Infrastructure Layer (`src/external/`)
 
 - **Database**: Drizzle ORM implementation with migrations
 - **Web API**: Elysia framework setup with Swagger
-- **External Services**: Third-party integrations
+- **Authentication**: JWT service implementation
+- **Configuration**: Environment-based configuration management
+- **Observability**: OpenTelemetry, logging, and monitoring setup
 
 ## 🔧 Dependency Injection
 
@@ -234,16 +350,44 @@ export class CreateUserUseCase implements IUseCase<Input, void> {
 
 ## 🗄️ Database Schema
 
-### User Table
+### Core Tables
+
+#### Users Table
 
 ```sql
 CREATE TABLE users (
-  id SERIAL PRIMARY KEY,
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   email VARCHAR(255) UNIQUE NOT NULL,
   name VARCHAR(255) NOT NULL,
   password VARCHAR(255) NOT NULL,
   created_at TIMESTAMP DEFAULT NOW() NOT NULL,
   updated_at TIMESTAMP DEFAULT NOW() NOT NULL
+);
+```
+
+#### Posts Table
+
+```sql
+CREATE TABLE posts (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  title VARCHAR(500) NOT NULL,
+  content TEXT NOT NULL,
+  status VARCHAR(50) DEFAULT 'draft',
+  author_id UUID REFERENCES users(id),
+  created_at TIMESTAMP DEFAULT NOW() NOT NULL,
+  updated_at TIMESTAMP DEFAULT NOW() NOT NULL
+);
+```
+
+#### Refresh Tokens Table
+
+```sql
+CREATE TABLE refresh_tokens (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  token_hash VARCHAR(255) NOT NULL UNIQUE,
+  user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+  expires_at TIMESTAMP NOT NULL,
+  created_at TIMESTAMP DEFAULT NOW() NOT NULL
 );
 ```
 
@@ -269,7 +413,7 @@ bun run test:e2e
 
 ### Test Structure
 
-```
+```text
 src/test/                    # Test files
 ├── unit/                    # Unit tests
 ├── integration/             # Integration tests
@@ -278,42 +422,84 @@ src/test/                    # Test files
 
 ### HTTP API Testing
 
-The project includes comprehensive HTTP test files in the `tests/` directory:
+The project includes comprehensive HTTP test files in the `src/adapters/` directory:
 
-- **`tests/http/users.http`** - User management API tests
-- **`tests/http/validation.http`** - DTO validation tests
-- **`tests/http/performance.http`** - Performance and load tests
-- **`tests/http/error-scenarios.http`** - Error handling tests
-- **`tests/http/health.http`** - Health check tests
+- **`src/adapters/auth/auth.http`** - Authentication API tests (Sign Up, Sign In, Refresh, Logout)
+- **`src/adapters/posts/post.http`** - Posts management API tests (CRUD operations)
 
-See [tests/README.md](tests/README.md) for detailed testing instructions.
+These files can be used directly in VS Code with the REST Client extension for interactive API testing.
 
 ## 📝 Environment Variables
 
+Create a `.env` file based on `.env.example`:
+
 ```env
+# Database
 DATABASE_URL=postgresql://username:password@localhost:5432/database_name
-PORT=3000
+
+# Application
+PORT=7000
 NODE_ENV=development
+
+# Authentication
+JWT_SECRET=your-super-secret-jwt-key
+JWT_ACCESS_TOKEN_EXPIRES_IN=15m
+JWT_REFRESH_TOKEN_EXPIRES_IN=7d
+
+# CSRF Protection
+REFRESH_TOKEN_CSRF_SECRET=your-csrf-secret-key
+
+# CORS
+CORS_ORIGIN=http://localhost:3000
+
+# OpenTelemetry (Optional)
+OTLP_ENDPOINT=http://localhost:4318/v1/traces
+OTEL_SERVICE_NAME=elysia-clean-architecture
 ```
 
 ## 📚 Documentation
 
 ### Core Documentation
 
-- **[DEVELOPMENT.md](DEVELOPMENT.md)** - Comprehensive development guide with architecture explanations
-- **[DTOs.md](DTOs.md)** - Data Transfer Objects documentation with TypeBox validation
-- **[tests/README.md](tests/README.md)** - HTTP API testing guide and examples
+- **[DEVELOPMENT.md](docs/DEVELOPMENT.md)** - Comprehensive development guide with architecture explanations
+- **[DTOs.md](docs/DTOs.md)** - Data Transfer Objects documentation with TypeBox validation
+- **[AUTH-README.md](docs/AUTH-README.md)** - Authentication system documentation and JWT implementation
+- **[AUTH-FLOW-DIAGRAM.md](docs/AUTH-FLOW-DIAGRAM.md)** - Authentication flow diagrams and security details
+
+### Module Documentation
+
+- **[Modules](docs/modules/)** - Individual module/domain documentation
+  - Each CRUD module has its own comprehensive README
+  - Complete API documentation with examples
+  - Database schema and business rules
+  - Testing guides and usage examples
+
+### Migration Documentation
+
+- **[Migrations](docs/migrations/)** - Database migration records
+  - Standalone migration documentation
+  - Schema change tracking
+  - Rollback plans and testing records
 
 ### API Documentation
 
-- **Swagger UI**: Available at `http://localhost:3000/swagger` when server is running
+- **Swagger UI**: Available at `http://localhost:7000/swagger` when server is running
 - **OpenAPI Spec**: Auto-generated from Elysia TypeBox schemas
+- **API Documentation**: Available in `docs/api-docs/` directory
+
+### AI Specifications
+
+- **[AI-SPEC.md](docs/ai-specs/AI-SPEC.md)** - AI development specifications and guidelines
+- **[AI-CRUD-SPEC.md](docs/ai-specs/ai-spec-crud.md)** - CRUD operations specifications for AI development
+- **[AI-CRUD-USAGE.md](docs/ai-specs/ai-crud-useage.md)** - Usage examples for AI-assisted development
 
 ### Architecture Documentation
 
-- **Clean Architecture**: Domain-driven design with clear layer separation
+- **Clean Architecture**: Multi-domain design with clear layer separation
+- **Authentication System**: JWT + Refresh Token pattern with CSRF protection
 - **Dependency Injection**: TSyringe container configuration and usage
 - **Repository Pattern**: Abstract data access layer with Drizzle ORM implementation
+- **Observability**: OpenTelemetry integration with comprehensive monitoring stack
 
 ## 🤝 Contributing
 
@@ -333,12 +519,14 @@ If you have any questions or need help, please open an issue in the repository.
 
 ## 🚀 Quick Start
 
-For a complete development setup guide, see [DEVELOPMENT.md](DEVELOPMENT.md).
+For a complete development setup guide, see [DEVELOPMENT.md](docs/DEVELOPMENT.md).
 
-For DTO validation and API documentation, see [DTOs.md](DTOs.md).
+For authentication system details, see [AUTH-README.md](docs/AUTH-README.md).
 
-For HTTP API testing, see [tests/README.md](tests/README.md).
+For DTO validation and API documentation, see [DTOs.md](docs/DTOs.md).
+
+For AI development specifications, see [AI-SPEC.md](docs/ai-specs/AI-SPEC.md).
 
 ---
 
-**Built with ❤️ using Clean Architecture principles and modern TypeScript stack**
+Built with ❤️ using Clean Architecture principles, JWT authentication, and modern TypeScript observability stack
