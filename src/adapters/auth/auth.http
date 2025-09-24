@@ -1,7 +1,6 @@
-### Sign Up
+ ### Sign Up
 POST {{baseUrl}}/auth/signup
 Content-Type: application/json
-
 
 {
   "name": "John Doe",
@@ -18,8 +17,8 @@ Content-Type: application/json
   "email": "user1@gmail.com",
   "password": "12345678"
 }
-###
 
+### Store tokens from signin response
 @myAccessToken = {{signin.response.body.accessToken}}
 @myCsrfToken = {{signin.response.body.csrf_token}}
 
@@ -34,6 +33,7 @@ X-CSRF-Token: {{myCsrfToken}}
 POST {{baseUrl}}/auth/logout
 Content-Type: application/json
 
-### Variables (replace with actual values from responses)
-# @csrf_token = {{myCsrfToken}}
-# Note: refresh_token is stored in cookie and sent automatically
+### Test Protected Route (example)
+GET {{baseUrl}}/posts
+Authorization: Bearer {{myAccessToken}}
+X-CSRF-Token: {{myCsrfToken}}
