@@ -8,9 +8,9 @@ import { UnauthorizedError } from '../../core/shared/errors/error-mapper';
 export type JwtDecorator = ReturnType<typeof jwt>['decorator']['jwt'];
 
 export interface JwtPayload {
-  sub: string;
   email: string;
   jti: string;
+  sub: string;
   type: string;
 }
 
