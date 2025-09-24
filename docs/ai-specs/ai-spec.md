@@ -821,18 +821,44 @@ http://localhost:7000
 
 For AI-assisted development, consult these specialized guides:
 
+#### Core Development Specifications
+
 - **[AI-SPEC-CRUD.md](ai-spec-crud.md)** - Complete CRUD generation specification
 - **[AI-SPEC-MIGRATE.md](ai-spec-migrate.md)** - Database migration generation specification
 - **[ai-crud-useage.md](ai-crud-useage.md)** - CRUD usage examples and patterns
 
+#### Quality & Testing Specifications
+
+- **[AI-SPEC-SECURITY.md](ai-spec-security.md)** - Security implementation guidelines and best practices
+- **[AI-SPEC-TESTING.md](ai-spec-testing.md)** - Testing strategies for unit, integration, and E2E tests
+- **[AI-SPEC-PERFORMANCE.md](ai-spec-performance.md)** - Performance optimization guidelines and benchmarks
+
+#### Operations & Maintenance Specifications
+
+- **[AI-SPEC-MAINTENANCE.md](ai-spec-maintenance.md)** - System maintenance and monitoring procedures
+
 ### Documentation Links
+
+#### Core Documentation
 
 - **Main README**: `README.md`
 - **Development Guide**: `docs/DEVELOPMENT.md`
 - **Authentication Guide**: `docs/AUTH-README.md`
 - **DTOs Documentation**: `docs/DTOs.md`
+
+#### Quality Assurance
+
+- **Code Review Checklist**: `docs/CODE-REVIEW-CHECKLIST.md`
+
+#### Module & Migration Documentation
+
 - **Modules Documentation**: `docs/modules/` - Individual module READMEs
 - **Migrations Documentation**: `docs/migrations/` - Standalone migration records
+
+#### Development Tools
+
+- **Development Scripts**: `scripts/` - Automation tools and utilities
+- **Health Check System**: `src/shared/health/` - Application health monitoring
 
 ### Migration & CRUD Workflow
 

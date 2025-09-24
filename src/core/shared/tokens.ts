@@ -6,4 +6,5 @@ export const TOKENS = {
   RefreshTokenRepository: Symbol('RefreshTokenRepository'),
   AuthTokenService: Symbol('AuthTokenService'),
   AuthConfig: Symbol('AuthConfig'),
+  HealthCheckService: Symbol('HealthCheckService'),
 } as const;

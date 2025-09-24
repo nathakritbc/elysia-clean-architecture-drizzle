@@ -2,14 +2,15 @@ import 'reflect-metadata';
 import { container } from 'tsyringe';
 
 import { JwtTokenService } from '../../external/auth/jwt-token.service';
-import { appConfig } from '../../external/config/app-config';
 import type { AppConfig } from '../../external/config/app-config';
-import { authConfig } from '../../external/config/auth.config';
+import { appConfig } from '../../external/config/app-config';
 import type { AuthConfig } from '../../external/config/auth.config';
+import { authConfig } from '../../external/config/auth.config';
 import { RefreshTokenDrizzleRepository } from '../../external/drizzle/auth/refresh-token.drizzle.repository';
 import { PostDrizzleRepository } from '../../external/drizzle/posts/post.drizzle.repository';
 import { UserDrizzleRepository } from '../../external/drizzle/users/user.drizzle.repository';
 import { PinoLogger } from '../../external/logging/pinoLogger';
+import { HealthCheckService } from '../../shared/health/health-check.service';
 import { AuthTokenService } from '../domain/auth/service/auth-token.service';
 import { RefreshTokenRepository } from '../domain/auth/service/refresh-token.repository';
 import { PostRepository } from '../domain/posts/service/post.repository';
@@ -25,5 +26,6 @@ container.registerSingleton<PostRepository>(TOKENS.IPostRepository, PostDrizzleR
 container.registerSingleton<RefreshTokenRepository>(TOKENS.RefreshTokenRepository, RefreshTokenDrizzleRepository);
 container.registerSingleton<AuthTokenService>(TOKENS.AuthTokenService, JwtTokenService);
 container.registerSingleton<LoggerPort>(TOKENS.Logger, PinoLogger);
+container.registerSingleton<HealthCheckService>(TOKENS.HealthCheckService, HealthCheckService);
 
 export { container };

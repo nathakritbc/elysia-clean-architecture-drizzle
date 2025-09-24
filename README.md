@@ -481,6 +481,15 @@ OTEL_SERVICE_NAME=elysia-clean-architecture
   - Schema change tracking
   - Rollback plans and testing records
 
+### Development Tools & Automation
+
+- **[Development Scripts](scripts/)** - Automation tools for development workflow
+  - `new-module.sh` - Generate new CRUD module structure
+  - `test-module.sh` - Comprehensive module testing
+  - `deploy-check.sh` - Pre-deployment validation
+- **[Code Review Checklist](docs/CODE-REVIEW-CHECKLIST.md)** - Comprehensive review guidelines
+- **[Health Check System](src/shared/health/)** - Application health monitoring
+
 ### API Documentation
 
 - **Swagger UI**: Available at `http://localhost:7000/swagger` when server is running
