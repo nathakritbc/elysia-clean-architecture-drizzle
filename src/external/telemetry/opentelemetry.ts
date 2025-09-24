@@ -1,10 +1,10 @@
-import { NodeSDK } from '@opentelemetry/sdk-node';
-import { resourceFromAttributes } from '@opentelemetry/resources';
-import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions';
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http';
+import { resourceFromAttributes } from '@opentelemetry/resources';
+import { NodeSDK } from '@opentelemetry/sdk-node';
+import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions';
 
-import type { AppConfig } from '../config/app-config';
 import type { LoggerPort } from '../../core/shared/logger/logger.port';
+import type { AppConfig } from '../config/app-config';
 
 export type TelemetryController = {
   shutdown(): Promise<void>;

@@ -1,31 +1,37 @@
 {
-  "rest-client.environmentVariables": {
-    "development": {
-      "baseUrl": "http://localhost:7000",
-      "contentType": "application/json"
-    },
-    "production": {
-      "baseUrl": "https://your-production-url.com",
-      "contentType": "application/json"
-    }
+  "editor.formatOnSave": true,
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.codeActionsOnSave": {
+    "source.fixAll": "explicit",
+    "source.organizeImports": "explicit"
   },
-  "rest-client.defaultHeaders": {
-    "User-Agent": "REST Client",
-    "Accept": "application/json"
-  },
-  "rest-client.timeoutinmilliseconds": 10000,
-  "rest-client.showResponseInDifferentTab": true,
-  "rest-client.previewResponseInUntitledDocument": true,
-  "rest-client.rememberCookiesForSubsequentRequests": true,
-  "rest-client.enableTelemetry": false,
+  "typescript.preferences.organizeImportsCollation": "ordinal",
+  "typescript.preferences.organizeImportsIgnoreCase": "auto",
+  "typescript.preferences.organizeImportsNumericCollation": true,
+  "typescript.suggest.autoImports": true,
+  "typescript.updateImportsOnFileMove.enabled": "always",
   "files.associations": {
-    "*.http": "http",
-    "*.rest": "http"
+    "*.ts": "typescript",
+    "*.tsx": "typescriptreact"
   },
-  "cSpell.words": [
-    "dtos",
-    "Elysia",
-    "elysiajs",
-    "tsyringe"
-  ]
+  "[typescript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.formatOnSave": true
+  },
+  "[javascript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.formatOnSave": true
+  },
+  "[json]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.formatOnSave": true
+  },
+  "[jsonc]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.formatOnSave": true
+  },
+  "[markdown]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.formatOnSave": true
+  }
 }

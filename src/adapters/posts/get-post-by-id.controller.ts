@@ -1,10 +1,11 @@
 import Elysia from 'elysia';
 import { inject, injectable } from 'tsyringe';
-import { GetPostByIdUseCase } from '../../core/domain/posts/use-case/get-post-by-id.usecase';
+
 import { PostId } from '../../core/domain/posts/entity/post.entity';
-import { TOKENS } from '../../core/shared/tokens';
+import { GetPostByIdUseCase } from '../../core/domain/posts/use-case/get-post-by-id.usecase';
 import type { LoggerPort } from '../../core/shared/logger/logger.port';
-import { GetPostResponseDto, ErrorResponseDto, PostIdParamsDto } from './dtos/post.dto';
+import { TOKENS } from '../../core/shared/tokens';
+import { ErrorResponseDto, GetPostResponseDto, PostIdParamsDto } from './dtos/post.dto';
 
 @injectable()
 export class GetPostByIdController {

@@ -1,12 +1,14 @@
+import { Builder } from 'builder-pattern';
 import 'reflect-metadata';
-import { PostRepository } from '../service/post.repository';
-import { faker } from '@faker-js/faker';
 import { vi } from 'vitest';
 import { mock } from 'vitest-mock-extended';
-import { IPost, PostStatus, PostTitle, PostContent, PostId, PostCreatedAt, PostUpdatedAt } from '../entity/post.entity';
+
+import { faker } from '@faker-js/faker';
+
 import { NotFoundError } from '../../../shared/errors/error-mapper';
+import { IPost, PostContent, PostCreatedAt, PostId, PostStatus, PostTitle, PostUpdatedAt } from '../entity/post.entity';
+import { PostRepository } from '../service/post.repository';
 import { UpdatePostByIdUseCase } from './update-post-by-id.usecase';
-import { Builder } from 'builder-pattern';
 
 describe('UpdatePostByIdUseCase', () => {
   let useCase: UpdatePostByIdUseCase;

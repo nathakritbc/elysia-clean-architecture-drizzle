@@ -1,8 +1,9 @@
+import * as argon2 from 'argon2';
 import { StrictBuilder } from 'builder-pattern';
+
 import { argon2Config } from '../../../../external/config/auth.config';
 import { Brand } from '../../../shared/branded.type';
 import { EStatus } from '../../../shared/status.enum';
-import * as argon2 from 'argon2';
 
 export type UserId = Brand<string, 'UserId'>;
 export type BUserName = Brand<string, 'BUserName'>;

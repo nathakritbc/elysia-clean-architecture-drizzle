@@ -1,26 +1,41 @@
-### Create User
+### Variables
+@baseUrl = http://localhost:7000
+@accessToken = your_access_token_here
+@csrfToken = your_csrf_token_here
+
+### Create Post
 POST {{baseUrl}}/posts
 Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+X-CSRF-Token: {{csrfToken}}
 
 {
   "title": "Title test 2sss",
-  "content": "content test",
+  "content": "content test"
 }
 
-### Get All Users
+### Get All Posts
 GET {{baseUrl}}/posts
+Authorization: Bearer {{accessToken}}
+X-CSRF-Token: {{csrfToken}}
 
-### Get User by ID
+### Get Post by ID
 GET {{baseUrl}}/posts/d5c7f5ce-ae98-446f-8d61-4cdacbdf2ccc
+Authorization: Bearer {{accessToken}}
+X-CSRF-Token: {{csrfToken}}
 
-### Update User
+### Update Post
 PUT {{baseUrl}}/posts/eafbfd10-331f-415c-99a4-1bd50730bd2d
 Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+X-CSRF-Token: {{csrfToken}}
 
 {
   "title": "Title updated",
-  "content": "content updated",
+  "content": "content updated"
 }
 
-### Delete User
+### Delete Post
 DELETE {{baseUrl}}/posts/d5c7f5ce-ae98-446f-8d61-4cdacbdf2ccc
+Authorization: Bearer {{accessToken}}
+X-CSRF-Token: {{csrfToken}}

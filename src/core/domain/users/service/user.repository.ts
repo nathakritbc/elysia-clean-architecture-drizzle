@@ -1,5 +1,5 @@
 import { GetAllMetaType, GetAllParamsType } from '../../../shared/common.type';
-import { UserEmail, IUser, BUserName } from '../entity/user.entity';
+import { BUserName, IUser, UserEmail, UserId } from '../entity/user.entity';
 
 export interface GetAllUsersQuery extends GetAllParamsType {
   name?: BUserName;
@@ -14,4 +14,5 @@ export interface GetAllUsersReturnType {
 export abstract class UserRepository {
   abstract create(user: IUser): Promise<IUser>;
   abstract getByEmail(email: UserEmail): Promise<IUser | undefined>;
+  abstract getById(id: UserId): Promise<IUser | undefined>;
 }

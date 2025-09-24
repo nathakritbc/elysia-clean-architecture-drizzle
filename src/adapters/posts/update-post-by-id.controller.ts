@@ -1,11 +1,12 @@
+import { Builder } from 'builder-pattern';
 import Elysia from 'elysia';
 import { inject, injectable } from 'tsyringe';
+
+import { IPost, PostContent, PostId, PostStatus, PostTitle } from '../../core/domain/posts/entity/post.entity';
 import { UpdatePostByIdUseCase } from '../../core/domain/posts/use-case/update-post-by-id.usecase';
-import { IPost, PostId, PostTitle, PostContent, PostStatus } from '../../core/domain/posts/entity/post.entity';
-import { TOKENS } from '../../core/shared/tokens';
 import type { LoggerPort } from '../../core/shared/logger/logger.port';
-import { UpdatePostRequestDto, UpdatePostResponseDto, ErrorResponseDto, PostIdParamsDto } from './dtos/post.dto';
-import { Builder } from 'builder-pattern';
+import { TOKENS } from '../../core/shared/tokens';
+import { ErrorResponseDto, PostIdParamsDto, UpdatePostRequestDto, UpdatePostResponseDto } from './dtos/post.dto';
 
 @injectable()
 export class UpdatePostByIdController {

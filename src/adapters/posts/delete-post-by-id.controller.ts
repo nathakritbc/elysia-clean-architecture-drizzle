@@ -1,9 +1,10 @@
 import Elysia from 'elysia';
 import { inject, injectable } from 'tsyringe';
-import { DeletePostByIdUseCase } from '../../core/domain/posts/use-case/delete-post-by-id.usecase';
+
 import { PostId } from '../../core/domain/posts/entity/post.entity';
-import { TOKENS } from '../../core/shared/tokens';
+import { DeletePostByIdUseCase } from '../../core/domain/posts/use-case/delete-post-by-id.usecase';
 import type { LoggerPort } from '../../core/shared/logger/logger.port';
+import { TOKENS } from '../../core/shared/tokens';
 import { DeletePostResponseDto, ErrorResponseDto, PostIdParamsDto } from './dtos/post.dto';
 
 @injectable()

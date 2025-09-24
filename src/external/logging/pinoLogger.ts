@@ -1,15 +1,16 @@
 import 'dotenv/config';
-import { inject, injectable } from 'tsyringe';
-import pino, { Logger as Pino } from 'pino';
-import type { LoggerPort } from '../../core/shared/logger/logger.port';
-import { TOKENS } from '../../core/shared/tokens';
-import type { AppConfig } from '../config/app-config';
-
+import 'dotenv/config';
 // import { GenReqId, ReqId } from 'pino-http';
 // import { nanoid } from 'nanoid';
 import { IncomingMessage } from 'http';
+import pino, { Logger as Pino } from 'pino';
+import { inject, injectable } from 'tsyringe';
+
 import { context, trace } from '@opentelemetry/api';
-import 'dotenv/config';
+
+import type { LoggerPort } from '../../core/shared/logger/logger.port';
+import { TOKENS } from '../../core/shared/tokens';
+import type { AppConfig } from '../config/app-config';
 import { k8s } from '../config/otlp.config';
 
 // const genReqId: GenReqId = (req: IncomingMessage, res: ServerResponse) => {

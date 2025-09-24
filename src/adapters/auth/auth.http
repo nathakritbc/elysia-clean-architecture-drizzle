@@ -1,0 +1,39 @@
+ ### Sign Up
+POST {{baseUrl}}/auth/signup
+Content-Type: application/json
+
+{
+  "name": "John Doe",
+  "email": "john.doe@example.com",
+  "password": "SecurePass123"
+}
+
+### Sign In
+# @name signin
+POST {{baseUrl}}/auth/signin
+Content-Type: application/json
+
+{
+  "email": "user1@gmail.com",
+  "password": "12345678"
+}
+
+### Store tokens from signin response
+@myAccessToken = {{signin.response.body.accessToken}}
+@myCsrfToken = {{signin.response.body.csrf_token}}
+
+### Refresh Session
+# Note: refresh_token is automatically sent via cookie from sign-in response
+POST {{baseUrl}}/auth/refresh
+Content-Type: application/json
+X-CSRF-Token: {{myCsrfToken}}
+
+### Logout
+# Note: refresh_token is automatically sent via cookie
+POST {{baseUrl}}/auth/logout
+Content-Type: application/json
+
+### Test Protected Route (example)
+GET {{baseUrl}}/posts
+Authorization: Bearer {{myAccessToken}}
+X-CSRF-Token: {{myCsrfToken}}

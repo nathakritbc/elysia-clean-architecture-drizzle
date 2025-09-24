@@ -1,4 +1,5 @@
 import { t } from 'elysia';
+
 import { GetAllMetaDto, GetAllParamsDto, StatusDto } from '../../../core/shared/dtos/common.dto';
 
 export const PostDto = t.Object({

@@ -1,21 +1,22 @@
-import { and, eq, not } from 'drizzle-orm';
+import { Builder } from 'builder-pattern';
+import { and, eq } from 'drizzle-orm';
 import { injectable } from 'tsyringe';
-import { db } from '../connection';
-import { users, type User as DrizzleUser } from './user.schema';
+
 import {
   BUserName,
+  IUser,
   User,
   UserCreatedAt,
   UserEmail,
   UserId,
-  UserStatus,
   UserPassword,
+  UserStatus,
   UserUpdatedAt,
-  IUser,
 } from '../../../core/domain/users/entity/user.entity';
-import { Builder } from 'builder-pattern';
 import { UserRepository } from '../../../core/domain/users/service/user.repository';
 import { EStatus } from '../../../core/shared/status.enum';
+import { db } from '../connection';
+import { type User as DrizzleUser, users } from './user.schema';
 
 @injectable()
 export class UserDrizzleRepository extends UserRepository {
@@ -35,7 +36,16 @@ export class UserDrizzleRepository extends UserRepository {
     const result = await db
       .select()
       .from(users)
-      .where(and(eq(users.email, email), not(eq(users.status, EStatus.deleted))))
+      .where(and(eq(users.email, email), eq(users.status, EStatus.active)))
+      .limit(1);
+    return result[0] ? this.toDomain(result[0]) : undefined;
+  }
+
+  async getById(id: UserId): Promise<IUser | undefined> {
+    const result = await db
+      .select()
+      .from(users)
+      .where(and(eq(users.id, id), eq(users.status, EStatus.active)))
       .limit(1);
     return result[0] ? this.toDomain(result[0]) : undefined;
   }

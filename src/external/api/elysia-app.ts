@@ -1,14 +1,19 @@
 import 'dotenv/config';
 import Elysia from 'elysia';
-import { swagger } from '@elysiajs/swagger';
-import { ErrorMapper } from '../../core/shared/errors/error-mapper';
-import { container } from '../../core/shared/container';
-import { TOKENS } from '../../core/shared/tokens';
-import type { LoggerPort } from '../../core/shared/logger/logger.port';
-import { createSwaggerConfig } from '../config/swagger.config';
-import type { AppConfig } from '../config/app-config';
+
+import bearer from '@elysiajs/bearer';
+import { jwt } from '@elysiajs/jwt';
 import { openapi } from '@elysiajs/openapi';
 import { opentelemetry } from '@elysiajs/opentelemetry';
+import { swagger } from '@elysiajs/swagger';
+
+import { container } from '../../core/shared/container';
+import { ErrorMapper } from '../../core/shared/errors/error-mapper';
+import type { LoggerPort } from '../../core/shared/logger/logger.port';
+import { TOKENS } from '../../core/shared/tokens';
+import type { AppConfig } from '../config/app-config';
+import { authConfig } from '../config/auth.config';
+import { createSwaggerConfig } from '../config/swagger.config';
 import { createTraceExporter } from '../telemetry/opentelemetry';
 
 const logger = container.resolve<LoggerPort>(TOKENS.Logger);
@@ -103,8 +108,20 @@ const createErrorHandler = () => {
   };
 };
 
+const createJwtPlugin = () => {
+  return jwt({
+    name: 'jwt',
+    secret: authConfig.jwt.secret,
+    iss: authConfig.jwt.issuer,
+    aud: authConfig.jwt.audience,
+    exp: authConfig.jwt.accessTokenExpiresIn,
+  });
+};
+
 export const createElysiaApp = (appConfig: AppConfig) => {
   const app = ErrorMapper.register(new Elysia())
+    .use(bearer())
+    .use(createJwtPlugin())
     .use(openapi())
     .use(appConfig.cors)
     .use(swagger(createSwaggerConfig()))
