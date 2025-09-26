@@ -1,0 +1,79 @@
+import 'reflect-metadata';
+import { beforeEach, describe, expect, it } from 'vitest';
+import { mock, mockReset } from 'vitest-mock-extended';
+
+import { UnauthorizedError } from '@shared/errors/error-mapper';
+import type { IUser, UserEmail, UserPassword } from '@modules/accounts/domain/entities/user.entity';
+import { UserRepository } from '@modules/accounts/domain/ports/user.repository';
+import type { RefreshTokenExpiresAt, RefreshTokenHash, RefreshTokenJti } from '@modules/auth/domain/entities/refresh-token.entity';
+import { AuthTokenService } from '@modules/auth/domain/ports/auth-token.service';
+import type { AccessTokenExpiresAt } from '@modules/auth/domain/ports/auth-token.service';
+import { RefreshTokenRepository } from '@modules/auth/domain/ports/refresh-token.repository';
+import { SignInUseCase } from '@modules/auth/application/use-cases/sign-in.usecase';
+
+const toInput = () => ({
+  email: 'john@example.com' as UserEmail,
+  password: 'SecurePass123' as UserPassword,
+});
+
+describe('SignInUseCase', () => {
+  const userRepository = mock<UserRepository>();
+  const refreshTokenRepository = mock<RefreshTokenRepository>();
+  const authTokenService = mock<AuthTokenService>();
+
+  let useCase: SignInUseCase;
+
+  const generatedTokens = {
+    accessToken: 'access-token',
+    accessTokenExpiresAt: new Date() as AccessTokenExpiresAt,
+    refreshToken: 'refresh-token',
+    refreshTokenHash: 'hashed-refresh-token' as RefreshTokenHash,
+    refreshTokenExpiresAt: new Date() as RefreshTokenExpiresAt,
+    jti: 'token-jti' as RefreshTokenJti,
+  };
+
+  beforeEach(() => {
+    mockReset(userRepository);
+    mockReset(refreshTokenRepository);
+    mockReset(authTokenService);
+    useCase = new SignInUseCase(userRepository, refreshTokenRepository, authTokenService);
+  });
+
+  it('throws unauthorized if user does not exist', async () => {
+    userRepository.getByEmail.mockResolvedValue(undefined);
+
+    await expect(useCase.execute(toInput())).rejects.toBeInstanceOf(UnauthorizedError);
+    expect(authTokenService.generateTokens).not.toHaveBeenCalled();
+  });
+
+  it('throws unauthorized if password is invalid', async () => {
+    const user = mock<IUser>();
+    user.comparePassword.mockResolvedValue(false);
+    userRepository.getByEmail.mockResolvedValue(user);
+
+    await expect(useCase.execute(toInput())).rejects.toBeInstanceOf(UnauthorizedError);
+    expect(authTokenService.generateTokens).not.toHaveBeenCalled();
+  });
+
+  it('returns tokens when credentials are valid', async () => {
+    const input = toInput();
+    const user = mock<IUser>();
+    user.comparePassword.mockResolvedValue(true);
+    user.hiddenPassword.mockImplementation(() => undefined);
+    userRepository.getByEmail.mockResolvedValue(user);
+    authTokenService.generateTokens.mockResolvedValue(generatedTokens);
+
+    const result = await useCase.execute(input);
+
+    expect(refreshTokenRepository.revokeAllByUserId).toHaveBeenCalled();
+    expect(refreshTokenRepository.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        jti: generatedTokens.jti,
+        tokenHash: generatedTokens.refreshTokenHash,
+        expiresAt: generatedTokens.refreshTokenExpiresAt,
+      })
+    );
+    expect(user.hiddenPassword).toHaveBeenCalled();
+    expect(result).toEqual({ user, tokens: generatedTokens });
+  });
+});
