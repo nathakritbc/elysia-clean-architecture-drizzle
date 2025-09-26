@@ -18,6 +18,9 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': '/src',
+      '@modules': '/src/modules',
+      '@shared': '/src/shared',
+      '@platform': '/src/platform'
     },
   },
 });

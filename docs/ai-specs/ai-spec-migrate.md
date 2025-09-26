@@ -11,7 +11,7 @@ Before generating migrations, ensure you understand:
 1. **Project Context**: Review [AI-SPEC.md](AI-SPEC.md) for overall architecture
 2. **CRUD Context**: If creating CRUD, review [ai-spec-crud.md](ai-spec-crud.md)
 3. **Current Database**: Understand existing schema and relationships
-4. **Migration History**: Check existing migrations in `src/external/drizzle/migrations/`
+4. **Migration History**: Check existing migrations in `src/platform/database/migrations/`
 
 ## 🗃️ Database Migration System
 
@@ -19,8 +19,8 @@ Before generating migrations, ensure you understand:
 
 - **Tool**: Drizzle Kit for schema management
 - **Database**: PostgreSQL with UUID primary keys
-- **Migration Location**: `src/external/drizzle/migrations/`
-- **Schema Location**: `src/external/drizzle/schema.ts` + domain-specific schemas
+- **Migration Location**: `src/platform/database/migrations/`
+- **Schema Location**: Aggregated via `src/platform/database/schema.ts` with module-specific tables defined under `src/modules/<module>/infrastructure/persistence`.
 
 ### Migration Commands
 
@@ -115,7 +115,7 @@ changes:
 First, update the domain-specific schema file:
 
 ```typescript
-// Example: src/external/drizzle/products/product.schema.ts
+// Example: src/modules/products/infrastructure/persistence/product.schema.ts
 import { index, integer, pgTable, text, timestamp, uniqueIndex, uuid, varchar } from 'drizzle-orm/pg-core';
 
 export const products = pgTable(
@@ -149,9 +149,9 @@ export type NewDrizzleProduct = typeof products.$inferInsert;
 Update the main schema file to export the new table:
 
 ```typescript
-// src/external/drizzle/schema.ts
+// src/platform/database/schema.ts
 // Add new export
-export { products } from './products/product.schema';
+export { products } from '@modules/products/infrastructure/persistence/product.schema';
 ```
 
 ### Step 4: Generate Migration
@@ -163,7 +163,7 @@ bun run db:generate
 ```
 
 This will create a new migration file like:
-`src/external/drizzle/migrations/0007_friendly_wolverine.sql`
+`src/platform/database/migrations/0007_friendly_wolverine.sql`
 
 ### Step 5: Review Generated Migration
 
@@ -249,10 +249,10 @@ bun run db:push
 
 ```typescript
 // 1. Create domain schema file
-// src/external/drizzle/{domain}/{entity}.schema.ts
+// src/modules/{domain}/infrastructure/persistence/{entity}.schema.ts
 
 // 2. Add to main schema exports
-// src/external/drizzle/schema.ts
+// src/platform/database/schema.ts
 
 // 3. Generate migration
 // bun run db:generate
@@ -418,14 +418,14 @@ When generating CRUD operations, the migration should be created **first**:
 1. **Plan CRUD Entity**: Define fields, relationships, constraints
 2. **Generate Migration**: Create database schema
 3. **Apply Migration**: Update database structure
-4. **Generate CRUD Code**: Create domain, adapters, and controllers
+4. **Generate CRUD Code**: Create module domain/application/interface/infrastructure slices and controllers
 5. **Test Integration**: Verify CRUD operations work with schema
 
 ## 📖 References
 
 - **Drizzle Kit Documentation**: [https://orm.drizzle.team/kit-docs/overview](https://orm.drizzle.team/kit-docs/overview)
 - **PostgreSQL Data Types**: [https://www.postgresql.org/docs/current/datatype.html](https://www.postgresql.org/docs/current/datatype.html)
-- **Project Migration Examples**: Check `src/external/drizzle/migrations/` for existing patterns
+- **Project Migration Examples**: Check `src/platform/database/migrations/` for existing patterns
 
 ---
 

@@ -1,371 +1,154 @@
 # AI CRUD Generation Usage Guide
 
-## 🎯 How to Use the AI CRUD Specification
+This guide walks through using the CRUD specification in the modular architecture.
 
-This guide explains how to use the AI CRUD specification to generate new CRUD operations for your Clean Architecture backend.
+## 1. Describe the Domain
 
-## 📋 Step-by-Step Process
-
-### Step 1: Define Your Entity
-
-Before generating CRUD operations, clearly define your entity:
+Provide the AI with:
+- Module name (`inventory`, `billing`, etc.).
+- Entity definition (fields, data types, optional/required, validation constraints).
+- Relationships and business invariants.
+- Required operations (create/read/update/delete, extras such as search or filter).
 
 ```typescript
-// Example: Product Entity
+// Example entity description for reference
 interface ProductEntity {
-  // Primary Key
-  id: number; // Auto-increment, primary key
-
-  // Required Fields
-  name: string; // Required, 2-100 characters, unique
-  price: number; // Required, positive number
-  category_id: number; // Required, foreign key to categories
-
-  // Optional Fields
-  description?: string; // Optional, max 500 characters
-  sku?: string; // Optional, unique identifier
-
-  // Timestamps
-  created_at: Date; // Auto-generated
-  updated_at: Date; // Auto-updated
+  id: string;                 // UUID primary key
+  name: string;               // unique, 2-100 chars
+  price: number;              // positive
+  categoryId: string;         // foreign key to categories
+  description?: string;       // optional, up to 500 chars
+  createdAt: Date;            // auto-generated
+  updatedAt: Date;            // auto-updated
 }
 ```
 
-### Step 2: Define Business Rules
+## 2. Share Business Rules
 
-Specify the business rules for your entity:
+List any invariants so the generated use cases can enforce them:
 
-```typescript
-// Business Rules for Product
-const businessRules = {
-  // Uniqueness constraints
-  uniqueFields: ['name', 'sku'],
-
-  // Validation rules
-  validations: {
-    name: { minLength: 2, maxLength: 100, required: true },
-    price: { min: 0, required: true },
-    description: { maxLength: 500, required: false },
-    sku: { pattern: /^[A-Z0-9-]+$/, required: false },
-    category_id: { required: true, foreignKey: 'categories.id' },
-  },
-
-  // Business logic
-  rules: [
-    'Product name must be unique',
-    'Price must be positive',
-    'SKU must be unique if provided',
-    'Category must exist',
-  ],
-};
+```text
+- Product name must be unique per tenant
+- Price must be greater than zero
+- If category is "premium" then price <= 1000
+- categoryId must reference an existing category
 ```
 
-### Step 3: Specify CRUD Operations
-
-Define which CRUD operations you need:
+## 3. Specify CRUD Scope
 
 ```typescript
-// CRUD Operations
 const operations = {
-  create: true, // POST /products
-  read: true, // GET /products, GET /products/:id
-  update: true, // PUT /products/:id
-  delete: true, // DELETE /products/:id
-
-  // Additional operations
-  search: false, // GET /products/search?q=...
-  filter: false, // GET /products?category=...
-  paginate: false, // GET /products?page=1&limit=10
+  create: true,
+  list: true,
+  get: true,
+  update: true,
+  delete: true,
+  search: false,
+  paginate: true,
 };
 ```
 
-## 🤖 AI Prompt Template
-
-Use this template when asking AI to generate CRUD operations:
+## 4. Prompt Template
 
 ```
-Please generate CRUD operations for the following entity using the AI-CRUD-SPEC.md specification:
+Please generate CRUD support for the Product entity inside our modular architecture.
 
-**Entity Name**: Product
-
-**Fields**:
-- id: number (auto-increment, primary key)
-- name: string (required, 2-100 chars, unique)
+Module name: inventory
+Entity fields:
+- id: string (uuid, primary key)
+- name: string (required, 2-100 chars, unique per tenant)
 - price: number (required, positive)
-- category_id: number (required, foreign key)
-- description?: string (optional, max 500 chars)
-- sku?: string (optional, unique, pattern: /^[A-Z0-9-]+$/)
-- created_at: Date (auto-generated)
-- updated_at: Date (auto-updated)
+- categoryId: string (required, references categories.id)
+- description?: string (optional, <= 500 chars)
+- createdAt: Date (auto-generated)
+- updatedAt: Date (auto-updated)
 
-**Business Rules**:
-- Product name must be unique
+Business rules:
+- Name must be unique within a tenant
 - Price must be positive
-- SKU must be unique if provided
-- Category must exist
+- Premium categories cannot exceed price 1000
 
-**CRUD Operations**: Full CRUD (Create, Read, Update, Delete)
+Operations: create, list, get by id, update, delete, pagination
 
-**Validation Rules**:
-- name: minLength: 2, maxLength: 100, required: true
-- price: min: 0, required: true
-- description: maxLength: 500, required: false
-- sku: pattern: /^[A-Z0-9-]+$/, required: false
-- category_id: required: true
-
-Please generate all necessary files following the Clean Architecture pattern.
+Follow the AI CRUD specification and use the new module layout (`src/modules/inventory/...`).
 ```
 
-## 📁 Generated File Structure
-
-After running the AI generation, you should get these files:
+## 5. Expected Output Structure
 
 ```
-src/
-├── core/
-│   ├── domain/
-│   │   └── product/                    # New domain module
-│   │       ├── entity/
-│   │       │   └── Product.ts          # Product entity
-│   │       ├── service/
-│   │       │   ├── CollectionProduct.ts      # Interface
-│   │       │   └── BaseCollectionProduct.ts  # Abstract class
-│   │       └── use-case/
-│   │           ├── CreateProductUseCase.ts
-│   │           ├── FindProductByIdUseCase.ts
-│   │           ├── FindProductsUseCase.ts
-│   │           ├── UpdateProductUseCase.ts
-│   │           └── DeleteProductUseCase.ts
-│   └── shared/
-│       ├── dtos/
-│       │   └── ProductDTOs.ts          # Product DTOs
-│       ├── container.ts                # Updated with new registrations
-│       └── tokens.ts                   # Updated with new tokens
-├── adapters/                           # New controllers
-│   ├── CreateProductController.ts
-│   ├── FindProductByIdController.ts
-│   ├── FindProductsController.ts
-│   ├── UpdateProductController.ts
-│   └── DeleteProductController.ts
-└── external/
-    ├── drizzle/
-    │   ├── schema.ts                   # Updated with Product table
-    │   └── CollectionProductDrizzle.ts # Product repository
-    └── api/
-        └── routes.ts                   # Updated with new routes
-
-tests/
-└── http/
-    └── products.http                   # Product API tests
+src/modules/inventory/
+├── domain/
+│   ├── entities/product.entity.ts
+│   └── ports/product.repository.ts
+├── application/
+│   └── use-cases/
+│       ├── create-product.usecase.ts
+│       ├── get-products.usecase.ts
+│       ├── get-product-by-id.usecase.ts
+│       ├── update-product.usecase.ts
+│       └── delete-product.usecase.ts
+├── infrastructure/
+│   └── persistence/
+│       ├── product.schema.ts
+│       └── product.drizzle.repository.ts
+├── interface/
+│   └── http/
+│       ├── dtos/product.dto.ts
+│       ├── controllers/
+│       │   ├── create-product.controller.ts
+│       │   ├── get-products.controller.ts
+│       │   ├── get-product-by-id.controller.ts
+│       │   ├── update-product.controller.ts
+│       │   └── delete-product.controller.ts
+│       └── product.http
+├── module-definition.ts
+├── module.tokens.ts
+└── tests/unit/
 ```
 
-## 🔧 Post-Generation Steps
+## 6. Remember the Wiring
 
-### 1. Update Database Schema
+1. Define module-specific tokens in `module.tokens.ts`.
+2. Register repositories/providers in `module-definition.ts`.
+3. Ensure the module is exported in the platform registry (normally already included).
+4. Update database schema & migrations (`@platform/database`).
+5. Add unit tests under `src/modules/<module>/tests/unit`.
 
-```bash
-# Generate migration
-bun run db:generate
+## 7. Import Patterns
 
-# Apply migration
-bun run db:migrate
-```
+Use path aliases:
+- Domain/application: `@modules/inventory/...`
+- Shared primitives: `@shared/...`
+- Platform services: `@platform/...`
 
-### 2. Test the Generated Code
-
-```bash
-# Start server
-bun run dev
-
-# Test endpoints using the generated HTTP files
-# Open tests/http/products.http in VS Code
-```
-
-### 3. Verify All Files
-
-Check that all generated files:
-
-- ✅ Follow naming conventions
-- ✅ Have proper imports
-- ✅ Include error handling
-- ✅ Have comprehensive DTOs
-- ✅ Include proper validation
-
-## 🎯 Example Usage Scenarios
-
-### Scenario 1: Simple Entity
+Example controller import list:
 
 ```typescript
-// Entity: Category
-// Fields: id, name, description
-// Rules: name unique, description optional
-// Operations: Full CRUD
+import { t } from 'elysia';
+import { inject, injectable } from 'tsyringe';
 
-// AI Prompt:
-'Generate CRUD for Category entity with fields: id (number, primary key), name (string, required, unique), description (string, optional). Full CRUD operations needed.';
+import { CreateProductUseCase } from '@modules/inventory/application/use-cases/create-product.usecase';
+import { ProductsModuleTokens } from '@modules/inventory/module.tokens';
+import { ProductResponseDto, CreateProductRequestDto } from '@modules/inventory/interface/http/dtos/product.dto';
+import type { LoggerPort } from '@shared/logging/logger.port';
+import { PlatformTokens } from '@platform/di/tokens';
 ```
 
-### Scenario 2: Complex Entity with Relationships
+## 8. Testing & Verification
 
-```typescript
-// Entity: Order
-// Fields: id, user_id, total, status, items
-// Rules: user must exist, total positive, status enum
-// Operations: Create, Read, Update (no delete)
+- Use the generated REST Client file (`*.http`) to exercise endpoints.
+- Add Vitest unit tests under the module's `tests/unit` folder.
+- Run `bun run test` to confirm suites pass.
+- If Drizzle schema changed, update migrations or `schema.ts` accordingly.
 
-// AI Prompt:
-'Generate CRUD for Order entity with fields: id (number, primary key), user_id (number, foreign key), total (number, positive), status (enum: pending, completed, cancelled), items (array). Operations: Create, Read, Update only.';
-```
+## 9. Quality Checklist
 
-### Scenario 3: Entity with Custom Validation
+- ✅ Repository implements all port methods.
+- ✅ Use cases enforce business rules and reuse shared helpers.
+- ✅ DTOs validate payloads with TypeBox.
+- ✅ Controllers register routes with correct guards and responses.
+- ✅ Module tokens/definition updated.
+- ✅ Imports use aliases, no relative `../../..` paths.
+- ✅ Tests cover happy path and failure scenarios.
 
-```typescript
-// Entity: User
-// Fields: id, email, password, role
-// Rules: email unique, password hashed, role enum
-// Operations: Full CRUD
-
-// AI Prompt:
-'Generate CRUD for User entity with fields: id (number, primary key), email (string, required, unique, email format), password (string, required, min 8 chars), role (enum: admin, user). Full CRUD operations needed.';
-```
-
-## 🚀 Advanced Features
-
-### Custom Business Logic
-
-```typescript
-// Add custom business logic to use cases
-export class CreateProductUseCase {
-  async execute(input: Input): Promise<void> {
-    // Custom validation
-    if (input.price < 0) {
-      throw new Error('Price cannot be negative');
-    }
-
-    // Custom business rule
-    if (input.category_id === 1 && input.price > 1000) {
-      throw new Error('Premium products cannot exceed $1000');
-    }
-
-    // Continue with standard flow...
-  }
-}
-```
-
-### Custom DTOs
-
-```typescript
-// Add custom DTOs for specific operations
-export const ProductSearchRequestDTO = t.Object({
-  query: t.String({ minLength: 1 }),
-  category_id: t.Optional(t.Number()),
-  min_price: t.Optional(t.Number({ minimum: 0 })),
-  max_price: t.Optional(t.Number({ minimum: 0 })),
-});
-```
-
-### Custom Controllers
-
-```typescript
-// Add custom endpoints
-export class SearchProductsController {
-  register(server: Elysia) {
-    server.get(
-      '/products/search',
-      async ({ query }) => {
-        // Custom search logic
-      },
-      {
-        query: ProductSearchRequestDTO,
-        response: { 200: ProductsResponseDTO },
-      }
-    );
-  }
-}
-```
-
-## 🐛 Troubleshooting
-
-### Common Issues
-
-1. **Missing Dependencies**
-
-   ```bash
-   # Check if all imports are correct
-   # Verify container registrations
-   # Ensure tokens are defined
-   ```
-
-2. **Validation Errors**
-
-   ```bash
-   # Check DTO definitions
-   # Verify field types and constraints
-   # Test with HTTP files
-   ```
-
-3. **Database Errors**
-   ```bash
-   # Generate and apply migrations
-   # Check schema definitions
-   # Verify foreign key constraints
-   ```
-
-### Debug Steps
-
-1. **Check Generated Files**
-
-   ```bash
-   # Verify all files were created
-   # Check file contents
-   # Validate imports and exports
-   ```
-
-2. **Test API Endpoints**
-
-   ```bash
-   # Use generated HTTP test files
-   # Check server logs
-   # Verify response formats
-   ```
-
-3. **Validate Business Logic**
-   ```bash
-   # Test use cases directly
-   # Verify error handling
-   # Check business rules
-   ```
-
-## 📚 Best Practices
-
-### 1. **Entity Design**
-
-- Keep entities focused and cohesive
-- Use clear, descriptive field names
-- Include proper validation rules
-- Consider relationships early
-
-### 2. **Business Rules**
-
-- Document all business rules clearly
-- Include validation in use cases
-- Handle edge cases properly
-- Provide meaningful error messages
-
-### 3. **API Design**
-
-- Follow RESTful conventions
-- Use consistent response formats
-- Include proper HTTP status codes
-- Document all endpoints
-
-### 4. **Testing**
-
-- Create comprehensive test files
-- Test both success and error scenarios
-- Include edge cases and boundary values
-- Validate all business rules
-
----
-
-**Follow this guide to generate consistent, maintainable CRUD operations! 🚀**
+Following these steps keeps CRUD features consistent with the modular clean architecture. 🚀

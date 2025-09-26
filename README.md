@@ -4,70 +4,36 @@ A modern TypeScript backend application built with Clean Architecture principles
 
 ## 🏗️ Architecture Overview
 
-This project follows **Clean Architecture** principles with clear separation of concerns across multiple domains:
+The codebase is organised as a modular clean-architecture monolith. Each business capability lives under `src/modules/<domain>` and carries its own domain, application, interface, infrastructure, and tests. A thin `platform` layer wires modules into the runtime, and a `shared` layer exposes framework-agnostic primitives used across modules.
 
 ```text
 src/
-├── core/                    # Business Logic Layer
-│   ├── domain/             # Domain Layer
-│   │   ├── auth/           # Authentication Domain
-│   │   │   ├── entity/     # Auth Entities (RefreshToken)
-│   │   │   ├── service/    # Domain Services & Interfaces
-│   │   │   └── use-case/   # Auth Use Cases (SignIn, SignUp, etc.)
-│   │   ├── posts/          # Posts Domain
-│   │   │   ├── entity/     # Post Entities
-│   │   │   ├── service/    # Domain Services & Interfaces
-│   │   │   └── use-case/   # Posts Use Cases (CRUD Operations)
-│   │   └── users/          # User Domain
-│   │       ├── entity/     # Domain Entities
-│   │       ├── service/    # Domain Services & Interfaces
-│   │       └── use-case/   # Business Use Cases
-│   └── shared/             # Shared Components
-│       ├── container.ts    # DI Container Configuration
-│       ├── tokens.ts       # DI Tokens
-│       ├── common.entity.ts # Base Entity Class
-│       ├── useCase.ts      # Use Case Interface
-│       ├── logger/         # Logger Port
-│       ├── errors/         # Error Handling
-│       └── dtos/           # Data Transfer Objects
-├── adapters/               # Interface Adapters
-│   ├── auth/               # Authentication Controllers
-│   │   ├── sign-up.controller.ts
-│   │   ├── sign-in.controller.ts
-│   │   ├── refresh-session.controller.ts
-│   │   ├── logout.controller.ts
-│   │   ├── auth.guard.ts   # JWT Authentication Guard
-│   │   └── dtos/           # Auth DTOs
-│   └── posts/              # Posts Controllers
-│       ├── create-post.controller.ts
-│       ├── get-all-posts.controller.ts
-│       ├── get-post-by-id.controller.ts
-│       ├── update-post-by-id.controller.ts
-│       ├── delete-post-by-id.controller.ts
-│       └── dtos/           # Post DTOs
-├── external/               # External Layer
-│   ├── api/                # Web API
-│   │   ├── elysia-app.ts   # Elysia App Configuration
-│   │   └── routes.ts       # Route Registration
-│   ├── auth/               # Authentication Services
-│   │   └── jwt-token.service.ts # JWT Service Implementation
-│   ├── config/             # Configuration
-│   │   ├── app-config.ts   # App Configuration
-│   │   ├── auth.config.ts  # Auth Configuration
-│   │   ├── cors.config.ts  # CORS Configuration
-│   │   └── open-telemetry.config.ts # Observability Config
-│   ├── drizzle/            # Database Layer
-│   │   ├── schema.ts       # Database Schema
-│   │   ├── connection.ts   # Database Connection
-│   │   ├── migrations/     # Database Migrations
-│   │   ├── auth/           # Auth Repository Implementation
-│   │   ├── posts/          # Posts Repository Implementation
-│   │   └── users/          # Users Repository Implementation
-│   ├── logging/            # Logging Implementation
-│   └── telemetry/          # OpenTelemetry Setup
-├── test/                   # Test Files
-└── index.ts                # Application Entry Point
+├── modules/
+│   ├── auth/                # Authentication domain & session flows
+│   │   ├── domain/          # Entities & ports (refresh tokens, JWT service)
+│   │   ├── application/     # Use cases (sign-in, sign-up, refresh, logout)
+│   │   ├── interface/http/  # Controllers, DTOs, guard, REST specs
+│   │   └── infrastructure/  # Drizzle repositories, JWT provider, config
+│   ├── accounts/            # User aggregate powering authentication
+│   └── content/             # Posts CRUD (use cases, controllers, persistence)
+├── platform/
+│   ├── di/                  # Container, tokens, module registry
+│   ├── http/                # Elysia app bootstrap, global routes (health)
+│   ├── config/              # App-level configuration providers
+│   ├── database/            # Drizzle connection, schema, migrations
+│   ├── logging/             # Pino logger adapter
+│   └── observability/       # OpenTelemetry helpers
+├── shared/
+│   ├── kernel/              # Base entity/value types, status enum
+│   ├── errors/              # Error mapper & custom errors
+│   ├── utils/               # Helpers (cookie builder, duration parsing, etc.)
+│   ├── logging/             # Logger port
+│   └── dtos/                # Common DTO definitions
+├── test/                    # Global test utilities & suites
+└── index.ts                 # Application entry point (module bootstrap)
 ```
+
+The module registry composes the application at runtime by registering module dependencies and routes in `platform/http/routes.ts`. Authentication refresh now accepts the refresh token from either the request body or the HTTP-only cookie, preserving backward compatibility with existing clients.
 
 ## 🚀 Tech Stack
 
@@ -283,67 +249,79 @@ curl -X GET "http://localhost:7000/posts?page=1&limit=10" \
 
 1. **Sign Up/Sign In**: Receive access token (short-lived) and refresh token (long-lived, HTTP-only cookie)
 2. **API Requests**: Use access token in Authorization header + CSRF token in X-CSRF-Token header
-3. **Token Refresh**: When access token expires, use refresh endpoint with refresh token cookie + CSRF token
+3. **Token Refresh**: When the access token expires, call `/auth/refresh` with the CSRF header; the endpoint accepts the refresh token from the HTTP-only cookie or an optional JSON payload, so existing clients remain compatible.
 4. **Logout**: Invalidate refresh token and clear cookies
 
 ## 🏛️ Clean Architecture Layers
 
-### 1. Domain Layer (`src/core/domain/`)
+### 1. Modules (`src/modules/*`)
 
-- **Entities**: Core business objects across three domains:
-  - **Auth Domain**: User authentication, refresh tokens
-  - **Posts Domain**: Post management entities
-  - **Users Domain**: User profile and account management
-- **Use Cases**: Business logic implementation for all domains
-- **Services**: Domain service interfaces and contracts
+- **Domain**: Entities, value objects, and repository ports for each capability (`auth`, `accounts`, `content`).
+- **Application**: Use cases and base classes orchestrating domain logic. Example: `auth` use cases handle sign-in/sign-up/refresh by depending on accounts and refresh-token ports through module tokens.
+- **Interface (HTTP)**: Controllers, DTOs, and guards that expose each module over REST. Controllers resolve dependencies through DI and register their routes via the module definition.
+- **Infrastructure**: Drizzle repositories, providers, and configuration bound to module-specific ports.
 
-### 2. Application Layer (`src/adapters/`)
+### 2. Platform Layer (`src/platform/*`)
 
-- **Controllers**: Handle HTTP requests and responses for each domain
-- **Guards**: Authentication and authorization middleware
-- **DTOs**: Data Transfer Objects with TypeBox validation
-- **Transformers**: Data transformation utilities
+- **DI & Routing**: Container, tokens, `ModuleRegistry`, and HTTP bootstrap.
+- **Config & Database**: Centralised configuration readers, Drizzle connection, and migration assets.
+- **Cross-Cutting Services**: Logging adapter, health checks, telemetry helpers, and other runtime glue shared by modules.
 
-### 3. Infrastructure Layer (`src/external/`)
+### 3. Shared Layer (`src/shared/*`)
 
-- **Database**: Drizzle ORM implementation with migrations
-- **Web API**: Elysia framework setup with Swagger
-- **Authentication**: JWT service implementation
-- **Configuration**: Environment-based configuration management
-- **Observability**: OpenTelemetry, logging, and monitoring setup
+- **Kernel**: Base entity/value types, status enums, and use-case contracts.
+- **Errors & DTOs**: Common error mapper and reusable DTO schemas.
+- **Utilities**: Cookie builders, duration helpers, function utilities, and logger port used across modules.
 
 ## 🔧 Dependency Injection
 
-The project uses **TSyringe** for dependency injection with the following setup:
+Dependency injection is powered by **TSyringe**. The platform container provides global infrastructure (app config, logger), while each module registers its own bindings through its module definition.
 
-### Container Configuration
-
-```typescript
-// src/core/shared/container.ts
-container.registerSingleton<BaseCollectionUser>(TOKENS.ICollectionUser, CollectionUserDrizzle);
-```
-
-### Token-based Injection
+### Platform Container
 
 ```typescript
-// src/core/shared/tokens.ts
-export const TOKENS = {
-  ICollectionUser: Symbol('ICollectionUser'),
-} as const;
+// src/platform/di/container.ts
+container.register<AppConfig>(PlatformTokens.AppConfig, { useValue: appConfig });
+container.registerSingleton<LoggerPort>(PlatformTokens.Logger, PinoLogger);
 ```
 
-### Usage in Use Cases
+### Module Registration
+
+```typescript
+// src/modules/auth/module-definition.ts
+export const authModule: ModuleDefinition = {
+  name: 'auth',
+  register(container) {
+    container.register<AuthConfig>(AuthModuleTokens.AuthConfig, { useValue: authConfig });
+    container.registerSingleton<RefreshTokenRepository>(
+      AuthModuleTokens.RefreshTokenRepository,
+      RefreshTokenDrizzleRepository
+    );
+    container.registerSingleton<AuthTokenService>(
+      AuthModuleTokens.AuthTokenService,
+      JwtTokenService
+    );
+  },
+  routes(app, container) {
+    container.resolve(SignUpController).register(app);
+    container.resolve(SignInController).register(app);
+    container.resolve(RefreshSessionController).register(app);
+    container.resolve(LogoutController).register(app);
+  },
+};
+```
+
+### Use Case Injection
 
 ```typescript
 @injectable()
-export class CreateUserUseCase implements IUseCase<Input, void> {
+export class SignInUseCase extends BaseAuthUseCase<SignInInput, AuthenticatedUser> {
   constructor(
-    @inject(TOKENS.ICollectionUser)
-    private readonly collection: BaseCollectionUser
-  ) {}
-
-  async execute(input: Input): Promise<void> {
-    // Business logic implementation
+    @inject(AccountsModuleTokens.UserRepository) private readonly users: UserRepository,
+    @inject(AuthModuleTokens.RefreshTokenRepository) private readonly refreshTokens: RefreshTokenRepository,
+    @inject(AuthModuleTokens.AuthTokenService) private readonly tokens: AuthTokenService
+  ) {
+    super(users, refreshTokens, tokens);
   }
 }
 ```
@@ -422,10 +400,10 @@ src/test/                    # Test files
 
 ### HTTP API Testing
 
-The project includes comprehensive HTTP test files in the `src/adapters/` directory:
+The project includes comprehensive HTTP test files in the `src/modules` directory:
 
-- **`src/adapters/auth/auth.http`** - Authentication API tests (Sign Up, Sign In, Refresh, Logout)
-- **`src/adapters/posts/post.http`** - Posts management API tests (CRUD operations)
+- **`src/modules/auth/interface/http/auth.http`** – Authentication API tests (Sign Up, Sign In, Refresh, Logout)
+- **`src/modules/content/interface/http/post.http`** – Posts management API tests (CRUD operations)
 
 These files can be used directly in VS Code with the REST Client extension for interactive API testing.
 
