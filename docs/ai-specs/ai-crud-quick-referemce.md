@@ -1,142 +1,167 @@
-# AI CRUD Generation - Quick Reference
+# AI CRUD Generation – Quick Reference
 
-## 🚀 Quick Start for AI Assistants
+Use this cheat sheet when generating new CRUD capabilities inside the modular architecture.
 
-### 1. **Input Requirements**
+## 🚀 Quick Start
 
-Ask the user for:
+### 1. Gather Requirements
 
-- Entity name (e.g., "Product", "Order", "Category")
-- Entity fields with types and validation rules
-- Business rules and constraints
-- Required CRUD operations (Create, Read, Update, Delete)
+Ask for:
+- Module / domain name (e.g. `inventory`, `billing`).
+- Entity name and field definitions (type, validation, optional/required).
+- Business rules (uniqueness, relationships, status workflows, etc.).
+- Required operations (Create, Read, Update, Delete).
 
-### 2. **File Generation Order**
+### 2. Recommended Generation Order
 
-Generate files in this sequence:
+1. **Scaffold module folders** under `src/modules/{module}/` if they do not exist yet.
+2. **Domain**: entity/value objects → repository port.
+3. **Application**: use cases (create/get/update/delete) + shared base classes if needed.
+4. **Infrastructure**: Drizzle schema updates → repository implementation.
+5. **Interface (HTTP)**: DTO schemas → controllers → optional guard/policies.
+6. **Module wiring**: update `module.tokens.ts` and `module-definition.ts`.
+7. **Platform wiring**: ensure module is registered (normally already handled via `ModuleRegistry`).
+8. **Tests**: unit tests (`src/modules/{module}/tests/unit`) + HTTP spec file.
 
-1. **Domain Layer**: Entity → Service Interface → Base Service → Use Cases
-2. **Infrastructure Layer**: Drizzle Schema → Repository Implementation
-3. **Application Layer**: DTOs → Controllers
-4. **Configuration**: Container → Tokens → Routes
-5. **Tests**: HTTP test files
+### 3. Naming Cheatsheet
 
-### 3. **Naming Conventions**
+```text
+Entity   : Product
+File     : product.entity.ts
+Class    : Product, CreateProductUseCase
+Variable : product, products
+Route    : /products, /products/:id
+Table    : products
+```
+
+## 📁 Module File Layout
+
+```
+src/modules/{module}/
+├── domain/
+│   ├── entities/{entity}.entity.ts
+│   └── ports/{entity}.repository.ts
+├── application/
+│   └── use-cases/
+│       ├── create-{entity}.usecase.ts
+│       ├── get-{entities}.usecase.ts
+│       ├── get-{entity}-by-id.usecase.ts
+│       ├── update-{entity}.usecase.ts
+│       └── delete-{entity}.usecase.ts
+├── infrastructure/
+│   └── persistence/
+│       ├── {entity}.schema.ts          # Drizzle
+│       └── {entity}.drizzle.repository.ts
+├── interface/
+│   └── http/
+│       ├── dtos/{entity}.dto.ts
+│       ├── controllers/
+│       │   ├── create-{entity}.controller.ts
+│       │   ├── get-{entities}.controller.ts
+│       │   ├── get-{entity}-by-id.controller.ts
+│       │   ├── update-{entity}.controller.ts
+│       │   └── delete-{entity}.controller.ts
+│       └── {entity}.http               # REST Client tests
+├── module-definition.ts
+├── module.tokens.ts
+└── tests/
+    └── unit/...
+```
+
+## 🔌 Key Integration Points
+
+### Module Tokens
+
+Create DI tokens local to the module:
 
 ```typescript
-// Entity: Product
-// Files: Product.ts, CollectionProduct.ts, CreateProductUseCase.ts
-// Variables: product, products
-// Endpoints: /products, /products/:id
-// Database: products table
+// src/modules/products/module.tokens.ts
+export const ProductsModuleTokens = {
+  Repository: Symbol('Products.Repository'),
+};
 ```
 
-## 📋 Template Variables
-
-Replace these placeholders in all generated files:
-
-| Placeholder  | Example    | Description            |
-| ------------ | ---------- | ---------------------- |
-| `{Entity}`   | `Product`  | PascalCase entity name |
-| `{entity}`   | `product`  | camelCase entity name  |
-| `{entities}` | `products` | camelCase plural       |
-| `{ENTITY}`   | `PRODUCT`  | UPPER_CASE entity name |
-
-## 🎯 Essential Files to Generate
-
-### Domain Layer
-
-```
-src/core/domain/{entity}/
-├── entity/{Entity}.ts
-├── service/Collection{Entity}.ts
-├── service/BaseCollection{Entity}.ts
-└── use-case/
-    ├── Create{Entity}UseCase.ts
-    ├── Find{Entity}ByIdUseCase.ts
-    ├── Find{Entity}sUseCase.ts
-    ├── Update{Entity}UseCase.ts
-    └── Delete{Entity}UseCase.ts
-```
-
-### Infrastructure Layer
-
-```
-src/external/drizzle/
-├── schema.ts (add {Entity} table)
-└── Collection{Entity}Drizzle.ts
-```
-
-### Application Layer
-
-```
-src/adapters/
-├── Create{Entity}Controller.ts
-├── Find{Entity}ByIdController.ts
-├── Find{Entity}sController.ts
-├── Update{Entity}Controller.ts
-└── Delete{Entity}Controller.ts
-
-src/core/shared/dtos/
-└── {Entity}DTOs.ts
-```
-
-### Configuration
-
-```
-src/core/shared/
-├── container.ts (add registrations)
-└── tokens.ts (add tokens)
-
-src/external/api/
-└── routes.ts (add route registrations)
-```
-
-### Tests
-
-```
-tests/http/
-└── {entities}.http
-```
-
-## 🔧 Key Patterns
-
-### Entity Pattern
+### Module Definition
 
 ```typescript
-export class {Entity} extends Entity {
-  // Fields with proper types
-  constructor(id, field1, field2, created_at, updated_at) {
-    super();
-    // Initialize all fields
-  }
+// src/modules/products/module-definition.ts
+export const productsModule: ModuleDefinition = {
+  name: 'products',
+  register(container) {
+    container.registerSingleton<ProductRepository>(
+      ProductsModuleTokens.Repository,
+      ProductDrizzleRepository
+    );
+  },
+  routes(app, container) {
+    container.resolve(CreateProductController).register(app);
+    container.resolve(GetAllProductsController).register(app);
+    container.resolve(GetProductByIdController).register(app);
+    container.resolve(UpdateProductController).register(app);
+    container.resolve(DeleteProductController).register(app);
+  },
+};
+```
+
+### Directory Aliases
+
+Use path aliases when importing:
+
+- `@modules/<module>/domain/...`
+- `@modules/<module>/application/...`
+- `@modules/<module>/interface/http/...`
+- `@modules/<module>/infrastructure/...`
+- `@shared/...`
+- `@platform/...`
+
+## 🧩 Patterns & Snippets
+
+### Domain Entity
+
+```typescript
+import { Entity } from '@shared/kernel/entity';
+import type { Brand } from '@shared/kernel/brand.type';
+
+export type ProductId = Brand<string, 'ProductId'>;
+
+export class Product extends Entity {
+  id: ProductId = '' as ProductId;
+  name!: string;
+  price!: number;
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 ```
 
-### Service Pattern
+### Repository Port
 
 ```typescript
-export abstract class BaseCollection{Entity} {
-  abstract getById(id: number): Promise<{Entity} | null>;
-  abstract find(): Promise<{Entity}[]>;
-  abstract create({entity}: {Entity}): Promise<{Entity}>;
-  abstract update(id: number, {entity}: Partial<{Entity}>): Promise<{Entity} | null>;
-  abstract delete(id: number): Promise<boolean>;
+export interface ProductRepository {
+  create(product: Product): Promise<Product>;
+  getById(id: ProductId): Promise<Product | undefined>;
+  getAll(params: PaginationParams): Promise<{ result: Product[]; meta: PaginationMeta }>;
+  update(product: Product): Promise<Product>;
+  delete(id: ProductId): Promise<void>;
 }
 ```
 
-### Use Case Pattern
+### Use Case Skeleton
 
 ```typescript
 @injectable()
-export class Create{Entity}UseCase implements IUseCase<Input, void> {
+export class CreateProductUseCase implements IUseCase<CreateProductInput, Product> {
   constructor(
-    @inject(TOKENS.ICollection{Entity})
-    private readonly collection: BaseCollection{Entity}
+    @inject(ProductsModuleTokens.Repository)
+    private readonly products: ProductRepository,
   ) {}
 
-  async execute(input: Input): Promise<void> {
-    // Business logic and validation
+  async execute(input: CreateProductInput): Promise<Product> {
+    const entity = Builder(Product)
+      .name(input.name)
+      .price(input.price)
+      .build();
+
+    return this.products.create(entity);
   }
 }
 ```
@@ -145,183 +170,112 @@ export class Create{Entity}UseCase implements IUseCase<Input, void> {
 
 ```typescript
 @injectable()
-export class Create{Entity}Controller {
-  constructor(
-    @inject(Create{Entity}UseCase)
-    private readonly useCase: Create{Entity}UseCase
-  ) {}
+export class CreateProductController {
+  constructor(@inject(CreateProductUseCase) private readonly useCase: CreateProductUseCase) {}
 
-  register(server: Elysia) {
-    server.post("/{entities}", handler, {
-      body: Create{Entity}RequestDTO,
-      response: { 200: {Entity}ResponseDTO, 400: ErrorResponseDTO },
+  register(app: Elysia) {
+    app.post('/products', async ({ body }) => {
+      const product = await this.useCase.execute(body);
+      return product;
+    }, {
+      body: CreateProductRequestDto,
+      response: {
+        200: ProductResponseDto,
+        400: ErrorResponseDto,
+      },
+      detail: {
+        summary: 'Create product',
+        tags: ['Products'],
+      },
     });
   }
 }
 ```
 
-### DTO Pattern
+### Drizzle Repository
 
 ```typescript
-export const Create{Entity}RequestDTO = t.Object({
-  field1: t.String({ minLength: 2, maxLength: 100 }),
-  field2: t.Number({ minimum: 0 }),
-  field3: t.Optional(t.String()),
+@injectable()
+export class ProductDrizzleRepository implements ProductRepository {
+  async create(product: Product): Promise<Product> {
+    const [row] = await db.insert(products).values({
+      name: product.name,
+      price: product.price,
+    }).returning();
+
+    return this.toDomain(row);
+  }
+
+  private toDomain(row: ProductRow): Product {
+    return Builder(Product)
+      .id(row.id as ProductId)
+      .name(row.name)
+      .price(row.price)
+      .createdAt(row.createdAt)
+      .updatedAt(row.updatedAt)
+      .build();
+  }
+}
+```
+
+### DTO Schema
+
+```typescript
+export const CreateProductRequestDto = t.Object({
+  name: t.String({ minLength: 2, maxLength: 100 }),
+  price: t.Number({ minimum: 0 }),
+});
+
+export const ProductResponseDto = t.Object({
+  id: t.String(),
+  name: t.String(),
+  price: t.Number(),
+  createdAt: t.Optional(t.Date()),
+  updatedAt: t.Optional(t.Date()),
 });
 ```
 
-## 🎯 Common Field Types
-
-### String Fields
-
-```typescript
-// Required string
-name: t.String({ minLength: 2, maxLength: 100 });
-
-// Optional string
-description: t.Optional(t.String({ maxLength: 500 }));
-
-// Email validation
-email: t.String({ format: 'email' });
-
-// Unique string
-sku: t.String({ pattern: /^[A-Z0-9-]+$/ });
-```
-
-### Number Fields
-
-```typescript
-// Required number
-price: t.Number({ minimum: 0 });
-
-// Optional number
-quantity: t.Optional(t.Number({ minimum: 0 }));
-
-// Integer
-category_id: t.Number();
-```
-
-### Date Fields
-
-```typescript
-// Auto-generated dates
-created_at: t.Optional(t.Date());
-updated_at: t.Optional(t.Date());
-```
-
-## 🔄 Database Schema Patterns
-
-### Basic Table
-
-```typescript
-export const { entities } = pgTable('{entities}', {
-  id: serial('id').primaryKey(),
-  name: varchar('name', { length: 100 }).notNull().unique(),
-  description: varchar('description', { length: 500 }),
-  price: decimal('price', { precision: 10, scale: 2 }).notNull(),
-  created_at: timestamp('created_at').defaultNow().notNull(),
-  updated_at: timestamp('updated_at').defaultNow().notNull(),
-});
-```
-
-### Foreign Key
-
-```typescript
-category_id: integer("category_id").notNull().references(() => categories.id),
-```
-
-### Unique Constraint
-
-```typescript
-name: varchar("name", { length: 100 }).notNull().unique(),
-```
-
-## 🧪 Test Patterns
-
-### HTTP Test Structure
+### HTTP Test Template
 
 ```http
 ### Variables
-@baseUrl = http://localhost:3000
+@baseUrl = http://localhost:7000
 @contentType = application/json
 
-### Create {Entity} - Valid
-POST {{baseUrl}}/{entities}
+### Create Product
+POST {{baseUrl}}/products
 Content-Type: {{contentType}}
 
-{
-  "field1": "value1",
-  "field2": 123
-}
+{ "name": "Sample", "price": 25 }
 
-### Create {Entity} - Invalid
-POST {{baseUrl}}/{entities}
+### List Products
+GET {{baseUrl}}/products
+
+### Get Product by ID
+GET {{baseUrl}}/products/{{productId}}
+
+### Update Product
+PUT {{baseUrl}}/products/{{productId}}
 Content-Type: {{contentType}}
 
-{
-  "field1": "a",
-  "field2": -1
-}
+{ "name": "Updated", "price": 30 }
 
-### Get All {Entity}s
-GET {{baseUrl}}/{entities}
-
-### Get {Entity} by ID
-GET {{baseUrl}}/{entities}/1
-
-### Update {Entity}
-PUT {{baseUrl}}/{entities}/1
-Content-Type: {{contentType}}
-
-{
-  "field1": "updated value"
-}
-
-### Delete {Entity}
-DELETE {{baseUrl}}/{entities}/1
+### Delete Product
+DELETE {{baseUrl}}/products/{{productId}}
 ```
 
-## ⚡ Quick Checklist
+## ✅ Final Checklist
 
-Before finishing, ensure:
-
-- ✅ All files follow naming conventions
-- ✅ Dependencies are properly injected
-- ✅ DTOs include proper validation
-- ✅ Controllers handle errors correctly
-- ✅ Use cases include business logic
-- ✅ Repository implements all methods
-- ✅ Container registrations are added
-- ✅ Tokens are defined
-- ✅ Routes are registered
-- ✅ HTTP tests are comprehensive
-- ✅ All imports are correct
-- ✅ TypeScript types are proper
-
-## 🎯 Example Prompt
-
-```
-Generate CRUD operations for Product entity:
-
-Fields:
-- id: number (primary key, auto-increment)
-- name: string (required, 2-100 chars, unique)
-- price: number (required, positive)
-- category_id: number (required, foreign key)
-- description?: string (optional, max 500 chars)
-- created_at: Date (auto-generated)
-- updated_at: Date (auto-updated)
-
-Business Rules:
-- Product name must be unique
-- Price must be positive
-- Category must exist
-
-Operations: Full CRUD (Create, Read, Update, Delete)
-
-Please generate all necessary files following the Clean Architecture pattern.
-```
+- Module folder structure created.
+- Domain entity & repository port implemented.
+- Use cases cover requested operations.
+- DTOs validate payloads with TypeBox.
+- Controllers register under correct routes and use DI.
+- Drizzle schema & repository persist data.
+- Module tokens and definition updated.
+- Tests and HTTP spec files added.
+- All imports use path aliases (`@modules`, `@shared`, `@platform`).
 
 ---
 
-**Use this reference to generate consistent, high-quality CRUD operations! 🚀**
+Use this guide to keep CRUD feature generation consistent with the modular architecture. 🛠️

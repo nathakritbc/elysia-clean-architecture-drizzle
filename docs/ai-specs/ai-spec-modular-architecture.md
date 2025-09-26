@@ -2,224 +2,140 @@
 
 ## Summary
 
-Restructure the codebase into self-contained modules that encapsulate their own clean-architecture slices (domain, application, interface, infrastructure). The goal is to make each module independently testable, deployable, and eventually splittable into microservices while preserving shared platform capabilities (HTTP server, observability, DI, security).
+The application now runs as a modular clean-architecture monolith. Business capabilities live in independent `src/modules/*` packages that each contain their own domain model, application services, interface adapters, and infrastructure adapters. A thin `src/platform` layer hosts composition concerns (DI container, HTTP bootstrap, telemetry, config), while `src/shared` exposes framework-agnostic building blocks reused by every module. The structure keeps the service deployable as a single Bun runtime today, yet lets any module be extracted into a microservice later with minimal friction.
 
 ## Goals
 
-- Establish clear module boundaries aligned with business capabilities (Auth, Accounts, Content, etc.).
-- Co-locate domain rules, use cases, interface adapters, and infrastructure inside each module.
-- Standardize module scaffolding to enable consistent development and future code generation.
-- Provide a composition layer that registers modules and wiring (DI, routing, events).
-- Preserve existing functionality while enabling phased migration of code from current structure.
+- Keep module boundaries aligned with business capabilities (`auth`, `accounts`, `content`) and allow new domains to reuse the same template.
+- Ensure each module ships a self-contained clean architecture slice (domain ◀ application ◀ interface & infrastructure).
+- Centralise cross-cutting concerns (HTTP server, config, logging, telemetry, DI) inside `platform` and framework-neutral primitives inside `shared`.
+- Rely on a runtime module registry so features plug into the app through declarative registration.
+- Preserve existing behaviour (authentication flows, posts CRUD, health checks) while enabling incremental feature work per module.
 
 ## Non-Goals
 
-- Rewrite business logic or introduce new features.
-- Split services into separate repositories yet.
-- Replace Bun/Elysia/Drizzle or other core technologies.
-- Introduce synchronous communication between modules via network calls (remain in-process for now).
+- Running separate processes per module (still an in-process monolith).
+- Replacing Bun, Elysia, or Drizzle ORM.
+- Rewriting business logic; only reorganising and tightening boundaries.
+- Introducing network calls between modules (keep synchronous DI calls for now).
 
 ## Architectural Principles
 
-1. **Independent Modules** – Each module owns its domain model, application services, interface adapters, and infrastructure adapters.
-2. **Clean Architecture Enforcement** – Domain layer free of framework dependencies; outer layers depend inward only.
-3. **Explicit Contracts** – Ports (interfaces) define cross-module interaction. Shared layer only hosts truly cross-cutting primitives.
-4. **Composition Root** – A platform bootstrap layer composes modules via DI container, HTTP routing, telemetry, etc.
-5. **Microservice Ready** – Modules expose contracts/events to make future extraction to separate service straightforward.
+1. **Module autonomy** – Each module owns its domain model, ports, use cases, controllers, persistence, and tests.
+2. **Direction of dependencies** – Domain logic stays framework-free; outer layers depend inward. Modules never import other modules' internals, only their public interfaces.
+3. **Explicit contracts** – Ports and DI tokens live inside the owning module (`module.tokens.ts`) so consumers cannot reach through layers implicitly.
+4. **Composition root** – `platform/di/module.registry.ts` wires modules into the Elysia app and DI container. The bootstrap stays the single place where modules are enabled/disabled.
+5. **Cross-cutting isolation** – Shared utilities (`@shared/*`) remain infrastructure-agnostic; anything framework-specific belongs to either a module or the platform.
+6. **Microservice readiness** – Modules expose HTTP routes via `ModuleDefinition.routes`, register dependencies via `ModuleDefinition.register`, and encapsulate infrastructure so extraction means copying one folder.
 
-## Target Module Topology
+## Current Topology
 
-| Module | Capability | Notes |
-| --- | --- | --- |
-| `auth` | Authentication, sessions, refresh tokens | Owns JWT issuance, credential validation |
-| `accounts` | User profiles, roles, account management | Decouple from auth for future IAM expansion |
-| `content` | Posts or other publishable entities | Current posts module fits here |
-| `platform` | Composition root, shared adapters (HTTP server, telemetry, config) | Bootstraps modules |
-| `shared` | Utility libraries, common value objects, error types | Must remain infrastructure-agnostic |
+| Folder | Responsibility |
+| --- | --- |
+| `src/modules/auth` | Authentication, session lifecycle, JWT handling (domain, application, HTTP controllers, Drizzle repositories, config). Refresh endpoints accept tokens from the body *or* cookies, falling back to cookies when the body is empty. |
+| `src/modules/accounts` | User aggregate (entities, repository port/implementation, usage within auth use cases). |
+| `src/modules/content` | Post aggregate (CRUD use cases, controllers, persistence). |
+| `src/platform` | Composition root: DI container and tokens, HTTP routes and controllers, logging adapters, database wiring, telemetry, health checks, config, migration assets. |
+| `src/shared` | Framework-agnostic primitives (kernel entity/value types, DTOs, error mapper, logger port, utility helpers such as cookie builders and duration parsing). |
 
-Additional future modules (booking, billing, notifications) should follow the same template.
+Additional domains can be scaffolded by copying any module folder and registering it with the module registry.
 
-## Module Folder Template
+## Module Template
 
 ```
-src/
-  modules/
-    <module-name>/
-      domain/
-        entities/
-        aggregates/
-        value-objects/
-        services/       # Domain services (pure)
-        events/
-        ports/          # Repository & integration interfaces
-      application/
-        use-cases/
-        dtos/
-        validators/
-        mappers/
-        policies/       # Authorization policies, orchestration logic
-      interface/
-        http/
-          controllers/
-          routes.ts
-          transformers/
-        subscribers/    # Event listeners (e.g. domain events)
-        graphql?/grpc?  # Placeholder for future transports
-      infrastructure/
-        persistence/
-          repositories/
-          mappers/
-        messaging/
-        providers/      # External services implementation
-        config/
-      tests/
-        unit/
-        integration/
-        contract/
+src/modules/<module>/
+  domain/
+    entities/
+    ports/
+  application/
+    base/
+    use-cases/
+  interface/
+    http/
+      controllers/
+      dtos/
+      guards/
+  infrastructure/
+    config/
+    persistence/
+    providers/
+  tests/
+    unit/
 ```
 
-### Shared & Platform Layers
+Shared DI tokens for a module live in `module.tokens.ts` and the module exposes a single `module-definition.ts` entry point so the platform can discover bindings and routes.
+
+## Platform & Shared Layers
 
 ```
 src/
   platform/
-    http/
-      server.ts
-      router.ts
+    config/
+    database/
     di/
       container.ts
+      module-definition.ts
       module.registry.ts
-    observability/
-    security/
-    bootstrap.ts
-  shared/
-    kernel/
-      result.ts
-      value-object.ts
-      entity.ts
-    errors/
-    utils/
+    health/
+    http/
+      controllers/
+      elysia-app.ts
+      routes.ts
     logging/
-    env/
+    observability/
+  shared/
+    application/
+    dtos/
+    errors/
+    kernel/
+    logging/
+    utils/
 ```
 
-- `platform` owns composition root, DI container wiring, app bootstrap, global middleware, telemetry, and configuration of modules.
-- `shared` contains framework-agnostic building blocks (base classes, error objects, functional helpers, cross-module DTO primitives).
+- `platform/di/module-definition.ts` defines the runtime contract:
 
-## Module Contracts
-
-Each module exports a `ModuleDefinition` to register itself with the platform:
-
-```typescript
+```ts
 export interface ModuleDefinition {
-  name: ModuleName;
-  routes?: (ctx: RegisterHttpContext) => void;
-  bindings: (container: DependencyContainer) => void;
-  projections?: ModuleProjection[]; // e.g. read models, background jobs
-  policies?: PolicyDefinition[];
-  events?: DomainEventDefinition[];
+  name: string;
+  register(container: DependencyContainer): void;
+  routes?: (app: Elysia, container: DependencyContainer) => void;
 }
 ```
 
-- `bindings` registers domain/application/infrastructure services.
-- `routes` attaches HTTP controllers to the shared router.
-- `policies` describes module-level authorization requirements.
-- `events` documents domain event publications and subscriptions.
+- The `ModuleRegistry` applies each module's bindings and attaches routes when bootstrapping the server.
+- `platform/health/health-check.service.ts` handles liveness/readiness/system checks using shared logging utilities and the central Drizzle connection.
 
-Modules live behind DI tokens defined locally (e.g. `AuthTokens.RefreshTokenRepository`). Cross-module access happens through interfaces exported from `ports/`.
+## DI and Configuration
 
-## Domain to Module Mapping
+- Global DI tokens (`PlatformTokens`) live under `platform/di/tokens.ts`; module-specific tokens remain internal to each module.
+- `platform/di/container.ts` registers platform primitives (AppConfig, Logger) only. Modules register their own dependencies inside `module-definition.ts`.
+- Config values sit in `platform/config/*` or `modules/<module>/infrastructure/config`. Auth config now exposes both refresh token cookies; controllers reference `refreshTokenCookie` and `refreshTokenCsrfCookie` explicitly.
 
-| Current Location | Target Module | Notes |
-| --- | --- | --- |
-| `src/core/domain/auth` | `src/modules/auth/domain` | Entities, value objects, services, use cases |
-| `src/adapters/auth` | `src/modules/auth/interface/http` | Controllers, guards, DTOs mapped to new folder |
-| `src/external/auth` | `src/modules/auth/infrastructure/providers` | JWT service implementations |
-| `src/external/drizzle/auth` | `src/modules/auth/infrastructure/persistence` | Repository implementations |
-| `src/core/domain/users` | `src/modules/accounts/domain` | Separate accounts from auth |
-| `src/adapters/posts` | `src/modules/content/interface/http` | Rename posts -> content |
-| `src/external/drizzle/posts` | `src/modules/content/infrastructure/persistence` | |
-| `src/core/shared` | `src/shared` | Keep domain-agnostic primitives |
-| `src/external/api` | `src/platform/http` | Centralized HTTP bootstrap |
+## HTTP Composition
 
-## Cross-Module Communication
-
-- **Synchronous**: Modules call each other via application services exposed behind interfaces registered in DI (e.g. `AccountsApplication.CurrentUserService`). Keep calls at application layer; avoid direct infrastructure dependency.
-- **Domain Events**: Modules publish events via an in-process dispatcher (future-proof for message bus). Define event contracts in `domain/events` and handle in `interface/subscribers` or `application`.
-- **Policies**: Authorization checks defined in `application/policies`. Platform-level guard composes module policies.
-
-## Configuration & Environment
-
-- Module-specific env keys defined under `modules/<module>/infrastructure/config` with TypeBox schema for validation.
-- Platform exports a central `ConfigService` reading `.env` and distributing typed configs to modules.
-- Each module registers its config schema during bootstrap so validation happens at startup.
+- `platform/http/routes.ts` creates the Elysia app, instantiates the module registry, and registers modules (`accounts`, `auth`, `content`).
+- Platform controllers (e.g. health endpoints) continue to resolve through DI and register directly after modules.
+- Module controllers are responsible for their own validation. The refresh-session controller demonstrates the dual-source token retrieval (body or cookie), ensuring compatibility with earlier clients that only use cookies.
 
 ## Testing Strategy
 
-- **Unit Tests**: `modules/<module>/tests/unit` target domain & application layers (no infrastructure).
-- **Integration Tests**: `modules/<module>/tests/integration` spin up module with in-memory adapters or test DB.
-- **Contract Tests**: `modules/<module>/tests/contract` define API schemas and module-to-module contracts (event payloads, DI interfaces).
-- Global E2E tests remain under `src/test/e2e` and exercise the composed platform.
+- Unit tests stay colocated under each module (`modules/<module>/tests/unit`). They import through module aliases (`@modules/...`) and reuse shared utilities.
+- Global Vitest config recognises the new path aliases; warnings remain for un-awaited `expect(...).resolves/rejects` in `auth.guard.spec.ts` and should be addressed separately.
 
-## Migration Plan (Phased)
+## Migration Checklist (Completed)
 
-1. **Scaffold Platform & Shared Layers**
-   - Create `src/modules`, `src/platform`, and `src/shared` directories following template.
-   - Move current DI container, tokens, and HTTP bootstrap into `platform/` while maintaining exports.
+1. Scaffolded `modules`, `platform`, and `shared` directories and moved legacy `core`, `adapters`, and `external` code into their new homes.
+2. Ported DI container, tokens, and HTTP bootstrap into `platform` and introduced the module registry.
+3. Migrated **auth** module (domain, application, HTTP, persistence, config) and enhanced refresh-session handling to support cookie/body tokens.
+4. Migrated **accounts** module (user aggregate and Drizzle repository) and updated auth use cases to depend on accounts ports via module tokens.
+5. Migrated **content** module (post aggregate, controllers, repositories, tests) using the same module token pattern.
+6. Extracted shared primitives (entities, DTOs, error mapper, logger port, utilities) into `shared` with framework-neutral aliases.
+7. Pointed tests, configs, and bootstrap to the new path aliases (`@modules/*`, `@shared/*`, `@platform/*`) and re-enabled Vitest.
+8. Verified runtime behaviour (sign-in, refresh via cookie fallback, posts CRUD, health endpoints) and updated documentation.
 
-2. **Migrate Auth Module**
-   - Move domain entities/use cases from `core/domain/auth` to `modules/auth/domain` & `application`.
-  - Move controllers/DTOs to `modules/auth/interface/http`.
-   - Relocate Drizzle repositories and JWT providers to `modules/auth/infrastructure`.
-   - Update DI registrations to use new module definition.
+## Outstanding Work & Next Steps
 
-3. **Migrate Accounts Module**
-   - Extract user-related logic from auth domain into separate `accounts` module.
-   - Update dependencies: auth module queries accounts via DI ports.
-
-4. **Migrate Content Module**
-   - Relocate posts domain/application/controller/repository into `modules/content`.
-   - Rename DTOs/entities as needed (e.g. `Post` remains, but inside content module).
-
-5. **Refine Shared Utilities**
-   - Move reusable primitives into `src/shared` (value objects, base use case class, error mapper).
-   - Ensure modules import from `shared` not from other modules directly if primitive is cross-cutting.
-
-6. **Introduce Module Registry & Bootstrap**
-   - Implement `ModuleRegistry` that loads module definitions, applies bindings, registers routes.
-   - Refactor `index.ts` to compose `platform` and register modules in desired order.
-
-7. **Testing & Documentation**
-   - Update tests to point to new paths.
-   - Document module responsibilities in `docs/modules/<module>.md`.
-   - Update API specs and Postman collections if needed.
-
-8. **Prepare for Microservices**
-   - Document event contracts and data ownership per module.
-   - Introduce optional `messaging` adapter behind interface to support future broker.
-
-Each step should be merged independently with regression tests (unit/integration/E2E).
-
-## Microservice Extraction Guidance
-
-- Keep module dependencies acyclic to simplify extraction.
-- Ensure each module publishes domain events for state changes (create/update/delete) using event dispatcher.
-- Maintain module-specific configuration and secrets to mirror future service boundaries.
-- Abstract infrastructure dependencies (DB tables, external APIs) behind module-specific repositories and providers.
-- When extracting, reuse module `application` and `domain` as base service logic; replace `interface` and `infrastructure` with service-specific adapters.
-
-## Deliverables
-
-- New folder structure under `src/modules`, `src/platform`, `src/shared`.
-- Per-module `module-definition.ts` implementing registration contract.
-- Updated DI container and HTTP bootstrap referencing module definitions.
-- Documentation updates in `docs/modules` and `docs/ai-specs` referencing modular architecture.
-- Migration checklist to track progress for each module.
-
-## Open Questions
-
-- Should database schemas remain in a monolithic Drizzle setup or split per module with schema namespaces?
-- Which modules will own cross-cutting entities (e.g. tenant, organization) when introduced?
-- Do we introduce API versioning during migration or keep current endpoints and add later?
-
-These should be resolved before full implementation.
+- Address Vitest warnings by awaiting `expect(...).resolves/rejects` in guard tests.
+- Consider adding per-module integration tests under `tests/integration` to exercise HTTP behaviour in isolation.
+- Build a scaffolding script (optional) that generates new module skeletons following the template above.
+- Evaluate message/event infrastructure once asynchronous workflows are required; the module registry already provides hooks for future subscriptions.

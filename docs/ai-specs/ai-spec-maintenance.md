@@ -252,10 +252,10 @@ update_module_version() {
   fi
 
   # 3. Run database migration if needed
-  if [ -d "src/external/drizzle/${module_name}" ]; then
+  if [ -d "src/modules/${module_name}/infrastructure/persistence" ]; then
     echo "🗃️ Checking for database changes"
     bun run db:generate
-    if [ -f "src/external/drizzle/migrations/*$(date +%Y%m%d)*" ]; then
+    if ls src/platform/database/migrations/*$(date +%Y%m%d)* >/dev/null 2>&1; then
       echo "📊 New migration generated, applying..."
       bun run db:migrate
     fi
