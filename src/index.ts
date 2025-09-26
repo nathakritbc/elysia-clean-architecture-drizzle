@@ -1,15 +1,15 @@
 import 'reflect-metadata';
 
-import { container } from './core/shared/container';
-import type { LoggerPort } from './core/shared/logger/logger.port';
-import { TOKENS } from './core/shared/tokens';
-import { createRoutes } from './external/api/routes';
-import type { AppConfig } from './external/config/app-config';
-import { initializeTelemetry, TelemetryController } from './external/telemetry/opentelemetry';
+import { container } from '@platform/di/container';
+import { PlatformTokens } from '@platform/di/tokens';
+import type { AppConfig } from '@platform/config/app-config';
+import { initializeTelemetry, TelemetryController } from '@platform/observability/opentelemetry';
+import { createRoutes } from '@platform/http/routes';
+import type { LoggerPort } from '@shared/logging/logger.port';
 
 const bootstrap = async () => {
-  const config = container.resolve<AppConfig>(TOKENS.AppConfig);
-  const logger = container.resolve<LoggerPort>(TOKENS.Logger);
+  const config = container.resolve<AppConfig>(PlatformTokens.AppConfig);
+  const logger = container.resolve<LoggerPort>(PlatformTokens.Logger);
 
   let telemetry: TelemetryController | null = null;
   try {
